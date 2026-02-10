@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ team.name }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="{{ path('team_index') }}" class="btn btn-outline-primary btn-sm">← Back to Teams</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="page-title">{{ team.name }}</h1>
+                
+                {% if team.country %}
+                    <p class="text-muted">📍 <strong>Country:</strong> {{ team.country }}</p>
+                {% endif %}
+                
+                {% if team.description %}
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p>{{ team.description }}</p>
+                    </div>
+                {% endif %}
+                
+                <hr>
+                
+                <!-- Team Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>👥 Players:</strong> {{ team.players|length }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>🎮 Total Matches:</strong> {{ (team.gamesAsTeam1|length) + (team.gamesAsTeam2|length) }}</p>
+                    </div>
+                </div>
+
+                <!-- Players Section -->
+                {% if team.players|length > 0 %}
+                    <hr>
+                    <h3>Players</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nickname</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Birth Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in team.players %}
+                                    <tr>
+                                        <td>{{ player.nickname }}</td>
+                                        <td>{{ player.firstName }} {{ player.lastName }}</td>
+                                        <td>{{ player.role ?? '-' }}</td>
+                                        <td>{{ player.birthDate ? player.birthDate|date('d M Y') : '-' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
+                <!-- Recent Matches -->
+                {% set allMatches = team.gamesAsTeam1|merge(team.gamesAsTeam2)|sort((a, b) => b.matchdate <=> a.matchdate) %}
+                {% if allMatches|length > 0 %}
+                    <hr>
+                    <h3>Recent Matches</h3>
+                    <div class="row">
+                        {% for match in allMatches[:5] %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ match.team1.name }} vs {{ match.team2.name }}</h6>
+                                        <p class="mb-1">
+                                            <strong style="color: var(--highlight-color);">{{ match.score1 }} - {{ match.score2 }}</strong>
+                                        </p>
+                                        <small class="text-muted">{{ match.matchdate|date('d M Y - H:i') }}</small><br>
+                                        <a href="{{ path('match_show', { id: match.id }) }}" class="btn btn-sm btn-outline-primary mt-2">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ path('team_index') }}" class="btn btn-outline-primary">← Back to Teams</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,636 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dev Esports - Home{% endblock %}
+
+{% block body %}
+<div class="row mb-5">
+    <div class="col-md-12 text-center">
+        <h1 style="font-size: 3rem; color: var(--highlight-color); margin-bottom: 1rem;">🎮 Welcome to Dev Esports</h1>
+        <p class="text-muted" style="font-size: 1.2rem;">Professional Esports Tournament Management System</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-5">
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ games_count ?? 0 }}</h3>
+                <p class="text-muted">🎮 Matches</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ tournaments_count ?? 0 }}</h3>
+                <p class="text-muted">🏆 Tournaments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ teams_count ?? 0 }}</h3>
+                <p class="text-muted">👥 Teams</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ players_count ?? 0 }}</h3>
+                <p class="text-muted">🎯 Players</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Matches Section -->
+{% if recent_matches %}
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title mb-4">🎮 Recent Matches</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Match</th>
+                            <th>Tournament</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in recent_matches %}
+                            <tr>
+                                <td>
+                                    {% if match.team1 and match.team2 %}
+                                        <strong>{{ match.team1.name }}</strong> vs <strong>{{ match.team2.name }}</strong>
+                                    {% else %}
+                                        Match #{{ match.id }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if match.tournament %}
+                                        <span class="badge bg-info">{{ match.tournament.name }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if match.status == 'finished' %}
+                                        <strong style="color: #00ff88;">{{ match.score1 }} - {{ match.score2 }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if match.status == 'finished' %}
+                                        <span class="badge bg-success" style="background-color: #00ff88 !important; color: #000;">Finished</span>
+                                    {% elseif match.status == 'pending' %}
+                                        <span class="badge bg-warning" style="background-color: #ffaa00 !important; color: #000;">Pending</span>
+                                    {% elseif match.status == 'ongoing' %}
+                                        <span class="badge bg-info" style="background-color: #00d4ff !important; color: #000;">Ongoing</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('match_show', {id: match.id}) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ path('match_index') }}" class="btn btn-primary btn-sm">View All Matches →</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Tournaments Section -->
+{% if recent_tournaments %}
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title mb-4">🏆 Featured Tournaments</h2>
+    </div>
+    {% for tournament in recent_tournaments %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" style="border-top: 3px solid var(--highlight-color);">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--highlight-color);">{{ tournament.name }}</h5>
+                    <p class="card-text text-muted">{{ tournament.description|slice(0, 100) }}{% if tournament.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="tournament-info mb-3">
+                        <p class="mb-2">
+                            <strong>Start Date:</strong><br>
+                            {% if tournament.startDate %}
+                                {{ tournament.startDate|date('d M Y') }}
+                            {% else %}
+                                <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-2">
+                            <strong>End Date:</strong><br>
+                            {% if tournament.endDate %}
+                                {{ tournament.endDate|date('d M Y') }}
+                            {% else %}
+                                <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top">
+                    <a href="{{ path('tournament_show', {id: tournament.id}) }}" class="btn btn-primary btn-sm w-100">View Tournament</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="col-md-12">
+        <div class="text-center">
+            <a href="{{ path('tournament_index') }}" class="btn btn-primary">View All Tournaments →</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Match Status Statistics -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title mb-4">Match Statistics</h2>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #00ff88;">
+            <div class="card-body">
+                <h3 style="color: #00ff88; font-size: 2rem;">{{ completed_games ?? 0 }}</h3>
+                <p class="text-muted">✓ Finished</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #ffaa00;">
+            <div class="card-body">
+                <h3 style="color: #ffaa00; font-size: 2rem;">{{ scheduled_games ?? 0 }}</h3>
+                <p class="text-muted">📅 Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #00d4ff;">
+            <div class="card-body">
+                <h3 style="color: #00d4ff; font-size: 2rem;">{{ in_progress_games ?? 0 }}</h3>
+                <p class="text-muted">▶️ Ongoing</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #ff6b6b;">
+            <div class="card-body">
+                <h3 style="color: #ff6b6b; font-size: 2rem;">{{ games_count - completed_games - scheduled_games - in_progress_games ?? 0 }}</h3>
+                <p class="text-muted">⏸️ Cancelled</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Teams by Wins -->
+{% if top_teams %}
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title mb-4">🏆 Top Teams by Wins</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Rank</th>
+                            <th style="width: 50%;">Team Name</th>
+                            <th style="width: 40%; text-align: center;">Wins</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teamName, wins in top_teams %}
+                            <tr>
+                                <td>
+                                    <span style="background: linear-gradient(90deg, #00d4ff, #00ff88); padding: 4px 12px; border-radius: 50%; color: #000; font-weight: bold; display: inline-block; width: 30px; text-align: center;">
+                                        {{ loop.index }}
+                                    </span>
+                                </td>
+                                <td>{{ teamName }}</td>
+                                <td style="text-align: center;">
+                                    <span style="background: rgba(0, 255, 136, 0.2); color: #00ff88; padding: 6px 12px; border-radius: 20px; font-weight: bold;">
+                                        {{ wins }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Team Overview -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title mb-4">👥 Team Overview</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 style="color: var(--highlight-color); margin-bottom: 1rem;">Total Teams: <span style="font-size: 1.5rem; color: #00ff88;">{{ teams_count }}</span></h5>
+                        <p class="text-muted">Active teams participating in tournaments and matches.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 style="color: var(--highlight-color); margin-bottom: 1rem;">Average Team Size: <span style="font-size: 1.5rem; color: #00d4ff;">
+                            {% if teams_count > 0 %}
+                                {{ (players_count / teams_count) | round(1) }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </span></h5>
+                        <p class="text-muted">Average number of players per team.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title mb-4">📊 Analytics & Insights</h2>
+    </div>
+    
+    <!-- Match Status Distribution -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 2px solid var(--primary);">
+                <h5 class="mb-0" style="color: var(--primary);">Match Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Teams Performance -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 2px solid var(--primary);">
+                <h5 class="mb-0" style="color: var(--primary);">Top Teams Performance (Wins)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="teamsChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tournaments Overview -->
+{% if matches_by_tournament %}
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 2px solid var(--primary);">
+                <h5 class="mb-0" style="color: var(--primary);">Matches by Tournament</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="tournamentsChart" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Main Navigation Section -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title">Browse</h2>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
+            <div class="card-body text-center">
+                <h3>🎮 Matches</h3>
+                <p class="text-muted">View all matches and tournaments</p>
+                <a href="{{ path('match_index') }}" class="btn btn-primary w-100">View Matches</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
+            <div class="card-body text-center">
+                <h3>🏆 Tournaments</h3>
+                <p class="text-muted">Explore upcoming tournaments</p>
+                <a href="{{ path('tournament_index') }}" class="btn btn-primary w-100">View Tournaments</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
+            <div class="card-body text-center">
+                <h3>👥 Teams</h3>
+                <p class="text-muted">Discover professional teams</p>
+                <a href="{{ path('team_index') }}" class="btn btn-primary w-100">View Teams</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
+            <div class="card-body text-center">
+                <h3>⏰ Upcoming</h3>
+                <p class="text-muted">See what's coming next</p>
+                <a href="{{ path('match_upcoming') }}" class="btn btn-primary w-100">Next Matches</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Administration Section -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h2 class="page-title">Administration</h2>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
+            <div class="card-body text-center">
+                <h3>⚙️ Manage Matches</h3>
+                <p class="text-muted">Create and edit matches</p>
+                <a href="{{ path('admin_match_index') }}" class="btn btn-outline-primary w-100">Admin</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
+            <div class="card-body text-center">
+                <h3>⚙️ Manage Teams</h3>
+                <p class="text-muted">Manage team information</p>
+                <a href="{{ path('admin_team_index') }}" class="btn btn-outline-primary w-100">Admin</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
+            <div class="card-body text-center">
+                <h3>⚙️ Manage Players</h3>
+                <p class="text-muted">Manage player profiles</p>
+                <a href="{{ path('admin_player_index') }}" class="btn btn-outline-primary w-100">Admin</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
+            <div class="card-body text-center">
+                <h3>⚙️ Manage Tournaments</h3>
+                <p class="text-muted">Create and organize tournaments</p>
+                <a href="{{ path('admin_tournament_index') }}" class="btn btn-outline-primary w-100">Admin</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="page-title">Features</h2>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--highlight-color);">✓ Full CRUD Operations</h5>
+                <p class="card-text">Create, read, update, and delete matches, teams, players, and tournaments with ease.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--highlight-color);">✓ Advanced Search & Filtering</h5>
+                <p class="card-text">Quickly find matches, tournaments, and teams using our powerful search functionality.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--highlight-color);">✓ Server-side Validation</h5>
+                <p class="card-text">Secure data validation ensures data integrity and prevents invalid entries.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--highlight-color);">✓ Entity Relationships</h5>
+                <p class="card-text">Complex relationships between teams, players, games, and tournaments.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--highlight-color);">✓ Responsive Design</h5>
+                <p class="card-text">Fully responsive interface that works seamlessly on desktop and mobile devices.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--highlight-color);">✓ Professional UI</h5>
+                <p class="card-text">Beautiful dark theme with intuitive navigation for administrators and users.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Wait for DOM and Chart.js to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart.js configuration
+        Chart.defaults.color = '#b0b8cc';
+        Chart.defaults.borderColor = '#1a1f3a';
+        Chart.defaults.font.family = 'sans-serif';
+        
+        // Match Status Distribution (Pie Chart)
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            const statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Finished', 'Pending', 'Ongoing', 'Cancelled'],
+                    datasets: [{
+                        data: [{{ completed_games }}, {{ scheduled_games }}, {{ in_progress_games }}, {{ games_count - completed_games - scheduled_games - in_progress_games }}],
+                        backgroundColor: [
+                            '#00ff88',
+                            '#ffaa00',
+                            '#00d4ff',
+                            '#ff6b6b'
+                        ],
+                        borderColor: '#0a0e27',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Top Teams Performance (Bar Chart)
+        const teamsCtx = document.getElementById('teamsChart');
+        if (teamsCtx) {
+            const teamNamesData = {{ team_names_chart|raw }};
+            const winsData = {{ wins_chart|raw }};
+            
+            if (teamNamesData && teamNamesData.length > 0) {
+                const teamsChart = new Chart(teamsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: teamNamesData,
+                        datasets: [{
+                            label: 'Wins',
+                            data: winsData,
+                            backgroundColor: [
+                                '#00d4ff',
+                                '#00ff88',
+                                '#ffaa00',
+                                '#ff6b6b',
+                                '#00d4ff',
+                                '#00ff88',
+                                '#ffaa00',
+                                '#ff6b6b'
+                            ],
+                            borderRadius: 5,
+                            borderSkipped: false,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 212, 255, 0.05)',
+                                    drawBorder: true,
+                                    borderColor: '#1a1f3a'
+                                },
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    drawBorder: true,
+                                    borderColor: '#1a1f3a'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Tournaments Chart
+        const tournamentsCtx = document.getElementById('tournamentsChart');
+        if (tournamentsCtx) {
+            const tournamentsData = {{ matches_by_tournament|json_encode|raw }};
+            
+            if (tournamentsData && Object.keys(tournamentsData).length > 0) {
+                const tournamentsChart = new Chart(tournamentsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(tournamentsData),
+                        datasets: [{
+                            label: 'Matches',
+                            data: Object.values(tournamentsData),
+                            backgroundColor: 'rgba(0, 212, 255, 0.8)',
+                            borderColor: '#00d4ff',
+                            borderWidth: 2,
+                            borderRadius: 5,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 212, 255, 0.05)',
+                                    drawBorder: true,
+                                    borderColor: '#1a1f3a'
+                                },
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    drawBorder: true,
+                                    borderColor: '#1a1f3a',
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}

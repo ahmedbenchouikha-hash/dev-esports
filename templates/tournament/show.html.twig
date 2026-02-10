@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ tournament.name }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="{{ path('tournament_index') }}" class="btn btn-outline-primary btn-sm">← Back to Tournaments</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <h1 class="page-title">{{ tournament.name }}</h1>
+                    <span class="badge {% if tournament.status == 'completed' %}badge-success{% elseif tournament.status == 'ongoing' %}badge-danger{% elseif tournament.status == 'pending' %}badge-warning{% else %}badge-secondary{% endif %}" style="font-size: 1rem;">
+                        {{ tournament.status|capitalize }}
+                    </span>
+                </div>
+                
+                {% if tournament.description %}
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p>{{ tournament.description }}</p>
+                    </div>
+                {% endif %}
+                
+                <hr>
+                
+                <!-- Tournament Details -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>📅 Start Date:</strong> {{ tournament.startDate|date('d M Y') }}</p>
+                        <p><strong>📅 End Date:</strong> {{ tournament.endDate|date('d M Y') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>📍 Location:</strong> {{ tournament.location ?? 'TBD' }}</p>
+                        <p><strong>💰 Prize Pool:</strong> {% if tournament.prizePool %}${{ tournament.prizePool|number_format(2) }}{% else %}TBD{% endif %}</p>
+                    </div>
+                </div>
+
+                <!-- Matches Section -->
+                {% if tournament.games|length > 0 %}
+                    <hr>
+                    <h3>Matches</h3>
+                    <div class="row">
+                        {% for match in tournament.games %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0">{{ match.team1.name }} vs {{ match.team2.name }}</h6>
+                                            <span class="badge {% if match.status == 'finished' %}badge-success{% elseif match.status == 'ongoing' %}badge-danger{% else %}badge-warning{% endif %}" style="font-size: 0.75rem;">
+                                                {{ match.status|capitalize }}
+                                            </span>
+                                        </div>
+                                        <p class="mb-1">
+                                            <strong style="color: var(--highlight-color);">{{ match.score1 }} - {{ match.score2 }}</strong>
+                                        </p>
+                                        <small class="text-muted">{{ match.matchdate|date('d M Y - H:i') }}</small><br>
+                                        <a href="{{ path('match_show', { id: match.id }) }}" class="btn btn-sm btn-outline-primary mt-2">View Match</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No matches scheduled yet for this tournament.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ path('tournament_index') }}" class="btn btn-outline-primary">← Back to Tournaments</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
