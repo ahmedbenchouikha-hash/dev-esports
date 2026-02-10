@@ -1,17 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Dev Esports{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+        
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+        <!-- App CSS -->
+        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+        
+        <style>
+            /* Admin Layout */
+            body.admin-layout {
+                margin-left: 280px;
+                transition: margin-left 0.3s ease;
+            }
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
+            body.admin-layout.sidebar-hidden {
+                margin-left: 0;
+            }
+
+            body.admin-layout .navbar {
+                width: 100%;
+                transition: width 0.3s ease;
+            }
+
+            body.admin-layout main {
+                margin-left: 0;
+                width: 100%;
+                transition: width 0.3s ease;
+            }
+
+            body.admin-layout .container-fluid {
+                width: 100%;
+            }
+
+            /* Footer always full width */
+            footer.footer {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+
+            @media (max-width: 768px) {
+                body.admin-layout {
+                    margin-left: 0;
+                }
+
+                body.admin-layout .navbar {
+                    margin-left: 0;
+                }
+            }
+        </style>
+        
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        {% set is_admin = 'admin' in app.request.attributes.get('_route', '') %}
+        
+        {% if is_admin %}
+            {% include 'partials/sidebar.html.twig' %}
+            <script>
+                // Add admin layout class
+                document.body.classList.add('admin-layout');
+            </script>
+        {% endif %}
+        
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">🎮 Dev Esports</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <!-- Front Office Links -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('match_index') }}">Matches</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('tournament_index') }}">Tournaments</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('team_index') }}">Teams</a>
+                        </li>
+                        
+                        <!-- Admin Links -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <span class="admin-badge">Admin</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="{{ path('admin_match_index') }}">Manage Matches</a></li>
+                                <li><a class="dropdown-item" href="{{ path('admin_tournament_index') }}">Manage Tournaments</a></li>
+                                <li><a class="dropdown-item" href="{{ path('admin_team_index') }}">Manage Teams</a></li>
+                                <li><a class="dropdown-item" href="{{ path('admin_player_index') }}">Manage Players</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div class="container-fluid mt-3">
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <!-- Main Content -->
+        <main class="container-fluid py-4">
+            {% block body %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer mt-5">
+            <div class="container">
+                <p>&copy; 2026 Dev Esports. All rights reserved.</p>
+                <p class="text-muted">PIDEV Project - Esports Management System</p>
+            </div>
+        </footer>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

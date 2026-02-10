@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Upcoming Tournaments - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="page-title">⏰ Upcoming Tournaments</h1>
+    </div>
+</div>
+
+<div class="row">
+    {% if tournaments is empty %}
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                No upcoming tournaments scheduled.
+            </div>
+        </div>
+    {% else %}
+        {% for tournament in tournaments %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tournament.name }}</h5>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                📅 {{ tournament.startDate|date('d M Y') }} to {{ tournament.endDate|date('d M Y') }}<br>
+                                📍 {{ tournament.location ?? 'TBD' }}<br>
+                                💰 {% if tournament.prizePool %}${{ tournament.prizePool|number_format(0) }}{% else %}Prize TBD{% endif %}<br>
+                                🎮 {{ tournament.games|length }} Matches Scheduled
+                            </small>
+                        </div>
+                        
+                        <a href="{{ path('tournament_show', { id: tournament.id }) }}" class="btn btn-primary w-100 btn-sm">View Tournament</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
