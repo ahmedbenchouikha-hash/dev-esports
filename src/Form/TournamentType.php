@@ -5,7 +5,8 @@ namespace App\Form;
 use App\Entity\Tournament;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -34,22 +35,22 @@ class TournamentType extends AbstractType
                     'rows' => 5
                 ]
             ])
-            ->add('startDate', DateType::class, [
-                'label' => 'Start Date',
+            ->add('startDate', DateTimeType::class, [
+                'label' => 'Start Date & Time',
                 'required' => true,
                 'widget' => 'single_text',
                 'attr' => [
                     'class' => 'form-control',
-                    'type' => 'date'
+                    'type' => 'datetime-local'
                 ]
             ])
-            ->add('endDate', DateType::class, [
-                'label' => 'End Date',
+            ->add('endDate', DateTimeType::class, [
+                'label' => 'End Date & Time',
                 'required' => true,
                 'widget' => 'single_text',
                 'attr' => [
                     'class' => 'form-control',
-                    'type' => 'date'
+                    'type' => 'datetime-local'
                 ]
             ])
             ->add('status', ChoiceType::class, [
@@ -67,7 +68,7 @@ class TournamentType extends AbstractType
             ])
             ->add('location', TextType::class, [
                 'label' => 'Location',
-                'required' => false,
+                'required' => true,
                 'attr' => [
                     'placeholder' => 'Tournament location',
                     'class' => 'form-control'
@@ -77,6 +78,24 @@ class TournamentType extends AbstractType
                 'label' => 'Prize Pool',
                 'required' => false,
                 'currency' => 'USD',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('rules', CollectionType::class, [
+                'label' => 'Tournament Rules',
+                'entry_type' => TextType::class,
+                'entry_options' => [
+                    'attr' => [
+                        'placeholder' => 'Enter a rule',
+                        'class' => 'form-control',
+                        'maxlength' => 500
+                    ]
+                ],
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control'
                 ]
