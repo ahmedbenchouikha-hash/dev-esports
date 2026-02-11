@@ -1,0 +1,178 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier - {{ recompense.recompense }}{% endblock %}
+
+{% block body %}
+    <div class="min-vh-100 py-5">
+        <!-- Retour à la liste -->
+        <a href="{{ path('recompense_index') }}" class="btn btn-sm rounded-pill mb-4" 
+            style="background: rgba(0, 242, 254, 0.2); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); font-weight: 600;">
+            <i class="fe fe-arrow-left me-2"></i> Retour à la liste
+        </a>
+
+        <!-- Conteneur principal -->
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <!-- Card Formulaire -->
+                <div class="card border-0 rounded-4 overflow-hidden shadow-lg" 
+                    style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+                    
+                    <!-- Header -->
+                    <div class="card-header p-5" style="background: linear-gradient(135deg, #fd7e14 0%, #fb6a0a 100%); border-bottom: 2px solid rgba(253, 126, 20, 0.2);">
+                        <h1 class="mb-0 fw-bold text-white" style="font-size: 1.8rem;">
+                            <i class="fe fe-edit-3 me-3"></i>Modifier : {{ recompense.recompense }}
+                        </h1>
+                    </div>
+
+                    <!-- Contenu du formulaire -->
+                    <div class="card-body p-5">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+
+                        <!-- Afficher les erreurs du formulaire -->
+                        {% if form.vars.errors|length > 0 %}
+                            <div class="alert alert-dismissible fade show rounded-3 mb-4\" role=\"alert\" style=\"background: #dc3545; border: 2px solid #a02834; color: white;\">
+                                <i class=\"fe fe-alert-triangle me-2\" style=\"font-size: 1.2em;\"></i>
+                                <strong>⚠️ Erreurs détectées :</strong>
+                                {% for error in form.vars.errors %}
+                                    <div style=\"margin-top: 8px; padding-left: 10px; border-left: 3px solid #ff6b6b;\">{{ error.message }}</div>
+                                {% endfor %}
+                                <button type=\"button\" class=\"btn-close btn-close-white\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Info ID -->
+                        <div class="alert alert-info rounded-3 mb-4" style="background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;">
+                            <i class="fe fe-info me-2"></i>
+                            <strong>ID :</strong> #{{ recompense.id }}
+                        </div>
+
+                        <!-- Nom de la récompense -->
+                        <div class="mb-4">
+                            {{ form_label(form.recompense, 'Nom de la récompense', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            {{ form_widget(form.recompense, {
+                                'attr': {
+                                    'placeholder': 'Ex: Trophée Or',
+                                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem;',
+                                    'class': 'form-control form-control-lg'
+                                }
+                            }) }}
+                            {% if form.recompense.vars.errors|length > 0 %}
+                                <div class="mt-2 p-2 rounded-2" style="background: #ffebee; border-left: 4px solid #dc3545;">
+                                    <small class="d-block" style="color: #c41c3b;">
+                                        <i class="fe fe-x-circle me-1" style="font-weight: bold;"></i>
+                                        {% for error in form.recompense.vars.errors %}
+                                            <strong>{{ error.message }}</strong>
+                                        {% endfor %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Type -->
+                        <div class="mb-4">
+                            {{ form_label(form.type, 'Type de récompense', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            {{ form_widget(form.type, {
+                                'attr': {
+                                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem;',
+                                    'class': 'form-control form-control-lg'
+                                }
+                            }) }}
+                            {% if form.type.vars.errors|length > 0 %}
+                                <div class="mt-2 p-2 rounded-2" style="background: #ffebee; border-left: 4px solid #dc3545;">
+                                    <small class="d-block" style="color: #c41c3b;">
+                                        <i class="fe fe-x-circle me-1" style="font-weight: bold;"></i>
+                                        {% for error in form.type.vars.errors %}
+                                            <strong>{{ error.message }}</strong>
+                                        {% endfor %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Classement -->
+                        <div class="mb-4">
+                            {{ form_label(form.classement, 'Classement (1-30)', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            {{ form_widget(form.classement, {
+                                'attr': {
+                                    'placeholder': '5',
+                                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem;',
+                                    'class': 'form-control form-control-lg',
+                                    'type': 'number',
+                                    'min': '1',
+                                    'max': '30'
+                                }
+                            }) }}
+                            <small class="text-muted d-block mt-2">Le classement doit être entre 1 et 30</small>
+                            {% if form.classement.vars.errors|length > 0 %}
+                                <div class="mt-2 p-2 rounded-2" style="background: #ffebee; border-left: 4px solid #dc3545;">
+                                    <small class="d-block" style="color: #c41c3b;">
+                                        <i class="fe fe-x-circle me-1" style="font-weight: bold;"></i>
+                                        {% for error in form.classement.vars.errors %}
+                                            <strong>{{ error.message }}</strong>
+                                        {% endfor %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-5">
+                            {{ form_label(form.description, 'Description (optionnel)', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            {{ form_widget(form.description, {
+                                'attr': {
+                                    'placeholder': 'Décrivez cette récompense...',
+                                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem; height: 120px; resize: vertical;',
+                                    'class': 'form-control form-control-lg'
+                                }
+                            }) }}
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-grid gap-3 d-md-flex">
+                            <button type="submit" class="btn btn-lg rounded-pill px-5" 
+                                style="background: linear-gradient(135deg, #fd7e14 0%, #fb6a0a 100%); color: white; border: none; font-weight: 600; flex: 1;">
+                                <i class="fe fe-check me-2"></i> Enregistrer les modifications
+                            </button>
+                            <a href="{{ path('recompense_show', {id: recompense.id}) }}" class="btn btn-lg rounded-pill px-5" 
+                                style="background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); font-weight: 600;">
+                                <i class="fe fe-x me-2"></i> Annuler
+                            </a>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Style pour les options de couleur -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const selectType = document.querySelector('select[name="recompense_type[type]"]');
+                        if (selectType) {
+                            const options = selectType.querySelectorAll('option');
+                            options.forEach(option => {
+                                const color = option.getAttribute('data-color');
+                                if (color) {
+                                    option.style.backgroundColor = color;
+                                    option.style.color = '#000';
+                                }
+                            });
+                        }
+                    });
+                </script>
+
+                <!-- Zone de danger -->
+                <div class="alert alert-danger rounded-3 mt-4" style="background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.3); color: #dc3545;">
+                    <h5 class="mb-3"><i class="fe fe-alert-triangle me-2"></i>Zone de danger</h5>
+                    <p class="mb-3 text-white">La suppression de cette récompense est définitive et ne peut pas être annulée.</p>
+                    <form method="post" action="{{ path('recompense_delete', {id: recompense.id}) }}" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ recompense.id) }}">
+                        <button type="submit" class="btn btn-danger rounded-pill px-4"
+                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette récompense ? Cette action est définitive.');">
+                            <i class="fe fe-trash-2 me-2"></i> Supprimer cette récompense
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Récompenses{% endblock %}
+
+{% block body %}
+    <div class="min-vh-100 py-5">
+        <!-- Messages flash -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                    <i class="fe fe-alert-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Header Principal -->
+        <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+            <div>
+                <h1 class="mb-2 fw-bold text-primary" style="font-size: 2.5rem;">
+                    <i class="fe fe-gift me-3"></i>Gestion des Récompenses
+                </h1>
+                <p class="text-muted mb-0">{{ recompenses|length }} récompense(s) disponible(s)</p>
+            </div>
+            <a href="{{ path('recompense_new') }}" class="btn btn-violet btn-lg px-5 py-3 rounded-pill shadow" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border: none;">
+                <i class="fe fe-plus me-2"></i> Ajouter une récompense
+            </a>
+        </div>
+
+        <!-- Barre de Recherche et Tri -->
+        <div class="card bg-surface border-0 rounded-4 shadow-sm mb-5" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%);">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Recherche -->
+                    <div class="col-md-6">
+                        <form method="GET" action="{{ path('recompense_index') }}" class="position-relative">
+                            <input type="text" name="search" class="form-control form-control-lg" placeholder="Rechercher une récompense..." 
+                                value="{{ search ?? '' }}" style="background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); padding: 12px 15px; border-radius: 10px; color: #ffffff;">
+                            <style>
+                                input::placeholder { color: rgba(255,255,255,0.6) !important; }
+                                input:focus { background: rgba(255,255,255,0.12) !important; border-color: #00f2fe !important; box-shadow: 0 0 15px rgba(0, 242, 254, 0.3) !important; }
+                            </style>
+                        </form>
+                    </div>
+
+                    <!-- Tri -->
+                    <div class="col-md-6">
+                        <div class="hstack gap-2">
+                            <label class="text-primary fw-bold me-2">Trier :</label>
+                            <a href="{{ path('recompense_index', {sort: 'asc'}) }}" class="btn btn-sm rounded-pill px-4 py-2" 
+                                style="background: {% if sort == 'asc' %}#00f2fe{% else %}rgba(0, 242, 254, 0.2){% endif %}; color: #0a0e1f; border: none; font-weight: 600;">
+                                <i class="fe fe-arrow-up me-1" style="font-size: 0.9rem;"></i> A → Z
+                            </a>
+                            <a href="{{ path('recompense_index', {sort: 'desc'}) }}" class="btn btn-sm rounded-pill px-4 py-2" 
+                                style="background: {% if sort == 'desc' %}#00ff9d{% else %}rgba(0, 255, 157, 0.2){% endif %}; color: #0a0e1f; border: none; font-weight: 600;">
+                                <i class="fe fe-arrow-down me-1" style="font-size: 0.9rem;"></i> Z → A
+                            </a>
+                            <a href="{{ path('recompense_index') }}" class="btn btn-sm rounded-pill px-4 py-2" 
+                                style="background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">
+                                <i class="fe fe-refresh-ccw me-1" style="font-size: 0.9rem;"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau Principal -->
+        <div class="card border-0 rounded-4 overflow-hidden shadow-lg mb-5" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle" style="color: #ffffff;">
+                        <thead style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.3);">
+                            <tr>
+                                <th class="ps-5 py-4 fw-bold">ID</th>
+                                <th class="py-4 fw-bold">Nom récompense</th>
+                                <th class="py-4 fw-bold">Type</th>
+                                <th class="py-4 fw-bold">Classement</th>
+                                <th class="py-4 fw-bold">Description</th>
+                                <th class="text-center py-4 fw-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recompenses is empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-6 text-muted fs-5">
+                                        <i class="fe fe-inbox me-2"></i>Aucune récompense trouvée
+                                    </td>
+                                </tr>
+                            {% else %}
+                                {% for r in recompenses %}
+                                    <tr style="border-bottom: 1px solid rgba(0, 242, 254, 0.1); transition: all 0.3s ease;">
+                                        <td class="ps-5 fw-bold text-primary">{{ r.id }}</td>
+                                        <td class="fw-medium" style="color: #000000;">{{ r.recompense }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 fw-600" 
+                                                style="background: rgba(0, 242, 254, 0.2); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4);">
+                                                {{ r.type }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 fw-600" 
+                                                style="background: rgba(0, 255, 157, 0.2); color: #00ff9d; border: 1px solid rgba(0, 255, 157, 0.4);">
+                                                {{ r.classement }}
+                                            </span>
+                                        </td>
+                                        <td class="text-muted" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">{{ r.description ?: '—' }}</td>
+                                        <td class="text-center">
+                                            <div class="hstack gap-2 justify-content-center flex-wrap">
+                                                <!-- Bouton Modifier -->
+                                                <a href="{{ path('recompense_edit', {id: r.id}) }}" class="btn btn-sm" 
+                                                    style="background: rgba(253, 126, 20, 0.2); color: #fd7e14; border: 1px solid rgba(253, 126, 20, 0.4); border-radius: 8px; padding: 6px 12px; font-size: 0.9rem; white-space: nowrap; font-weight: 500;"
+                                                    data-bs-toggle="tooltip" title="Éditer">
+                                                    <i class="fe fe-edit-2" style="width: 16px; height: 16px; margin-right: 4px;"></i>Modifier
+                                                </a>
+
+                                                <!-- Bouton Supprimer -->
+                                                <form method="post" action="{{ path('recompense_delete', {id: r.id}) }}" style="display:inline;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ r.id) }}">
+                                                    <button type="submit" class="btn btn-sm" 
+                                                        style="background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.4); border-radius: 8px; padding: 6px 12px; font-size: 0.9rem; white-space: nowrap; font-weight: 500;"
+                                                        data-bs-toggle="tooltip" title="Supprimer définitivement"
+                                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette récompense ?');">
+                                                        <i class="fe fe-trash-2" style="width: 16px; height: 16px; margin-right: 4px;"></i>Supprimer
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques et Graphique -->
+        <div class="row g-4 mb-5">
+            <!-- Stats Cards -->
+            <div class="col-md-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4" style="background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%); min-height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                    <p class="text-white mb-2 fw-bold">Total Récompenses</p>
+                    <h2 class="text-white mb-0" style="font-size: 2.5rem;">{{ recompenses|length }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4" style="background: linear-gradient(135deg, #4ECDC4 0%, #44B0A3 100%); min-height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                    <p class="text-white mb-2 fw-bold">Classement Minimum</p>
+                    <h2 class="text-white mb-0" style="font-size: 2.5rem;">{{ minClassement ?? '—' }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4" style="background: linear-gradient(135deg, #95E1D3 0%, #7FD8BE 100%); min-height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                    <p class="text-white mb-2 fw-bold">Classement Maximum</p>
+                    <h2 class="text-white mb-0" style="font-size: 2.5rem;">{{ maxClassement ?? '—' }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique Circulaire Statistiques par Type -->
+        {% if recompenses|length > 0 %}
+        <div class="card border-0 rounded-4 overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+            <div class="card-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+                <h4 class="mb-0 fw-bold text-white">
+                    <i class="fe fe-pie-chart me-2"></i>Distribution des types de récompenses
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <canvas id="typeChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- Script Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('typeChart');
+                
+                // Construire les statistiques par type
+                const typeStats = {};
+                {% for r in recompenses %}
+                    const type = "{{ r.type }}";
+                    typeStats[type] = (typeStats[type] || 0) + 1;
+                {% endfor %}
+                
+                const typeLabels = Object.keys(typeStats);
+                const typeData = Object.values(typeStats);
+                
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: typeLabels,
+                        datasets: [{
+                            data: typeData,
+                            backgroundColor: colors.slice(0, typeLabels.length),
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#ffffff',
+                                    font: { size: 13, weight: 'bold' },
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#00f2fe',
+                                bodyColor: '#ffffff',
+                                borderColor: '#00f2fe',
+                                borderWidth: 1,
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + ' récompense(s)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+        {% endif %}
+
+        <!-- Bouton Export PDF -->
+        <div class="text-center mt-5 mb-3">
+            <a href="{{ path('recompense_export_pdf') }}" class="btn btn-lg rounded-pill px-5 shadow" 
+                style="background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%); color: white; border: none; font-weight: 600;">
+                <i class="fe fe-download me-2"></i> Exporter en PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Tooltip Bootstrap -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

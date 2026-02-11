@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Liste des Récompenses{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Feathericons -->
+    <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.css" rel="stylesheet">
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="{{ asset('app.css') }}">
+    
+    <style>
+        [data-feather] {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body class="bg-dark text-text-primary">
+    <!-- Navigation -->
+    <nav class="navbar bg-gradient-dark text-text-primary sticky-top" style="background: linear-gradient(135deg, #0a0e1f 0%, #12172d 100%)!important; border-bottom: 2px solid rgba(0, 242, 254, 0.1);">
+        <div class="container-fluid">
+            <a href="{{ path('recompense_index') }}" class="navbar-brand text-primary fw-bold" style="font-size: 1.5rem;">
+                <i class="fe fe-gift me-2" style="width: 32px; height: 32px;"></i>Liste des Récompenses
+            </a>
+            <span class="navbar-text text-muted ms-auto" style="font-size: 0.9rem;">
+                <i class="fe fe-check-circle me-1" style="width: 18px; height: 18px; color: #00ff9d;"></i>Système actif
+            </span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid py-4">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                    <i class="fe fe-alert-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {% block body %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: linear-gradient(135deg, #0a0e1f 0%, #12172d 100%); border-top: 2px solid rgba(0, 242, 254, 0.1); margin-top: 60px; padding: 30px 0; color: #a0a9d4; font-size: 0.9rem;">
+        <div class="container-fluid text-center">
+            <p class="mb-2">
+                <i class="fe fe-code" style="width: 18px; height: 18px;"></i>
+                Système de Gestion des Récompenses | Développé avec Symfony & Bootstrap
+            </p>
+            <small style="color: #7a8db0;">© 2026 - Tous droits réservés | <span style="color: #00f2fe;">v1.0</span></small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Feathericons JS -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.js"></script>
+    
+    <!-- Initialize Feathericons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html>
