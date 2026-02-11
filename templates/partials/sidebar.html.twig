@@ -97,6 +97,26 @@
             </div>
         </div>
 
+        <!-- Recompenses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#recompenseMenu">
+                <span class="menu-icon">🎁</span>
+                <span class="menu-label">Recompenses</span>
+                <span class="menu-arrow">▼</span>
+            </a>
+            <div id="recompenseMenu" class="collapse {% if 'recompense' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    All Recompenses
+                </a>
+                <a href="{{ path('recompense_new') }}" class="menu-subitem">
+                    Create Recompense
+                </a>
+                <a href="{{ path('recompense_export_pdf') }}" class="menu-subitem">
+                    Export PDF
+                </a>
+            </div>
+        </div>
+
         <!-- Divider -->
         <div class="menu-divider"></div>
 

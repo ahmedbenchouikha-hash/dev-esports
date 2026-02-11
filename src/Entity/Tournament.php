@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TournamentRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Tournament
 {
     #[ORM\Id]
@@ -18,32 +19,43 @@ class Tournament
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Tournament name is required')]
-    #[Assert\Length(min: 2, max: 255)]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'The name must be at least {{ limit }} characters', maxMessage: 'The name cannot be longer than {{ limit }} characters')]
     private ?string $name = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(type: 'datetime')]
     #[Assert\NotNull(message: 'Start date is required')]
     #[Assert\LessThan(propertyPath: 'endDate', message: 'Start date must be before end date')]
     private ?\DateTimeInterface $startDate = null;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(type: 'datetime')]
     #[Assert\NotNull(message: 'End date is required')]
     private ?\DateTimeInterface $endDate = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
     #[Assert\Choice(choices: ['pending', 'ongoing', 'completed', 'cancelled'])]
     private ?string $status = 'pending';
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Location is required')]
     private ?string $location = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\Positive(message: 'Prize pool must be positive')]
+    #[Assert\GreaterThanOrEqual(value: 0, message: 'Prize pool must be 0 or greater')]
     private ?float $prizePool = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\Type(type: 'array', message: 'Rules must be an array')]
+    #[Assert\Count(max: 100, maxMessage: 'You cannot have more than {{ limit }} rules')]
+    #[Assert\All(constraints: [
+        new Assert\Type(type: 'string', message: 'Each rule must be a string'),
+        new Assert\NotBlank(message: 'Rules cannot contain empty values'),
+        new Assert\Length(min: 1, max: 500, minMessage: 'Each rule must be at least {{ limit }} character', maxMessage: 'Each rule cannot exceed {{ limit }} characters'),
+    ])]
+    private ?array $rules = null;
 
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
@@ -57,7 +69,18 @@ class Tournament
     public function __construct()
     {
         $this->games = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
         $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
         $this->updatedAt = new \DateTime();
     }
 
@@ -93,7 +116,7 @@ class Tournament
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): static
+    public function setStartDate(?\DateTimeInterface $startDate): static
     {
         $this->startDate = $startDate;
         return $this;
@@ -104,7 +127,7 @@ class Tournament
         return $this->endDate;
     }
 
-    public function setEndDate(\DateTimeInterface $endDate): static
+    public function setEndDate(?\DateTimeInterface $endDate): static
     {
         $this->endDate = $endDate;
         return $this;
@@ -143,6 +166,35 @@ class Tournament
         return $this;
     }
 
+    public function getRules(): ?array
+    {
+        return $this->rules;
+    }
+
+    public function setRules(?array $rules): static
+    {
+        $this->rules = $rules;
+        return $this;
+    }
+
+    public function addRule(string $rule): static
+    {
+        $current = $this->rules ?? [];
+        $current[] = $rule;
+        $this->rules = array_values($current);
+        return $this;
+    }
+
+    public function removeRule(string $rule): static
+    {
+        $current = $this->rules ?? [];
+        if (($idx = array_search($rule, $current, true)) !== false) {
+            array_splice($current, $idx, 1);
+        }
+        $this->rules = array_values($current);
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
@@ -165,9 +217,6 @@ class Tournament
         return $this;
     }
 
-    /**
-     * @return Collection<int, Game>
-     */
     public function getGames(): Collection
     {
         return $this->games;

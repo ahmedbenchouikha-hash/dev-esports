@@ -15,8 +15,36 @@
             <div class="card-body">
                 <h1 class="page-title">{{ title }}</h1>
 
-                {{ form_start(form) }}
-                    {{ form_widget(form) }}
+                {% if form.vars.errors|length > 0 %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Form Error!</strong>
+                        {% for error in form.vars.errors %}
+                            <div>{{ error.message }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                    {% for child in form %}
+                        {% if child.vars.name != 'csrf_token' %}
+                            <div class="mb-3">
+                                {{ form_label(child, null, {'label_attr': {'class': 'form-label'}}) }}
+                                
+                                {% if child.vars.errors|length > 0 %}
+                                    {{ form_widget(child, {'attr': {'class': 'form-control is-invalid'}}) }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in child.vars.errors %}
+                                            <div>• {{ error.message }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form_widget(child, {'attr': {'class': 'form-control'}}) }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary">{% if tournament %}Update Tournament{% else %}Create Tournament{% endif %}</button>
                         <a href="{{ path('admin_tournament_index') }}" class="btn btn-outline-primary">Cancel</a>
@@ -26,4 +54,15 @@
         </div>
     </div>
 </div>
+
+<style>
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+    }
+</style>
 {% endblock %}
