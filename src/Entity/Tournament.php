@@ -46,6 +46,13 @@ class Tournament
     private ?float $prizePool = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\Type(type: 'array', message: 'Rules must be an array')]
+    #[Assert\Count(max: 100, maxMessage: 'You cannot have more than {{ limit }} rules')]
+    #[Assert\All(constraints: [
+        new Assert\Type(type: 'string', message: 'Each rule must be a string'),
+        new Assert\NotBlank(message: 'Rules cannot contain empty values'),
+        new Assert\Length(min: 1, max: 500, minMessage: 'Each rule must be at least {{ limit }} character', maxMessage: 'Each rule cannot exceed {{ limit }} characters'),
+    ])]
     private ?array $rules = null;
 
     #[ORM\Column(type: 'datetime')]

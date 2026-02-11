@@ -20,13 +20,14 @@ class TournamentAdminController extends AbstractController
         $search = $request->query->get('search', '');
         $status = $request->query->get('status', '');
         $sort = $request->query->get('sort', 'startDate');
+        $direction = $request->query->get('direction', 'ASC');
 
         if ($search) {
-            $tournaments = $tournamentRepository->findBySearchTerm($search);
+            $tournaments = $tournamentRepository->findBySearchTerm($search, $sort, $direction);
         } elseif ($status) {
-            $tournaments = $tournamentRepository->findByStatus($status);
+            $tournaments = $tournamentRepository->findByStatus($status, $sort, $direction);
         } else {
-            $tournaments = $tournamentRepository->findAllOrdered($sort);
+            $tournaments = $tournamentRepository->findAllOrdered($sort, $direction);
         }
 
         return $this->render('admin/tournament/index.html.twig', [
@@ -34,6 +35,7 @@ class TournamentAdminController extends AbstractController
             'search' => $search,
             'status' => $status,
             'sort' => $sort,
+            'direction' => $direction,
         ]);
     }
 

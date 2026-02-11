@@ -16,34 +16,42 @@ class TournamentRepository extends ServiceEntityRepository
         parent::__construct($registry, Tournament::class);
     }
 
-    public function findAllOrdered(string $sort = 'startDate'): array
+    public function findAllOrdered(string $sort = 'startDate', string $direction = 'ASC'): array
     {
-        $validSortFields = ['startDate', 'name', 'createdAt', 'status'];
+        $validSortFields = ['startDate', 'name', 'createdAt', 'status', 'prizePool'];
         $sortField = in_array($sort, $validSortFields) ? $sort : 'startDate';
-        $direction = 'ASC';
+        $sortDirection = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
 
         return $this->createQueryBuilder('t')
-            ->orderBy('t.' . $sortField, $direction)
+            ->orderBy('t.' . $sortField, $sortDirection)
             ->getQuery()
             ->getResult();
     }
 
-    public function findBySearchTerm(string $term): array
+    public function findBySearchTerm(string $term, string $sort = 'startDate', string $direction = 'ASC'): array
     {
+        $validSortFields = ['startDate', 'name', 'createdAt', 'status', 'prizePool'];
+        $sortField = in_array($sort, $validSortFields) ? $sort : 'startDate';
+        $sortDirection = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
         return $this->createQueryBuilder('t')
             ->where('t.name LIKE :term OR t.description LIKE :term')
             ->setParameter('term', '%' . $term . '%')
-            ->orderBy('t.startDate', 'DESC')
+            ->orderBy('t.' . $sortField, $sortDirection)
             ->getQuery()
             ->getResult();
     }
 
-    public function findByStatus(string $status): array
+    public function findByStatus(string $status, string $sort = 'startDate', string $direction = 'ASC'): array
     {
+        $validSortFields = ['startDate', 'name', 'createdAt', 'status', 'prizePool'];
+        $sortField = in_array($sort, $validSortFields) ? $sort : 'startDate';
+        $sortDirection = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
         return $this->createQueryBuilder('t')
             ->where('t.status = :status')
             ->setParameter('status', $status)
-            ->orderBy('t.startDate', 'DESC')
+            ->orderBy('t.' . $sortField, $sortDirection)
             ->getQuery()
             ->getResult();
     }
