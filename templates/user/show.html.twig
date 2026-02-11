@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h1 style="margin:0">{{ user.username }}'s profile</h1>
+                <div>
+                    {% if app.user and app.user.id == user.id %}
+                        <a class="btn" href="{{ path('user_edit', {id: user.id}) }}">Edit your profile</a>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="btn secondary" href="{{ path('user_index') }}">Back to users</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <dl>
+                <dt>ID</dt><dd>{{ user.id }}</dd>
+                <dt>Username</dt><dd>{{ user.username }}</dd>
+                <dt>Email</dt><dd>{{ user.email }}</dd>
+                <dt>Type</dt><dd><span class="chip">{{ user.typeuser }}</span></dd>
+            </dl>
+        </div>
+    </div>
+{% endblock %}

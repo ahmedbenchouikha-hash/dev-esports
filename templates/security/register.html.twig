@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    {% include '_sidebar.html.twig' %}
+
+    <div class="content-with-sidebar">
+        <div class="auth-container">
+            <h1>Sign Up</h1>
+            {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+
+            {# Global form errors (entity-level, UniqueEntity, etc.) #}
+            {% if registrationForm.vars.errors|length > 0 %}
+                <div class="form-error"><span class="icon">!</span>{{ form_errors(registrationForm) }}</div>
+            {% endif %}
+
+        <div class="form-group">
+            {{ form_label(registrationForm.username) }}
+            {{ form_widget(registrationForm.username, {'attr': {'class': 'input' ~ (registrationForm.username.vars.valid ? '' : ' invalid')}}) }}
+            {{ form_errors(registrationForm.username) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.email) }}
+            {{ form_widget(registrationForm.email, {'attr': {'class': 'input' ~ (registrationForm.email.vars.valid ? '' : ' invalid')}}) }}
+            {{ form_errors(registrationForm.email) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.plainPassword.first) }}
+            {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'input' ~ (registrationForm.plainPassword.first.vars.valid ? '' : ' invalid')}}) }}
+            {{ form_errors(registrationForm.plainPassword.first) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.plainPassword.second) }}
+            {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'input' ~ (registrationForm.plainPassword.second.vars.valid ? '' : ' invalid')}}) }}
+            {{ form_errors(registrationForm.plainPassword.second) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.typeUser) }}
+            {{ form_widget(registrationForm.typeUser, {'attr': {'class': 'input' ~ (registrationForm.typeUser.vars.valid ? '' : ' invalid')}}) }}
+            {{ form_errors(registrationForm.typeUser) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.profileFile, 'Player Confirmation (Document for admin verification)') }}
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">Upload an ID, certificate, or any document to confirm your player status. This will be reviewed by our admin team.</p>
+            {{ form_widget(registrationForm.profileFile, {'attr': {'class': 'input'}}) }}
+            {{ form_errors(registrationForm.profileFile) }}
+        </div>
+
+        <button class="submit" type="submit">Register</button>
+
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
+{% endblock %}

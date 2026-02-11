@@ -1,25 +1,26 @@
+/* Copied improved global styles */
 :root{
-    --bg: #f6f8fb;
-    --card: #ffffff;
-    --muted: #6b7280;
-    --primary: #2563eb;
-    --primary-600: #1e40af;
-    --danger: #dc2626;
-    --success: #16a34a;
-    --shadow: 0 6px 18px rgba(15,23,42,0.08);
-    --radius: 10px;
-    --max-width: 980px;
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-600: #1e40af;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --shadow: 0 6px 18px rgba(15,23,42,0.08);
+  --radius: 10px;
+  --max-width: 980px;
 }
 
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-    margin:0;
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background: linear-gradient(180deg,#f8fafc 0%, var(--bg) 100%);
-    color:#0f172a;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg,#f8fafc 0%, var(--bg) 100%);
+  color:#0f172a;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
 /* Layout helpers */
@@ -66,8 +67,18 @@ label{display:block;margin-bottom:6px;font-weight:600;font-size:13px}
 
 /* Responsive */
 @media (max-width:900px){
-    .content-with-sidebar{flex-direction:column}
-    .sidebar{width:100%}
-    .auth-container{margin:24px;padding:20px}
+  .content-with-sidebar{flex-direction:column}
+  .sidebar{width:100%}
+  .auth-container{margin:24px;padding:20px}
 }
 
+/* Tables */
+.table{width:100%;border-collapse:collapse;font-size:14px}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:left}
+.table thead th{color:var(--muted);font-size:13px;font-weight:700}
+.table tbody tr:hover{background:#fbfdff}
+
+.actions{display:flex;gap:8px;align-items:center}
+.chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f5f9;color:var(--muted);font-weight:600;font-size:13px}
+.small-btn{padding:6px 8px;border-radius:8px;border:1px solid #e6edf3;background:#fff;color:var(--primary);cursor:pointer}
+.small-btn.danger{border-color:rgba(220,38,38,0.12);color:var(--danger)}

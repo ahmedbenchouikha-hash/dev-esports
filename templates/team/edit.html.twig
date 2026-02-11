@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Team - {{ team.name }}{% endblock %}
+
+{% block body %}
+    {% include '_sidebar.html.twig' %}
+
+    <div class="content-with-sidebar">
+        <div class="container" style="max-width: 700px;">
+            <div class="card">
+                <h1 style="margin-bottom: 10px; color: #667eea;">{{ team.name }}</h1>
+                <p style="color: #666; margin-bottom: 30px;">Add players to your team ({{ team.memberCount }}/5)</p>
+
+                <!-- Current Members -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #333; margin-bottom: 15px;">Current Members</h3>
+                    <div style="background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
+                        {% for member in team.members %}
+                            <div style="padding: 15px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <p style="margin: 0; font-weight: 600;">{{ member.user.username }}</p>
+                                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">
+                                        {% if member.user == team.creator %}
+                                            <span style="background-color: #667eea; color: white; padding: 2px 8px; border-radius: 3px;">Captain</span>
+                                        {% else %}
+                                            Joined {{ member.joinedAt.format('M d, Y') }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                {% if member.user != team.creator %}
+                                    <form action="{{ path('team_remove_member', {id: team.id, memberId: member.id}) }}" method="post" style="display:inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('') }}">
+                                        <button type="submit" class="small-btn" style="background-color: #ef4444; color: white;" onclick="return confirm('Remove this member?');">Remove</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Add Players Form -->
+                {% if not team.isFull %}
+                    <form method="POST" action="{{ path('team_edit', {id: team.id}) }}">
+                        <h3 style="color: #333; margin-bottom: 15px;">Add Players</h3>
+                        
+                        <div id="players-container">
+                            {% for i in 0..(team.availableSlots - 1) %}
+                                <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                    <input type="text" name="player_username[]" placeholder="Enter username #{{ i + 1 }}" class="input" style="flex: 1;">
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="submit" class="btn primary" style="padding: 12px 30px; margin-top: 20px;">Add Players</button>
+                        <a href="{{ path('team_show', {id: team.id}) }}" class="btn secondary" style="padding: 12px 30px; text-decoration: none; display: inline-block; background-color: #e2e8f0; color: #333; margin-left: 10px;">Back</a>
+                        
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('') }}">
+                    </form>
+                {% else %}
+                    <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
+                        <p style="margin: 0; color: #92400e;">Your team is full (5 members maximum).</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
