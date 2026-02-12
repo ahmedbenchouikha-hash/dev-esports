@@ -17,18 +17,15 @@ class AdminPlayerApprovalController extends AbstractController
     #[Route('', name: 'list')]
     public function list(UserRepository $userRepository): Response
     {
-        $pendingPlayers = $userRepository->findBy([
-            'roles' => '["ROLE_USER"]',
+        // Get all pending users
+        $pendingUsers = $userRepository->findBy([
             'approvalStatus' => 'pending',
-        ]);
+        ], ['id' => 'DESC']);
 
-        // Workaround for Doctrine JSON filtering
-        $pendingPlayers = $userRepository->createQueryBuilder('u')
-            ->where("JSON_CONTAINS(u.roles, '\"ROLE_USER\"') = 1")
-            ->andWhere("u.approvalStatus = 'pending'")
-            ->orderBy('u.id', 'DESC')
-            ->getQuery()
-            ->getResult();
+        // Filter for ROLE_USER only (players)
+        $pendingPlayers = array_filter($pendingUsers, function($user) {
+            return in_array('ROLE_USER', $user->getRoles());
+        });
 
         return $this->render('admin/player_approval.html.twig', [
             'pendingPlayers' => $pendingPlayers,

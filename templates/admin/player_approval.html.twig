@@ -30,7 +30,7 @@
                     <div class="player-card">
                         <div class="player-header">
                             <div class="player-avatar">
-                                {{ player.firstName|first|upper ?? 'P' }}
+                                {{ player.firstName ? (player.firstName|first|upper) : 'P' }}
                             </div>
                             <div class="player-info">
                                 <h3>{{ player.firstName ?? player.username }} {{ player.lastName }}</h3>
@@ -94,7 +94,7 @@
     </div>
 
     <div class="admin-footer">
-        <a href="{{ path('dashboard_admin') }}" class="btn-back">
+        <a href="{{ path('admin_dashboard') }}" class="btn-back">
             <i class="fas fa-arrow-left"></i>
             Back to Dashboard
         </a>

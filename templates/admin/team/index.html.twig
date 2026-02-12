@@ -12,18 +12,37 @@
     </div>
 </div>
 
-<!-- Search Section -->
+<!-- Search & Sort Section -->
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
                 <form method="GET" class="row g-3">
-                    <div class="col-md-9">
-                        <input type="text" name="search" class="form-control" placeholder="Search by team name or country..." value="{{ search }}">
+                    <div class="col-md-6">
+                        <label class="form-label">Search Team</label>
+                        <input type="text" name="search" class="form-control" placeholder="Team name or country..." value="{{ search }}">
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    <div class="col-md-4">
+                        <label class="form-label">Sort By</label>
+                        <select name="sort" class="form-select">
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                            <option value="country" {% if sort == 'country' %}selected{% endif %}>Country</option>
+                            <option value="createdAt" {% if sort == 'createdAt' %}selected{% endif %}>Newest First</option>
+                        </select>
                     </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    {% if search %}
+                        <div class="col-md-12">
+                            <a href="{{ path('admin_team_index') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </a>
+                        </div>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -39,6 +58,9 @@
             </div>
         {% else %}
             <div class="card">
+                <div class="card-header">
+                    <strong>Teams</strong> <span class="badge bg-info">{{ teams|length }} team{{ teams|length != 1 ? 's' : '' }}</span>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>

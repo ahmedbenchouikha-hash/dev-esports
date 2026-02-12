@@ -5,23 +5,38 @@ namespace App\Controller;
 use App\Entity\Player;
 use App\Form\PlayerType;
 use App\Repository\PlayerRepository;
+use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/admin/players', name: 'admin_player_')]
+#[Route('/admin/all-players', name: 'admin_player_')]
 class PlayerAdminController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(PlayerRepository $playerRepository, Request $request): Response
+    public function index(PlayerRepository $playerRepository, TeamRepository $teamRepository, Request $request): Response
     {
         $search = $request->query->get('search', '');
+        $team = $request->query->get('team', '');
+        $role = $request->query->get('role', '');
         $sort = $request->query->get('sort', 'nickname');
 
-        if ($search) {
-            $players = $playerRepository->findBySearchTerm($search);
+        // Get all teams for filter dropdown
+        $allTeams = $teamRepository->findAll();
+        
+        // Get all unique roles
+        $allRoles = ['Mid', 'Support', 'Carry', 'Top', 'Jungler'];
+
+        // Build query based on filters
+        if ($search || $team || $role) {
+            $players = $playerRepository->findByFilters(
+                $search,
+                $team ? (int)$team : null,
+                $role ?: null,
+                $sort
+            );
         } else {
             $players = $playerRepository->findAllOrdered($sort);
         }
@@ -29,7 +44,11 @@ class PlayerAdminController extends AbstractController
         return $this->render('admin/player/index.html.twig', [
             'players' => $players,
             'search' => $search,
+            'team' => $team,
+            'role' => $role,
             'sort' => $sort,
+            'allTeams' => $allTeams,
+            'allRoles' => $allRoles,
         ]);
     }
 

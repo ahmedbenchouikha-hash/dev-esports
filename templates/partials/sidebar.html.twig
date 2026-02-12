@@ -83,6 +83,11 @@
                 <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="playersMenu" class="collapse {% if 'admin_player' in app.request.attributes.get('_route') %}show{% endif %}">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_players_list') }}" class="menu-subitem {% if 'admin_players_list' in app.request.attributes.get('_route') %}active{% endif %}">
+                        <i class="fas fa-user-check"></i> User Approvals
+                    </a>
+                {% endif %}
                 <a href="{{ path('admin_player_index') }}" class="menu-subitem {% if 'admin_player_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Players
                 </a>
