@@ -1,0 +1,424 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Pending Approval - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="pending-approval-container">
+    <div class="pending-approval-wrapper">
+        <div class="pending-approval-card">
+            <!-- Icon -->
+            <div class="pending-icon">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+
+            <!-- Content -->
+            <h1>Account Pending Approval</h1>
+            
+            <div class="pending-content">
+                <p>Hello <strong>{{ user.firstName ?? user.username }}</strong>,</p>
+                
+                <p>Thank you for registering with Dev Esports! Your account is currently <strong>pending admin approval</strong>.</p>
+
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Why is my account pending?</strong>
+                        <p>As a player, your account needs to be verified by our admin team to ensure fair competition and compliance with our platform standards.</p>
+                    </div>
+                </div>
+
+                {% if user.confirmationFile %}
+                <div class="verification-info">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Your verification document has been uploaded and is being reviewed.</span>
+                </div>
+                {% else %}
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>No verification document was uploaded with your registration.</span>
+                </div>
+                {% endif %}
+
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Account Created</h4>
+                            <p>Your account has been successfully registered.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item active">
+                        <div class="timeline-marker">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Pending Review</h4>
+                            <p>Admin is reviewing your account and verification documents.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Full Access</h4>
+                            <p>Once approved, you'll have access to join teams and compete.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="support-box">
+                    <h4><i class="fas fa-question-circle"></i> Need Help?</h4>
+                    <p>If you have any questions about the approval process, please contact our support team.</p>
+                </div>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="pending-footer">
+                <a href="{{ path('app_logout') }}" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="decorative-elements">
+            <div class="element element-1"></div>
+            <div class="element element-2"></div>
+            <div class="element element-3"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pending-approval-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0f172a 0%, #1a2847 50%, #1e3a5f 100%);
+        position: relative;
+        overflow: hidden;
+        padding: 2rem;
+    }
+
+    .pending-approval-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        z-index: 10;
+    }
+
+    .pending-approval-card {
+        background: rgba(26, 40, 71, 0.85);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 16px;
+        padding: 3rem 2.5rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        position: relative;
+        z-index: 10;
+        text-align: center;
+    }
+
+    .pending-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 2rem;
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .pending-approval-card h1 {
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin: 0 0 1.5rem;
+        font-weight: 800;
+    }
+
+    .pending-content {
+        text-align: left;
+        line-height: 1.8;
+    }
+
+    .pending-content p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box {
+        background: rgba(0, 242, 254, 0.05);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .info-box i {
+        color: var(--primary);
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        margin-top: 0.2rem;
+    }
+
+    .info-box strong {
+        color: var(--text-primary);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-box div {
+        flex: 1;
+    }
+
+    .info-box p {
+        margin: 0.5rem 0 0;
+        font-size: 0.9rem;
+    }
+
+    .verification-info {
+        background: rgba(37, 211, 102, 0.1);
+        border: 1px solid rgba(37, 211, 102, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #25d366;
+    }
+
+    .verification-info i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .warning-box {
+        background: rgba(255, 68, 68, 0.1);
+        border: 1px solid rgba(255, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #ff9999;
+    }
+
+    .warning-box i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .timeline {
+        margin: 2rem 0;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 50px;
+        top: 80px;
+        width: 2px;
+        height: 50px;
+        background: rgba(0, 242, 254, 0.2);
+    }
+
+    .timeline-marker {
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 242, 254, 0.1);
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background: rgba(37, 211, 102, 0.2);
+        border-color: #25d366;
+        color: #25d366;
+    }
+
+    .timeline-item.active .timeline-marker {
+        background: rgba(255, 193, 7, 0.2);
+        border-color: #ffc107;
+        color: #ffc107;
+        animation: pulse 2s infinite;
+    }
+
+    .timeline-content {
+        text-align: left;
+        padding-top: 0.5rem;
+        flex: 1;
+    }
+
+    .timeline-content h4 {
+        color: var(--text-primary);
+        margin: 0 0 0.3rem;
+        font-weight: 600;
+    }
+
+    .timeline-content p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .support-box {
+        background: rgba(37, 211, 102, 0.05);
+        border: 1px solid rgba(37, 211, 102, 0.2);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .support-box h4 {
+        color: var(--text-primary);
+        margin: 0 0 0.5rem;
+        font-weight: 600;
+    }
+
+    .support-box h4 i {
+        color: #25d366;
+        margin-right: 0.5rem;
+    }
+
+    .support-box p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .pending-footer {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 242, 254, 0.1);
+    }
+
+    .btn-logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--secondary);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-logout:hover {
+        background: #00a8cc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 168, 204, 0.3);
+    }
+
+    .decorative-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .element {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.05;
+    }
+
+    .element-1 {
+        width: 300px;
+        height: 300px;
+        top: -100px;
+        left: -100px;
+        background: linear-gradient(135deg, #00f2fe, #25d366);
+    }
+
+    .element-2 {
+        width: 200px;
+        height: 200px;
+        bottom: -50px;
+        right: -50px;
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+    }
+
+    .element-3 {
+        width: 150px;
+        height: 150px;
+        top: 50%;
+        right: -75px;
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+    }
+
+    @media (max-width: 600px) {
+        .pending-approval-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .pending-approval-card h1 {
+            font-size: 1.5rem;
+        }
+
+        .pending-icon {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+        }
+
+        .timeline-item {
+            gap: 1rem;
+        }
+
+        .timeline-marker {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            left: 20px;
+            top: 60px;
+        }
+    }
+</style>
+{% endblock %}

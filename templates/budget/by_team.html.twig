@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Team Budget - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">💰 Team Budget</h1>
+                <a href="{{ path('budget_index') }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to Budgets
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Summary -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ budget.team.name }} - Budget</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="text-muted">Allocated:</label>
+                            <h4 class="text-primary">{{ budget.montantAlloue|number_format(2, ',', ' ') }}€</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted">Used:</label>
+                            <h4 class="text-warning">{{ budget.montantUtilise|number_format(2, ',', ' ') }}€</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted">Remaining:</label>
+                            {% if budget.montantRestant >= 0 %}
+                                <h4 class="text-success">{{ budget.montantRestant|number_format(2, ',', ' ') }}€</h4>
+                            {% else %}
+                                <h4 class="text-danger">{{ budget.montantRestant|number_format(2, ',', ' ') }}€</h4>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted">Usage:</label>
+                            {% set percentage = budget.pourcentageUtilisation %}
+                            <h4>
+                                {% if percentage > 100 %}
+                                    <span class="badge bg-danger">{{ percentage|round(1) }}%</span>
+                                {% elseif percentage > 80 %}
+                                    <span class="badge bg-warning">{{ percentage|round(1) }}%</span>
+                                {% else %}
+                                    <span class="badge bg-success">{{ percentage|round(1) }}%</span>
+                                {% endif %}
+                            </h4>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar {% if percentage > 100 %}bg-danger{% elseif percentage > 80 %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {% if percentage > 100 %}100{% else %}{{ percentage|round(1) }}{% endif %}%" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ percentage|round(1) }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Expenses -->
+    <div class="row">
+        <div class="col-md-12">
+            {% if depenses is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No approved expenses found for this team.
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Approved Expenses</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Amount</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for depense in depenses %}
+                                    <tr>
+                                        <td><strong>{{ depense.titre }}</strong></td>
+                                        <td>{{ depense.montant|number_format(2, ',', ' ') }}€</td>
+                                        <td>
+                                            {% if depense.categorie == 'materiel' %}
+                                                <span class="badge bg-info">Material</span>
+                                            {% elseif depense.categorie == 'transport' %}
+                                                <span class="badge bg-primary">Transport</span>
+                                            {% elseif depense.categorie == 'logistique' %}
+                                                <span class="badge bg-secondary">Logistics</span>
+                                            {% elseif depense.categorie == 'nourriture' %}
+                                                <span class="badge bg-success">Food</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Other</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><small class="text-muted">{{ depense.dateCreation|date('d/m/Y H:i') }}</small></td>
+                                        <td>
+                                            <a href="{{ path('depense_show', {id: depense.id}) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="alert alert-info mt-3">
+                    <strong>Total Approved Expenses:</strong> {{ depenses|length }}<br>
+                    <strong>Total Amount:</strong> 
+                    {% set total = 0 %}
+                    {% for depense in depenses %}
+                        {% set total = total + depense.montant %}
+                    {% endfor %}
+                    {{ total|number_format(2, ',', ' ') }}€
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

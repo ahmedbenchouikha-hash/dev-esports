@@ -7,34 +7,21 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
-class Player
+class Player extends User // <--- 1. Extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    // 2. REMOVED: #[ORM\Id], #[ORM\GeneratedValue], and the $id property.
+    // They are now inherited from the User entity.
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Player name is required')]
     #[Assert\Length(min: 2, max: 255)]
     private ?string $nickname = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'First name is required')]
-    #[Assert\Length(min: 2, max: 255)]
-    private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Last name is required')]
-    #[Assert\Length(min: 2, max: 255)]
-    private ?string $lastName = null;
-
-    #[ORM\Column(type: 'date', nullable: true)]
-    #[Assert\LessThan('today', message: 'Birth date must be in the past')]
-    private ?\DateTimeInterface $birthDate = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $role = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $playerStatus = null;
 
     #[ORM\ManyToOne(inversedBy: 'players')]
     #[ORM\JoinColumn(nullable: false)]
@@ -53,10 +40,7 @@ class Player
         $this->updatedAt = new \DateTime();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    // REMOVED: getId() method. It is inherited from User.
 
     public function getNickname(): ?string
     {
@@ -69,39 +53,6 @@ class Player
         return $this;
     }
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-        return $this;
-    }
-
-    public function getBirthDate(): ?\DateTimeInterface
-    {
-        return $this->birthDate;
-    }
-
-    public function setBirthDate(?\DateTimeInterface $birthDate): static
-    {
-        $this->birthDate = $birthDate;
-        return $this;
-    }
-
     public function getRole(): ?string
     {
         return $this->role;
@@ -110,6 +61,17 @@ class Player
     public function setRole(?string $role): static
     {
         $this->role = $role;
+        return $this;
+    }
+
+    public function getPlayerStatus(): ?string
+    {
+        return $this->playerStatus;
+    }
+
+    public function setPlayerStatus(?string $playerStatus): static
+    {
+        $this->playerStatus = $playerStatus;
         return $this;
     }
 

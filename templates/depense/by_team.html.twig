@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Team Expenses - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">💰 Team Expenses (Team ID: {{ teamId }})</h1>
+            <a href="{{ path('depense_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to All Expenses
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Team Expenses List -->
+<div class="row">
+    <div class="col-md-12">
+        {% if depenses is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No expenses found for this team.
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Title</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for depense in depenses %}
+                            <tr>
+                                <td><strong>{{ depense.titre }}</strong></td>
+                                <td>{{ depense.montant|number_format(2, ',', ' ') }}€</td>
+                                <td>
+                                    {% if depense.categorie == 'materiel' %}
+                                        <span class="badge bg-info">Material</span>
+                                    {% elseif depense.categorie == 'transport' %}
+                                        <span class="badge bg-primary">Transport</span>
+                                    {% elseif depense.categorie == 'logistique' %}
+                                        <span class="badge bg-secondary">Logistics</span>
+                                    {% elseif depense.categorie == 'nourriture' %}
+                                        <span class="badge bg-success">Food</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Other</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if depense.statut == 'validée' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elseif depense.statut == 'refusée' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ depense.dateCreation|date('d/m/Y H:i') }}</small></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ path('depense_show', {id: depense.id}) }}" class="btn btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('depense_edit', {id: depense.id}) }}" class="btn btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <strong>Total Expenses:</strong> {{ depenses|length }}<br>
+                <strong>Total Amount:</strong> 
+                {% set total = 0 %}
+                {% for depense in depenses %}
+                    {% set total = total + depense.montant %}
+                {% endfor %}
+                {{ total|number_format(2, ',', ' ') }}€
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
