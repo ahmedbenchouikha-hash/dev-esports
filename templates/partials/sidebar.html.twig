@@ -1,19 +1,14 @@
-<!-- Sidebar Toggle Overlay -->
-<button class="sidebar-toggle-overlay" id="sidebarToggleOverlay" title="Open Sidebar">
-    <span class="toggle-icon">☰</span>
+<!-- Sidebar Toggle Button -->
+<button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+    <i class="fas fa-bars"></i>
 </button>
 
 <!-- Sidebar Navigation -->
 <aside class="sidebar-nav">
-    <!-- Collapse Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle" title="Close Sidebar">
-        <span class="toggle-icon">✕</span>
-    </button>
-
     <!-- Brand -->
     <div class="sidebar-brand">
         <a href="{{ path('home') }}" class="brand-link">
-            <span class="brand-icon">🎮</span>
+            <span class="brand-icon"><i class="fas fa-gamepad"></i></span>
             <span class="brand-text">Dev Esports</span>
         </a>
     </div>
@@ -25,23 +20,23 @@
 
         <!-- Dashboard -->
         <a href="{{ path('admin_dashboard') }}" class="menu-item {% if 'admin_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
-            <span class="menu-icon">📊</span>
+            <i class="fas fa-chart-line menu-icon"></i>
             <span class="menu-label">Dashboard</span>
         </a>
 
         <!-- Matches -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#matchesMenu">
-                <span class="menu-icon">🎮</span>
+                <i class="fas fa-trophy menu-icon"></i>
                 <span class="menu-label">Matches</span>
-                <span class="menu-arrow">▼</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="matchesMenu" class="collapse {% if 'admin_match' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('admin_match_index') }}" class="menu-subitem {% if 'admin_match_index' in app.request.attributes.get('_route') %}active{% endif %}">
-                    All Matches
+                    <i class="fas fa-list"></i> All Matches
                 </a>
                 <a href="{{ path('admin_match_create') }}" class="menu-subitem">
-                    Create Match
+                    <i class="fas fa-plus"></i> Create Match
                 </a>
             </div>
         </div>
@@ -49,16 +44,16 @@
         <!-- Tournaments -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#tournamentsMenu">
-                <span class="menu-icon">🏆</span>
+                <i class="fas fa-crown menu-icon"></i>
                 <span class="menu-label">Tournaments</span>
-                <span class="menu-arrow">▼</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="tournamentsMenu" class="collapse {% if 'admin_tournament' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('admin_tournament_index') }}" class="menu-subitem {% if 'admin_tournament_index' in app.request.attributes.get('_route') %}active{% endif %}">
-                    All Tournaments
+                    <i class="fas fa-list"></i> All Tournaments
                 </a>
                 <a href="{{ path('admin_tournament_create') }}" class="menu-subitem">
-                    Create Tournament
+                    <i class="fas fa-plus"></i> Create Tournament
                 </a>
             </div>
         </div>
@@ -66,16 +61,16 @@
         <!-- Teams -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#teamsMenu">
-                <span class="menu-icon">👥</span>
+                <i class="fas fa-users menu-icon"></i>
                 <span class="menu-label">Teams</span>
-                <span class="menu-arrow">▼</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="teamsMenu" class="collapse {% if 'admin_team' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('admin_team_index') }}" class="menu-subitem {% if 'admin_team_index' in app.request.attributes.get('_route') %}active{% endif %}">
-                    All Teams
+                    <i class="fas fa-list"></i> All Teams
                 </a>
                 <a href="{{ path('admin_team_create') }}" class="menu-subitem">
-                    Create Team
+                    <i class="fas fa-plus"></i> Create Team
                 </a>
             </div>
         </div>
@@ -83,16 +78,16 @@
         <!-- Players -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#playersMenu">
-                <span class="menu-icon">⭐</span>
+                <i class="fas fa-star menu-icon"></i>
                 <span class="menu-label">Players</span>
-                <span class="menu-arrow">▼</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="playersMenu" class="collapse {% if 'admin_player' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('admin_player_index') }}" class="menu-subitem {% if 'admin_player_index' in app.request.attributes.get('_route') %}active{% endif %}">
-                    All Players
+                    <i class="fas fa-list"></i> All Players
                 </a>
                 <a href="{{ path('admin_player_create') }}" class="menu-subitem">
-                    Create Player
+                    <i class="fas fa-plus"></i> Create Player
                 </a>
             </div>
         </div>
@@ -100,19 +95,119 @@
         <!-- Recompenses -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#recompenseMenu">
-                <span class="menu-icon">🎁</span>
+                <i class="fas fa-gift menu-icon"></i>
                 <span class="menu-label">Recompenses</span>
-                <span class="menu-arrow">▼</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="recompenseMenu" class="collapse {% if 'recompense' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
-                    All Recompenses
+                    <i class="fas fa-list"></i> All Recompenses
                 </a>
                 <a href="{{ path('recompense_new') }}" class="menu-subitem">
-                    Create Recompense
+                    <i class="fas fa-plus"></i> Create Recompense
                 </a>
                 <a href="{{ path('recompense_export_pdf') }}" class="menu-subitem">
-                    Export PDF
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
+            </div>
+        </div>
+
+        <!-- Depenses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#depenseMenu">
+                <i class="fas fa-receipt menu-icon"></i>
+                <span class="menu-label">Expenses</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="depenseMenu" class="collapse {% if 'depense' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('depense_index') }}" class="menu-subitem {% if 'depense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Expenses
+                </a>
+                <a href="{{ path('depense_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Expense
+                </a>
+                <a href="{{ path('depense_historique') }}" class="menu-subitem">
+                    <i class="fas fa-history"></i> History
+                </a>
+                <a href="{{ path('depense_pending') }}" class="menu-subitem">
+                    <i class="fas fa-hourglass-half"></i> Pending
+                </a>
+            </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#budgetMenu">
+                <i class="fas fa-wallet menu-icon"></i>
+                <span class="menu-label">Budget</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="budgetMenu" class="collapse {% if 'budget' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('budget_index') }}" class="menu-subitem {% if 'budget_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Budgets
+                </a>
+                <a href="{{ path('budget_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Budget
+                </a>
+                <a href="{{ path('budget_tracking') }}" class="menu-subitem">
+                    <i class="fas fa-chart-pie"></i> Tracking
+                </a>
+                <a href="{{ path('budget_alerte') }}" class="menu-subitem">
+                    <i class="fas fa-bell"></i> Alerts
+                </a>
+                <a href="{{ path('budget_historique') }}" class="menu-subitem">
+                    <i class="fas fa-history"></i> History
+                </a>
+            </div>
+        </div>
+
+        <!-- Reclamations -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#reclamationMenu">
+                <i class="fas fa-exclamation-circle menu-icon"></i>
+                <span class="menu-label">Complaints</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="reclamationMenu" class="collapse {% if 'reclamation' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('app_reclamation_index') }}" class="menu-subitem {% if 'app_reclamation_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Complaints
+                </a>
+                <a href="{{ path('app_reclamation_new_player') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> New Complaint
+                </a>
+            </div>
+        </div>
+
+        <!-- Punitions -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#punitionMenu">
+                <i class="fas fa-ban menu-icon"></i>
+                <span class="menu-label">Sanctions</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="punitionMenu" class="collapse {% if 'punition' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('app_punition_index') }}" class="menu-subitem {% if 'app_punition_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Sanctions
+                </a>
+                <a href="{{ path('app_punition_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Sanction
+                </a>
+            </div>
+        </div>
+
+        <!-- Admin Responses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#adminResponseMenu">
+                <i class="fas fa-reply menu-icon"></i>
+                <span class="menu-label">Responses</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="adminResponseMenu" class="collapse {% if 'admin_response' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('app_admin_response_index') }}" class="menu-subitem {% if 'app_admin_response_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Responses
+                </a>
+                <a href="{{ path('app_admin_response_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Response
                 </a>
             </div>
         </div>
@@ -120,24 +215,38 @@
         <!-- Divider -->
         <div class="menu-divider"></div>
 
+        <!-- Player Section -->
+        {% if is_granted('ROLE_USER') and app.user is not null %}
+            <div class="menu-section-title">PLAYER</div>
+
+            <!-- Player Dashboard -->
+            <a href="{{ path('player_dashboard') }}" class="menu-item {% if 'player_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+                <i class="fas fa-user-circle menu-icon"></i>
+                <span class="menu-label">My Dashboard</span>
+            </a>
+
+            <!-- Divider -->
+            <div class="menu-divider"></div>
+        {% endif %}
+
         <!-- Public Section Header -->
         <div class="menu-section-title">PUBLIC</div>
 
         <!-- View Matches -->
         <a href="{{ path('match_index') }}" class="menu-item">
-            <span class="menu-icon">👁️</span>
+            <i class="fas fa-eye menu-icon"></i>
             <span class="menu-label">View Matches</span>
         </a>
 
         <!-- View Tournaments -->
         <a href="{{ path('tournament_index') }}" class="menu-item">
-            <span class="menu-icon">👁️</span>
+            <i class="fas fa-eye menu-icon"></i>
             <span class="menu-label">View Tournaments</span>
         </a>
 
         <!-- View Teams -->
         <a href="{{ path('team_index') }}" class="menu-item">
-            <span class="menu-icon">👁️</span>
+            <i class="fas fa-eye menu-icon"></i>
             <span class="menu-label">View Teams</span>
         </a>
     </nav>
@@ -145,498 +254,41 @@
     <!-- Sidebar Footer -->
     <div class="sidebar-footer">
         <div class="footer-item">
-            <p class="version-text">v1.0</p>
+            <p class="version-text"><i class="fas fa-code"></i> v1.0</p>
             <p class="copyright-text">© 2026 Dev Esports</p>
         </div>
     </div>
 </aside>
 
-<style>
-    /* Sidebar Navigation Styles */
-    .sidebar-nav {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 280px;
-        height: 100vh;
-        background: var(--gradient-surface);
-        border-right: 1px solid var(--border-color);
-        z-index: 1030;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        padding-top: 0;
-        transition: width 0.3s ease, transform 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed {
-        width: 80px;
-    }
-
-    .sidebar-nav.hidden {
-        width: 0;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(-280px);
-        border-right: none;
-    }
-
-    /* Sidebar Toggle Overlay Button */
-    .sidebar-toggle-overlay {
-        position: fixed;
-        left: 1rem;
-        top: 1rem;
-        width: 2.5rem;
-        height: 2.5rem;
-        background: var(--gradient-primary);
-        border: none;
-        border-radius: var(--radius-md);
-        color: var(--bg-dark);
-        cursor: pointer;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition);
-        font-size: 1.25rem;
-        font-weight: bold;
-        z-index: 1040;
-    }
-
-    .sidebar-toggle-overlay:hover {
-        transform: scale(1.1);
-        box-shadow: var(--shadow-glow);
-    }
-
-    .sidebar-toggle-overlay.show {
-        display: flex;
-    }
-
-    /* Sidebar Toggle Button */
-    .sidebar-toggle {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        width: 2.5rem;
-        height: 2.5rem;
-        background: transparent;
-        border: none;
-        color: var(--text-secondary);
-        cursor: pointer;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition);
-        font-size: 1.25rem;
-        font-weight: bold;
-        z-index: 1045;
-        display: flex;
-        padding: 0;
-    }
-
-    .sidebar-toggle:hover {
-        color: var(--primary);
-    }
-
-    .toggle-icon {
-        display: block;
-        line-height: 1;
-    }
-
-    .sidebar-brand {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-        transition: padding 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .sidebar-brand {
-        padding: 1rem 0.5rem;
-    }
-
-    .sidebar-nav.collapsed .brand-text {
-        display: none;
-    }
-
-    .sidebar-nav.collapsed .brand-icon {
-        font-size: 1.5rem;
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .brand-link {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        text-decoration: none;
-        font-weight: 800;
-        font-size: 1.1rem;
-        transition: var(--transition);
-    }
-
-    .brand-icon {
-        font-size: 1.75rem;
-    }
-
-    .brand-text {
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .sidebar-menu {
-        flex: 1;
-        padding: 1rem 0;
-        overflow-y: auto;
-        transition: all 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .sidebar-menu {
-        padding: 0.5rem 0;
-    }
-
-    .menu-section-title {
-        padding: 0.75rem 1.5rem;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-muted);
-        font-weight: 700;
-        margin-top: 0.5rem;
-        transition: opacity 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .menu-section-title {
-        opacity: 0;
-        height: 0;
-        padding: 0;
-        margin: 0;
-    }
-
-    .menu-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.75rem 1.25rem;
-        color: var(--text-secondary);
-        text-decoration: none;
-        cursor: pointer;
-        transition: var(--transition);
-        border-left: 3px solid transparent;
-        margin: 0.25rem 0.5rem;
-        border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    }
-
-    .sidebar-nav.collapsed .menu-item {
-        padding: 0.75rem 0.75rem;
-        justify-content: center;
-        margin: 0.25rem 0.25rem;
-        border-radius: var(--radius-md);
-        border-left: none;
-    }
-
-    .menu-label {
-        flex: 1;
-        font-size: 0.9rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        transition: opacity 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .menu-label {
-        display: none;
-    }
-
-    .menu-icon {
-        min-width: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        transition: var(--transition);
-    }
-
-    .sidebar-nav.collapsed .menu-icon {
-        min-width: auto;
-        font-size: 1.5rem;
-    }
-
-    .menu-item:hover {
-        background: rgba(0, 242, 254, 0.1);
-        color: var(--text-primary);
-        border-left-color: var(--primary);
-    }
-
-    .sidebar-nav.collapsed .menu-item:hover {
-        background: rgba(0, 242, 254, 0.15);
-        border-left-color: transparent;
-    }
-
-    .menu-item.active {
-        background: rgba(0, 242, 254, 0.15);
-        color: var(--primary);
-        font-weight: 600;
-        border-left-color: var(--primary);
-    }
-
-    .sidebar-nav.collapsed .menu-item.active {
-        background: rgba(0, 242, 254, 0.2);
-        border-left-color: transparent;
-    }    .menu-section-title {
-        padding: 1rem 1.5rem 0.5rem;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 700;
-        color: var(--text-muted);
-        margin-top: 0.5rem;
-    }
-
-    .menu-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.875rem 1.5rem;
-        color: var(--text-secondary);
-        text-decoration: none;
-        transition: var(--transition);
-        font-weight: 500;
-        cursor: pointer;
-        border-left: 3px solid transparent;
-        position: relative;
-    }
-
-    .menu-item:hover {
-        color: var(--text-primary);
-        background: rgba(0, 242, 254, 0.05);
-        border-left-color: var(--primary);
-    }
-
-    .menu-item.active {
-        color: var(--primary);
-        background: rgba(0, 242, 254, 0.1);
-        border-left-color: var(--primary);
-        font-weight: 600;
-    }
-
-    .menu-icon {
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .menu-label {
-        flex: 1;
-        font-size: 0.95rem;
-    }
-
-    .menu-arrow {
-        font-size: 0.7rem;
-        transition: var(--transition);
-        color: var(--text-muted);
-    }
-
-    .menu-toggle[aria-expanded="true"] .menu-arrow {
-        transform: rotate(180deg);
-    }
-
-    .menu-group {
-        margin: 0;
-    }
-
-    .menu-subitem {
-        display: flex;
-        align-items: center;
-        padding: 0.7rem 1.5rem 0.7rem 3.5rem;
-        color: var(--text-muted);
-        text-decoration: none;
-        transition: var(--transition);
-        font-size: 0.9rem;
-        font-weight: 500;
-        border-left: 3px solid transparent;
-    }
-
-    .sidebar-nav.collapsed .menu-subitem {
-        display: none;
-    }
-
-    .menu-subitem:hover {
-        color: var(--text-secondary);
-        background: rgba(0, 242, 254, 0.05);
-        border-left-color: var(--primary);
-    }
-
-    .menu-subitem.active {
-        color: var(--accent);
-        background: rgba(0, 255, 157, 0.05);
-        border-left-color: var(--accent);
-        font-weight: 600;
-    }
-
-    .menu-divider {
-        height: 1px;
-        background: var(--border-color);
-        margin: 1rem 0;
-        transition: margin 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .menu-divider {
-        margin: 0.5rem 0;
-    }
-
-    .sidebar-footer {
-        padding: 1rem 1.5rem;
-        border-top: 1px solid var(--border-color);
-        flex-shrink: 0;
-        transition: padding 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .sidebar-footer {
-        padding: 1rem 0.5rem;
-    }
-
-    .footer-item {
-        text-align: center;
-        transition: opacity 0.3s ease;
-    }
-
-    .sidebar-nav.collapsed .footer-item {
-        opacity: 0;
-        height: 0;
-        padding: 0;
-        margin: 0;
-    }
-
-    .version-text {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        margin: 0;
-    }
-
-    .copyright-text {
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        margin: 0.25rem 0 0;
-    }
-
-    /* Scrollbar styling */
-    .sidebar-nav::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .sidebar-nav::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .sidebar-nav::-webkit-scrollbar-thumb {
-        background: rgba(0, 242, 254, 0.2);
-        border-radius: 3px;
-    }
-
-    .sidebar-nav::-webkit-scrollbar-thumb:hover {
-        background: rgba(0, 242, 254, 0.4);
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-        .sidebar-toggle {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            right: auto;
-            z-index: 1050;
-        }
-
-        .sidebar-nav {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            box-shadow: var(--shadow-md);
-        }
-
-        .sidebar-nav.show {
-            transform: translateX(0);
-        }
-
-        body.sidebar-open {
-            overflow: hidden;
-        }
-    }
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.querySelector('.sidebar-nav');
     const toggleBtn = document.getElementById('sidebarToggle');
-    const overlayBtn = document.getElementById('sidebarToggleOverlay');
-    const body = document.body;
     const isMobile = window.innerWidth <= 768;
-
-    // Load sidebar state from localStorage
-    const isHidden = localStorage.getItem('sidebarHidden') === 'true';
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    
-    if (isHidden && !isMobile) {
-        sidebar.classList.add('hidden');
-        body.classList.add('sidebar-hidden');
-        overlayBtn.classList.add('show');
-    } else if (isCollapsed && !isMobile) {
-        sidebar.classList.add('collapsed');
-    }
 
     // Toggle sidebar
     if (toggleBtn) {
         toggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            
-            if (isMobile) {
-                // Mobile: close sidebar
-                sidebar.classList.remove('show');
-                overlayBtn.classList.add('show');
-                localStorage.setItem('sidebarHidden', 'true');
-            } else {
-                // Desktop: collapse to hidden state
-                if (sidebar.classList.contains('hidden')) {
-                    sidebar.classList.remove('hidden');
-                    body.classList.remove('sidebar-hidden');
-                    overlayBtn.classList.remove('show');
-                    localStorage.setItem('sidebarHidden', 'false');
-                } else {
-                    sidebar.classList.add('hidden');
-                    body.classList.add('sidebar-hidden');
-                    overlayBtn.classList.add('show');
-                    localStorage.setItem('sidebarHidden', 'true');
-                }
-            }
+            sidebar.classList.toggle('show');
         });
     }
 
-    // Reopen sidebar from overlay button
-    if (overlayBtn) {
-        overlayBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            sidebar.classList.remove('hidden', 'show');
-            body.classList.remove('sidebar-hidden');
-            overlayBtn.classList.remove('show');
-            localStorage.setItem('sidebarHidden', 'false');
-        });
-    }
-
-    // Close sidebar on mobile when clicking a menu item
+    // Close sidebar on menu item click (mobile)
     const menuItems = document.querySelectorAll('.menu-item, .menu-subitem');
     menuItems.forEach(item => {
         item.addEventListener('click', function() {
             if (isMobile && !item.classList.contains('menu-toggle')) {
                 sidebar.classList.remove('show');
-                overlayBtn.classList.add('show');
             }
         });
     });
 
-    // Close sidebar on mobile when clicking outside
+    // Close sidebar on outside click (mobile)
     document.addEventListener('click', function(e) {
-        if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle-overlay')) {
+        if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle')) {
             sidebar.classList.remove('show');
-            overlayBtn.classList.add('show');
         }
     });
 

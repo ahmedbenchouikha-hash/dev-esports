@@ -1,0 +1,44 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Admin Response #{{ admin_response.id }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Response #{{ admin_response.id }}</h1>
+        <div>
+            <a href="{{ path('app_admin_response_edit', {'id': admin_response.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <form method="POST" action="{{ path('app_admin_response_delete', {'id': admin_response.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this response?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ admin_response.id) }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Reclamation #{{ admin_response.reclamation.id }} - {{ admin_response.reclamation.titre }}</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ admin_response.message }}</p>
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">
+                Created: {{ admin_response.createdAt|date('d/m/Y H:i') }}
+                {% if admin_response.updatedAt %}
+                    | Updated: {{ admin_response.updatedAt|date('d/m/Y H:i') }}
+                {% endif %}
+            </small>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ path('app_admin_response_index') }}" class="btn btn-secondary">Back to List</a>
+        <a href="{{ path('app_reclamation_show', {'id': admin_response.reclamation.id}) }}" class="btn btn-info">View Reclamation</a>
+    </div>
+</div>
+{% endblock %}

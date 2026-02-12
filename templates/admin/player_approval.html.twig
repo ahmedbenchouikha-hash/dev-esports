@@ -1,0 +1,405 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Player Approvals - Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fas fa-user-check"></i> Player Verification & Approvals</h1>
+        <p>Review and approve pending player registrations</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="admin-content">
+        {% if pendingPlayers|length > 0 %}
+            <div class="players-grid">
+                {% for player in pendingPlayers %}
+                    <div class="player-card">
+                        <div class="player-header">
+                            <div class="player-avatar">
+                                {{ player.firstName|first|upper ?? 'P' }}
+                            </div>
+                            <div class="player-info">
+                                <h3>{{ player.firstName ?? player.username }} {{ player.lastName }}</h3>
+                                <p class="email">{{ player.email }}</p>
+                                <p class="username"><i class="fas fa-at"></i> {{ player.username }}</p>
+                            </div>
+                            <span class="badge badge-pending">
+                                <i class="fas fa-hourglass-half"></i> Pending
+                            </span>
+                        </div>
+
+                        <div class="player-details">
+                            {% if player.birthDate %}
+                                <div class="detail-row">
+                                    <span class="label"><i class="fas fa-birthday-cake"></i> Birth Date:</span>
+                                    <span>{{ player.birthDate|date('Y-m-d') }}</span>
+                                </div>
+                            {% endif %}
+
+                            {% if player.confirmationFile %}
+                                <div class="detail-row verification">
+                                    <span class="label"><i class="fas fa-file-upload"></i> Verification:</span>
+                                    <a href="{{ player.confirmationFile }}" target="_blank" class="file-link">
+                                        <i class="fas fa-download"></i> View Document
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="detail-row no-verification">
+                                    <span class="label"><i class="fas fa-exclamation-triangle"></i> Verification:</span>
+                                    <span class="warning-text">No document uploaded</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="player-actions">
+                            <form method="post" action="{{ path('admin_players_approve', {id: player.id}) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-approve" onclick="return confirm('Approve this player?')">
+                                    <i class="fas fa-check"></i>
+                                    Approve
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('admin_players_reject', {id: player.id}) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-reject" onclick="return confirm('Reject this player?')">
+                                    <i class="fas fa-times"></i>
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>No Pending Players</h3>
+                <p>All player registrations have been reviewed!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="admin-footer">
+        <a href="{{ path('dashboard_admin') }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<style>
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .admin-header {
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 1.5rem;
+    }
+
+    .admin-header h1 {
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .admin-header h1 i {
+        color: var(--primary);
+    }
+
+    .admin-header p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideDown 0.3s ease;
+    }
+
+    .alert-success {
+        background: rgba(37, 211, 102, 0.1);
+        border: 1px solid rgba(37, 211, 102, 0.3);
+        color: #25d366;
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        color: #ffc107;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .admin-content {
+        background: rgba(26, 40, 71, 0.5);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        min-height: 400px;
+    }
+
+    .players-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .player-card {
+        background: rgba(26, 40, 71, 0.8);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .player-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 8px 25px rgba(0, 242, 254, 0.15);
+        transform: translateY(-4px);
+    }
+
+    .player-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .player-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), #25d366);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .player-info {
+        flex: 1;
+    }
+
+    .player-info h3 {
+        color: var(--text-primary);
+        margin: 0 0 0.2rem;
+        font-size: 1.1rem;
+    }
+
+    .player-info p {
+        margin: 0.2rem 0;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .player-info .email {
+        color: var(--primary);
+    }
+
+    .badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .badge-pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .player-details {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-row .label {
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-row .label i {
+        color: var(--primary);
+    }
+
+    .detail-row span {
+        color: var(--text-primary);
+    }
+
+    .file-link {
+        color: var(--primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .file-link:hover {
+        color: #25d366;
+        text-decoration: underline;
+    }
+
+    .no-verification {
+        background: rgba(255, 68, 68, 0.05);
+        padding: 0.75rem;
+        border-radius: 6px;
+    }
+
+    .warning-text {
+        color: #ff9999 !important;
+        font-weight: 600;
+    }
+
+    .player-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-approve {
+        background: linear-gradient(135deg, #25d366, #00a853);
+        color: white;
+    }
+
+    .btn-approve:hover {
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-reject {
+        background: linear-gradient(135deg, #ff6b6b, #ff4757);
+        color: white;
+    }
+
+    .btn-reject:hover {
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #25d366;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+    }
+
+    .admin-footer {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--secondary);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #00a8cc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 168, 204, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .players-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .player-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}

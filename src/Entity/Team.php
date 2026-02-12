@@ -22,11 +22,67 @@ class Team
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Length(max: 255)]
+    #[Assert\Length(max: 255, maxMessage: 'Country must not exceed 255 characters')]
     private ?string $country = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(max: 1000, maxMessage: 'Description must not exceed 1000 characters')]
     private ?string $description = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(max: 2000, maxMessage: 'Detailed description must not exceed 2000 characters')]
+    private ?string $detailedDescription = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z0-9._-]+\.(jpg|jpeg|png|gif)$/i',
+        message: 'Invalid logo filename. Only jpg, jpeg, png, gif are allowed'
+    )]
+    private ?string $logo = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Assert\Choice(
+        choices: ['LoL', 'CS:GO', 'Dota 2', 'FIFA'],
+        message: 'Invalid game choice'
+    )]
+    private ?string $jeu = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Choice(
+        choices: ['Débutant', 'Intermédiaire', 'Pro'],
+        message: 'Invalid level choice'
+    )]
+    private ?string $niveau = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Regex(
+        pattern: '/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/i',
+        message: 'Invalid color format. Use hex format like #FF0000'
+    )]
+    private ?string $couleurEquipe = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\Type(type: 'array')]
+    private array $membres = [];
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\Positive(message: 'Captain ID must be a positive number')]
+    private ?int $captainId = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice(
+        choices: ['en attente', 'approuvé', 'refusé'],
+        message: 'Invalid status'
+    )]
+    private ?string $statut = 'en attente';
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $dateValidation = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'Score must be zero or positive')]
+    #[Assert\LessThanOrEqual(value: 1000000, message: 'Score is too high')]
+    private ?int $score = 0;
 
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
@@ -109,6 +165,116 @@ class Team
     public function setUpdatedAt(\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getLogo(): ?string
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?string $logo): static
+    {
+        $this->logo = $logo;
+        return $this;
+    }
+
+    public function getJeu(): ?string
+    {
+        return $this->jeu;
+    }
+
+    public function setJeu(?string $jeu): static
+    {
+        $this->jeu = $jeu;
+        return $this;
+    }
+
+    public function getNiveau(): ?string
+    {
+        return $this->niveau;
+    }
+
+    public function setNiveau(?string $niveau): static
+    {
+        $this->niveau = $niveau;
+        return $this;
+    }
+
+    public function getCouleurEquipe(): ?string
+    {
+        return $this->couleurEquipe;
+    }
+
+    public function setCouleurEquipe(?string $couleurEquipe): static
+    {
+        $this->couleurEquipe = $couleurEquipe;
+        return $this;
+    }
+
+    public function getMembres(): array
+    {
+        return $this->membres;
+    }
+
+    public function setMembres(?array $membres): static
+    {
+        $this->membres = $membres ?? [];
+        return $this;
+    }
+
+    public function getCaptainId(): ?int
+    {
+        return $this->captainId;
+    }
+
+    public function setCaptainId(?int $captainId): static
+    {
+        $this->captainId = $captainId;
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+
+    public function getDateValidation(): ?\DateTime
+    {
+        return $this->dateValidation;
+    }
+
+    public function setDateValidation(?\DateTime $dateValidation): static
+    {
+        $this->dateValidation = $dateValidation;
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): static
+    {
+        $this->score = $score;
+        return $this;
+    }
+
+    public function getDetailedDescription(): ?string
+    {
+        return $this->detailedDescription;
+    }
+
+    public function setDetailedDescription(?string $detailedDescription): static
+    {
+        $this->detailedDescription = $detailedDescription;
         return $this;
     }
 

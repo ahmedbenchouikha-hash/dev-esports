@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Budgets - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">💰 Budget Management</h1>
+            <a href="{{ path('budget_new') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Create New Budget
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% if app.flashes %}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Budgets</h6>
+                <h4>{{ stats.nombre_budgets }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Allocated</h6>
+                <h4>{{ stats.total_alloue|number_format(2, ',', ' ') }}€</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Used</h6>
+                <h4>{{ stats.total_utilise|number_format(2, ',', ' ') }}€</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Exceeded</h6>
+                <h4><span class="badge bg-danger">{{ stats.budgets_depassement }}</span></h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filters -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search by team name..." value="{{ search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="filter" class="form-control">
+                            <option value="all" {% if filter == 'all' %}selected{% endif %}>All Budgets</option>
+                            <option value="actif" {% if filter == 'actif' %}selected{% endif %}>Active</option>
+                            <option value="depassement" {% if filter == 'depassement' %}selected{% endif %}>Exceeded</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ path('budget_index') }}" class="btn btn-secondary w-100">
+                            <i class="fas fa-redo"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Budgets Table -->
+<div class="row">
+    <div class="col-md-12">
+        {% if budgets is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No budgets found. <a href="{{ path('budget_new') }}">Create one</a>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Team</th>
+                            <th>Allocated</th>
+                            <th>Used</th>
+                            <th>Remaining</th>
+                            <th>Usage %</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for budget in budgets %}
+                            <tr {% if budget.isDepassement() %}class="table-danger"{% endif %}>
+                                <td><strong>{{ budget.team.name }}</strong></td>
+                                <td>{{ budget.montantAlloue|number_format(2, ',', ' ') }}€</td>
+                                <td>{{ budget.montantUtilise|number_format(2, ',', ' ') }}€</td>
+                                <td>
+                                    {% if budget.montantRestant >= 0 %}
+                                        <span class="text-success">{{ budget.montantRestant|number_format(2, ',', ' ') }}€</span>
+                                    {% else %}
+                                        <span class="text-danger">{{ budget.montantRestant|number_format(2, ',', ' ') }}€</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        {% set percentage = budget.pourcentageUtilisation %}
+                                        <div class="progress-bar {% if percentage > 100 %}bg-danger{% elseif percentage > 80 %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {% if percentage > 100 %}100{% else %}{{ percentage|round(1) }}{% endif %}%" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ percentage|round(1) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if budget.statut == 'actif' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elseif budget.statut == 'dépassé' %}
+                                        <span class="badge bg-danger">Exceeded</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ budget.statut }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ path('budget_show', {id: budget.id}) }}" class="btn btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('budget_edit', {id: budget.id}) }}" class="btn btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="{{ path('budget_delete', {id: budget.id}) }}" style="display:inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ budget.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete" onclick="return confirm('Delete this budget?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="d-flex gap-2">
+            <a href="{{ path('budget_tracking') }}" class="btn btn-primary">
+                <i class="fas fa-chart-line"></i> Budget Tracking
+            </a>
+            <a href="{{ path('budget_alerte') }}" class="btn btn-warning">
+                <i class="fas fa-exclamation-triangle"></i> Alerts
+            </a>
+            <a href="{{ path('budget_historique') }}" class="btn btn-secondary">
+                <i class="fas fa-history"></i> History
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

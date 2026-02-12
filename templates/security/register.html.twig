@@ -1,0 +1,568 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Register - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="register-container">
+    <div class="register-wrapper">
+        <!-- Register Card -->
+        <div class="register-card">
+            <!-- Header -->
+            <div class="register-header">
+                <div class="register-logo">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Join Dev Esports</h1>
+                <p class="register-subtitle">Create your account and start playing</p>
+            </div>
+
+            <!-- Register Form -->
+            {{ form_start(registrationForm, { attr: { class: 'form-horizontal', enctype: 'multipart/form-data', novalidate: true } }) }}
+            
+            <!-- Form Errors at Top -->
+            {% if registrationForm.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show mb-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Registration Error:</strong>
+                    {% for error in registrationForm.vars.errors %}
+                        <div>{{ error.message }}</div>
+                    {% endfor %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+            
+            <!-- Email Field -->
+            <div class="form-group">
+                {{ form_label(registrationForm.email, 'Email Address', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.email, {
+                    attr: { class: 'form-control', placeholder: 'you@example.com', autofocus: true }
+                }) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <!-- Username Field -->
+            <div class="form-group">
+                {{ form_label(registrationForm.username, 'Username/Nickname', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.username, {
+                    attr: { class: 'form-control', placeholder: 'Choose your username' }
+                }) }}
+                {{ form_errors(registrationForm.username) }}
+            </div>
+
+            <!-- First Name Field -->
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(registrationForm.firstName, 'First Name', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(registrationForm.firstName, {
+                        attr: { class: 'form-control', placeholder: 'John' }
+                    }) }}
+                </div>
+
+                <!-- Last Name Field -->
+                <div class="form-group">
+                    {{ form_label(registrationForm.lastName, 'Last Name', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(registrationForm.lastName, {
+                        attr: { class: 'form-control', placeholder: 'Doe' }
+                    }) }}
+                </div>
+            </div>
+
+            <!-- Birth Date Field -->
+            <div class="form-group">
+                {{ form_label(registrationForm.birthDate, 'Birth Date (Optional)', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.birthDate, {
+                    attr: { class: 'form-control' }
+                }) }}
+                {{ form_errors(registrationForm.birthDate) }}
+            </div>
+
+            <!-- Role Selection Field -->
+            <div class="form-group">
+                {{ form_label(registrationForm.userRole, 'Select Your Role', { label_attr: { class: 'form-label' } }) }}
+                <div class="role-options">
+                    <div class="role-option">
+                        {{ form_widget(registrationForm.userRole.0, {
+                            attr: { id: 'user_role', class: 'form-check-input role-radio' }
+                        }) }}
+                        <label for="user_role" class="role-label">
+                            <i class="fas fa-gamepad"></i>
+                            <span>Player</span>
+                            <small>Compete and join teams</small>
+                        </label>
+                    </div>
+                    <div class="role-option">
+                        {{ form_widget(registrationForm.userRole.1, {
+                            attr: { id: 'admin_role', class: 'form-check-input role-radio' }
+                        }) }}
+                        <label for="admin_role" class="role-label">
+                            <i class="fas fa-crown"></i>
+                            <span>Admin</span>
+                            <small>Manage tournaments and teams</small>
+                        </label>
+                    </div>
+                </div>
+                {{ form_errors(registrationForm.userRole) }}
+            </div>
+
+            <!-- Verification File Field (Players Only) -->
+            <div class="form-group verification-file-group" style="display: none;" id="verificationFileGroup">
+                {{ form_label(registrationForm.verificationFile, 'Verification Document (Players Only)', { label_attr: { class: 'form-label' } }) }}
+                <div class="file-input-wrapper">
+                    {{ form_widget(registrationForm.verificationFile, {
+                        attr: { class: 'form-control', accept: '.pdf,.jpg,.jpeg,.png' }
+                    }) }}
+                    <div class="file-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Upload ID, passport, or gaming license (PDF, JPG, PNG - max 5MB)
+                    </div>
+                </div>
+                {{ form_errors(registrationForm.verificationFile) }}
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                {{ form_label(registrationForm.password.first, 'Password', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.password.first, {
+                    attr: { class: 'form-control', placeholder: 'Create a strong password', autocomplete: 'new-password' }
+                }) }}
+                <div class="password-requirements">
+                    <span class="requirement" id="req-length">
+                        <i class="fas fa-check-circle"></i> At least 8 characters
+                    </span>
+                    <span class="requirement" id="req-uppercase">
+                        <i class="fas fa-check-circle"></i> One uppercase letter
+                    </span>
+                    <span class="requirement" id="req-number">
+                        <i class="fas fa-check-circle"></i> One number
+                    </span>
+                </div>
+                {{ form_errors(registrationForm.password.first) }}
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="form-group">
+                {{ form_label(registrationForm.password.second, 'Confirm Password', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.password.second, {
+                    attr: { class: 'form-control', placeholder: 'Repeat your password', autocomplete: 'new-password' }
+                }) }}
+                {{ form_errors(registrationForm.password.second) }}
+            </div>
+
+            <!-- Agreement Checkbox -->
+            <div class="form-check">
+                {{ form_widget(registrationForm.agreeTerms, {
+                    attr: { class: 'form-check-input' }
+                }) }}
+                {{ form_label(registrationForm.agreeTerms, 'I agree to the Terms of Service and Privacy Policy', { label_attr: { class: 'form-check-label' } }) }}
+                {{ form_errors(registrationForm.agreeTerms) }}
+            </div>
+
+            <!-- Submit Button -->
+            <button class="btn btn-register btn-primary" type="submit">
+                <i class="fas fa-user-check"></i>
+                Create Account
+            </button>
+
+            {{ form_end(registrationForm) }}
+
+            <!-- Login Link -->
+            <div class="register-footer">
+                <p>Already have an account? 
+                    <a href="{{ path('app_login') }}" class="link-inline">Log in here</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="decorative-elements">
+            <div class="element element-1"></div>
+            <div class="element element-2"></div>
+            <div class="element element-3"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 80px);
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1a2847 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .register-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .register-card {
+        backdrop-filter: blur(10px);
+        background: rgba(26, 40, 71, 0.8);
+        border: 1px solid rgba(0, 242, 254, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #00f2fe 0%, #0089b3 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        margin: 0 auto 1rem;
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+    }
+
+    .register-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+    }
+
+    .register-subtitle {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #00f2fe;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .form-label i {
+        margin-right: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #00f2fe;
+        background: rgba(15, 23, 42, 0.7);
+        box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: #64748b;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .register-card {
+            padding: 1.5rem;
+        }
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .role-option {
+        position: relative;
+    }
+
+    .form-check-input {
+        display: none;
+    }
+
+    .form-check-input:checked + .role-label {
+        background: linear-gradient(135deg, #00f2fe 0%, #0089b3 100%);
+        border-color: #00f2fe;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+    }
+
+    .role-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1.5rem 1rem;
+        background: rgba(10, 20, 40, 0.6);
+        border: 2px solid rgba(0, 242, 254, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        color: #94a3b8;
+    }
+
+    .role-label:hover {
+        border-color: #00f2fe;
+        background: rgba(10, 20, 40, 0.8);
+    }
+
+    .role-label i {
+        font-size: 1.5rem;
+        color: #00f2fe;
+    }
+
+    .role-label span {
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .role-label small {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .password-requirements {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .requirement {
+        color: #ff4444;
+        transition: all 0.3s ease;
+    }
+
+    .requirement.valid {
+        color: #25d366;
+    }
+
+    .requirement i {
+        margin-right: 0.5rem;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: rgba(0, 242, 254, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid #00f2fe;
+    }
+
+    .form-check-input[type="checkbox"] {
+        display: block !important;
+        width: 18px;
+        height: 18px;
+        margin-top: 0.25rem;
+        accent-color: #00f2fe;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 0.8rem;
+        background: linear-gradient(135deg, #00f2fe 0%, #0089b3 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    .register-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .link-inline {
+        color: #00f2fe;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .link-inline:hover {
+        text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    }
+
+    .error-message {
+        color: #ff4444;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+    }
+
+    .file-hint {
+        margin-top: 0.5rem;
+        color: #64748b;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .verification-file-group {
+        margin-bottom: 1.5rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .decorative-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .element {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+
+    .element-1 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, #00f2fe, transparent);
+        top: -100px;
+        right: -50px;
+    }
+
+    .element-2 {
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, #25d366, transparent);
+        bottom: -50px;
+        left: -100px;
+    }
+
+    .element-3 {
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, #ffb84d, transparent);
+        top: 50%;
+        right: -30px;
+    }
+
+    form {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Role selection and verification file toggle
+        const userRoleInput = document.getElementById('user_role');
+        const adminRoleInput = document.getElementById('admin_role');
+        const verificationFileGroup = document.getElementById('verificationFileGroup');
+        
+        if(userRoleInput) {
+            userRoleInput.addEventListener('change', function() {
+                if(this.checked) {
+                    verificationFileGroup.style.display = 'block';
+                } else {
+                    verificationFileGroup.style.display = 'none';
+                }
+            });
+        }
+
+        if(adminRoleInput) {
+            adminRoleInput.addEventListener('change', function() {
+                if(this.checked) {
+                    verificationFileGroup.style.display = 'none';
+                }
+            });
+        }
+
+        // Password validation
+        const passwordInput = document.getElementById('registration_form_password_first');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                document.getElementById('req-length').classList.toggle('valid', password.length >= 8);
+                document.getElementById('req-uppercase').classList.toggle('valid', /[A-Z]/.test(password));
+                document.getElementById('req-number').classList.toggle('valid', /[0-9]/.test(password));
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Budget History - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">📋 Budget History</h1>
+            <a href="{{ path('budget_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Budgets
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- History List -->
+<div class="row">
+    <div class="col-md-12">
+        {% if budgets is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No budget history found.
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Team</th>
+                            <th>Allocated</th>
+                            <th>Used</th>
+                            <th>Usage %</th>
+                            <th>Status</th>
+                            <th>Last Modified</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for budget in budgets %}
+                            <tr {% if budget.isDepassement() %}class="table-danger"{% endif %}>
+                                <td><strong>{{ budget.team.name }}</strong></td>
+                                <td>{{ budget.montantAlloue|number_format(2, ',', ' ') }}€</td>
+                                <td>{{ budget.montantUtilise|number_format(2, ',', ' ') }}€</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        {% set percentage = budget.pourcentageUtilisation %}
+                                        <div class="progress-bar {% if percentage > 100 %}bg-danger{% elseif percentage > 80 %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {% if percentage > 100 %}100{% else %}{{ percentage|round(1) }}{% endif %}%" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ percentage|round(1) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if budget.statut == 'actif' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elseif budget.statut == 'dépassé' %}
+                                        <span class="badge bg-danger">Exceeded</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ budget.statut }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ budget.dateModification ? budget.dateModification|date('d/m/Y H:i') : budget.dateAllocation|date('d/m/Y H:i') }}</small></td>
+                                <td>
+                                    <a href="{{ path('budget_show', {id: budget.id}) }}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
