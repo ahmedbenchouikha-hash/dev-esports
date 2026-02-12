@@ -12,17 +12,53 @@
     </div>
 </div>
 
-<!-- Search Section -->
+<!-- Search & Filter Section -->
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
                 <form method="GET" class="row g-3">
-                    <div class="col-md-9">
-                        <input type="text" name="search" class="form-control" placeholder="Search by nickname, first name or last name..." value="{{ search }}">
+                    <div class="col-md-4">
+                        <label class="form-label">Search Player</label>
+                        <input type="text" name="search" class="form-control" placeholder="Nickname, first name or last name..." value="{{ search }}">
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                        <label class="form-label">Filter by Team</label>
+                        <select name="team" class="form-select">
+                            <option value="">-- All Teams --</option>
+                            {% for t in allTeams %}
+                                <option value="{{ t.id }}" {% if team == t.id %}selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Filter by Role</label>
+                        <select name="role" class="form-select">
+                            <option value="">-- All Roles --</option>
+                            {% for r in allRoles %}
+                                <option value="{{ r }}" {% if role == r %}selected{% endif %}>{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sort By</label>
+                        <select name="sort" class="form-select">
+                            <option value="nickname" {% if sort == 'nickname' %}selected{% endif %}>Nickname</option>
+                            <option value="firstName" {% if sort == 'firstName' %}selected{% endif %}>First Name</option>
+                            <option value="lastName" {% if sort == 'lastName' %}selected{% endif %}>Last Name</option>
+                            <option value="role" {% if sort == 'role' %}selected{% endif %}>Role</option>
+                            <option value="createdAt" {% if sort == 'createdAt' %}selected{% endif %}>Newest</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Apply Filters
+                        </button>
+                        {% if search or team or role %}
+                            <a href="{{ path('admin_player_index') }}" class="btn btn-secondary w-100 mt-2">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </a>
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -33,9 +69,22 @@
 <!-- Players Table -->
 <div class="row">
     <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                {% if players is not empty %}
+                    <p class="text-muted">
+                        <strong>{{ players|length }}</strong> player{{ players|length != 1 ? 's' : '' }} found
+                        {% if search or team or role %}
+                            <span class="badge bg-info">Filtered</span>
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
         {% if players is empty %}
             <div class="alert alert-info">
-                No players found.
+                <i class="fas fa-info-circle"></i> No players found matching your criteria.
             </div>
         {% else %}
             <div class="card">
@@ -57,7 +106,7 @@
                                     <td><strong>{{ player.nickname }}</strong></td>
                                     <td>{{ player.firstName }} {{ player.lastName }}</td>
                                     <td>{{ player.team.name ?? '-' }}</td>
-                                    <td>{{ player.role ?? '-' }}</td>
+                                    <td><span class="badge bg-secondary">{{ player.role ?? '-' }}</span></td>
                                     <td>{{ player.birthDate ? player.birthDate|date('d M Y') : '-' }}</td>
                                     <td>
                                         <a href="{{ path('admin_player_show', { id: player.id }) }}" class="btn btn-sm btn-info">View</a>

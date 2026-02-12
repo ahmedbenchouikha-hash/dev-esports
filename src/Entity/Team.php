@@ -22,11 +22,13 @@ class Team
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Length(max: 255, maxMessage: 'Country must not exceed 255 characters')]
+    #[Assert\NotBlank(message: 'Country is required')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Country must be at least 2 characters', maxMessage: 'Country must not exceed 255 characters')]
     private ?string $country = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Assert\Length(max: 1000, maxMessage: 'Description must not exceed 1000 characters')]
+    #[Assert\NotBlank(message: 'Description is required')]
+    #[Assert\Length(min: 10, max: 1000, minMessage: 'Description must be at least 10 characters', maxMessage: 'Description must not exceed 1000 characters')]
     private ?string $description = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

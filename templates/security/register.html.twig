@@ -80,26 +80,28 @@
             <div class="form-group">
                 {{ form_label(registrationForm.userRole, 'Select Your Role', { label_attr: { class: 'form-label' } }) }}
                 <div class="role-options">
-                    <div class="role-option">
-                        {{ form_widget(registrationForm.userRole.0, {
-                            attr: { id: 'user_role', class: 'form-check-input role-radio' }
-                        }) }}
-                        <label for="user_role" class="role-label">
-                            <i class="fas fa-gamepad"></i>
-                            <span>Player</span>
-                            <small>Compete and join teams</small>
-                        </label>
-                    </div>
-                    <div class="role-option">
-                        {{ form_widget(registrationForm.userRole.1, {
-                            attr: { id: 'admin_role', class: 'form-check-input role-radio' }
-                        }) }}
-                        <label for="admin_role" class="role-label">
-                            <i class="fas fa-crown"></i>
-                            <span>Admin</span>
-                            <small>Manage tournaments and teams</small>
-                        </label>
-                    </div>
+                    {% for child in registrationForm.userRole %}
+                        <div class="role-option">
+                            {{ form_widget(child, {
+                                attr: { 
+                                    id: child.vars.id, 
+                                    class: 'form-check-input role-radio',
+                                    'data-role-value': child.vars.value
+                                }
+                            }) }}
+                            <label for="{{ child.vars.id }}" class="role-label">
+                                {% if child.vars.value == 'ROLE_USER' %}
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>Player</span>
+                                    <small>Compete and join teams</small>
+                                {% else %}
+                                    <i class="fas fa-crown"></i>
+                                    <span>Admin</span>
+                                    <small>Manage tournaments and teams</small>
+                                {% endif %}
+                            </label>
+                        </div>
+                    {% endfor %}
                 </div>
                 {{ form_errors(registrationForm.userRole) }}
             </div>
@@ -531,26 +533,29 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Role selection and verification file toggle
-        const userRoleInput = document.getElementById('user_role');
-        const adminRoleInput = document.getElementById('admin_role');
+        const roleRadios = document.querySelectorAll('input[name*="user_role"]');
         const verificationFileGroup = document.getElementById('verificationFileGroup');
         
-        if(userRoleInput) {
-            userRoleInput.addEventListener('change', function() {
+        // Handle role selection change
+        roleRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
                 if(this.checked) {
-                    verificationFileGroup.style.display = 'block';
-                } else {
-                    verificationFileGroup.style.display = 'none';
+                    // Show verification file only if ROLE_USER is selected
+                    if(this.value === 'ROLE_USER') {
+                        verificationFileGroup.style.display = 'block';
+                    } else {
+                        verificationFileGroup.style.display = 'none';
+                    }
                 }
             });
-        }
+        });
 
-        if(adminRoleInput) {
-            adminRoleInput.addEventListener('change', function() {
-                if(this.checked) {
-                    verificationFileGroup.style.display = 'none';
-                }
-            });
+        // Check initial state
+        const checkedRadio = document.querySelector('input[name*="user_role"]:checked');
+        if(checkedRadio && checkedRadio.value === 'ROLE_USER') {
+            verificationFileGroup.style.display = 'block';
+        } else {
+            verificationFileGroup.style.display = 'none';
         }
 
         // Password validation

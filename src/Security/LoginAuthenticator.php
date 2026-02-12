@@ -55,7 +55,7 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
         
         // Redirect based on role
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            return new RedirectResponse($this->router->generate('dashboard_admin'));
+            return new RedirectResponse($this->router->generate('admin_dashboard'));
         }
         
         // Default to player dashboard for approved ROLE_USER

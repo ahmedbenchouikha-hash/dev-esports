@@ -17,16 +17,33 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
-    public function findBySearchTerm(string $searchTerm): array
+    public function findByFilters(string $searchTerm = '', ?int $teamId = null, ?string $role = null, string $orderBy = 'nickname'): array
     {
-        return $this->createQueryBuilder('p')
-            ->where('p.nickname LIKE :searchTerm')
-            ->orWhere('p.firstName LIKE :searchTerm')
-            ->orWhere('p.lastName LIKE :searchTerm')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->orderBy('p.nickname', 'ASC')
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('p');
+
+        if ($searchTerm) {
+            $qb->where('p.nickname LIKE :searchTerm')
+                ->orWhere('p.firstName LIKE :searchTerm')
+                ->orWhere('p.lastName LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        if ($teamId) {
+            $qb->andWhere('p.team = :teamId')
+                ->setParameter('teamId', $teamId);
+        }
+
+        if ($role) {
+            $qb->andWhere('p.role = :role')
+                ->setParameter('role', $role);
+        }
+
+        $validOrderBy = ['nickname', 'firstName', 'lastName', 'createdAt', 'role'];
+        $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'nickname';
+
+        $qb->orderBy('p.' . $orderBy, 'ASC');
+
+        return $qb->getQuery()->getResult();
     }
 
     public function findByTeam(Team $team): array

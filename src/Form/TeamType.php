@@ -11,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 class TeamType extends AbstractType
 {
@@ -20,26 +22,59 @@ class TeamType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Team Name',
                 'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Team name is required']),
+                    new Length([
+                        'min' => 2,
+                        'max' => 255,
+                        'minMessage' => 'Team name must be at least 2 characters',
+                        'maxMessage' => 'Team name must not exceed 255 characters'
+                    ])
+                ],
                 'attr' => [
-                    'placeholder' => 'Enter team name',
-                    'class' => 'form-control'
+                    'placeholder' => 'Enter team name (min 2 characters)',
+                    'class' => 'form-control',
+                    'minlength' => 2,
+                    'maxlength' => 255
                 ]
             ])
             ->add('country', TextType::class, [
                 'label' => 'Country',
-                'required' => false,
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Country is required']),
+                    new Length([
+                        'min' => 2,
+                        'max' => 255,
+                        'minMessage' => 'Country must be at least 2 characters',
+                        'maxMessage' => 'Country must not exceed 255 characters'
+                    ])
+                ],
                 'attr' => [
-                    'placeholder' => 'e.g., France',
-                    'class' => 'form-control'
+                    'placeholder' => 'e.g., France (required)',
+                    'class' => 'form-control',
+                    'minlength' => 2,
+                    'maxlength' => 255
                 ]
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'required' => false,
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Description is required']),
+                    new Length([
+                        'min' => 10,
+                        'max' => 1000,
+                        'minMessage' => 'Description must be at least 10 characters',
+                        'maxMessage' => 'Description must not exceed 1000 characters'
+                    ])
+                ],
                 'attr' => [
-                    'placeholder' => 'Team description',
+                    'placeholder' => 'Team description (min 10 characters)',
                     'class' => 'form-control',
-                    'rows' => 5
+                    'rows' => 5,
+                    'minlength' => 10,
+                    'maxlength' => 1000
                 ]
             ])
             ->add('detailedDescription', TextareaType::class, [

@@ -15,10 +15,84 @@
             <div class="card-body">
                 <h1 class="page-title">{{ title }}</h1>
 
-                {{ form_start(form) }}
-                    {{ form_widget(form) }}
+                {{ form_start(form, { 'attr': {'novalidate': 'novalidate'} }) }}
+                    <div class="mb-3">
+                        {{ form_label(form.name) }}
+                        {{ form_widget(form.name, {
+                            'attr': { 
+                                'class': 'form-control' ~ (form.name.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'Enter team name',
+                                'required': true
+                            }
+                        }) }}
+                        {% if form.name.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block text-danger">
+                                <small>{{ form.name.vars.errors.0.message }}</small>
+                            </div>
+                        {% else %}
+                            <small class="form-text text-danger"><strong>Required:</strong> Minimum 2 characters</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.country) }}
+                        {{ form_widget(form.country, {
+                            'attr': { 
+                                'class': 'form-control' ~ (form.country.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'Enter country',
+                                'required': true
+                            }
+                        }) }}
+                        {% if form.country.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block text-danger">
+                                <small>{{ form.country.vars.errors.0.message }}</small>
+                            </div>
+                        {% else %}
+                            <small class="form-text text-danger"><strong>Required:</strong> Minimum 2 characters</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description, {
+                            'attr': { 
+                                'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'Enter description',
+                                'rows': 4,
+                                'required': true
+                            }
+                        }) }}
+                        {% if form.description.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block text-danger">
+                                <small>{{ form.description.vars.errors.0.message }}</small>
+                            </div>
+                        {% else %}
+                            <small class="form-text text-danger"><strong>Required:</strong> Minimum 10 characters</small>
+                        {% endif %}
+                    </div>
+
+                    {% for field in form %}
+                        {% if field.vars.name not in ['name', 'country', 'description', '_token'] %}
+                            <div class="mb-3">
+                                {{ form_label(field) }}
+                                {{ form_widget(field, {
+                                    'attr': { 
+                                        'class': 'form-control' ~ (field.vars.errors|length > 0 ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                {% if field.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <small>{{ field.vars.errors.0.message }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
                     <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary">{% if team %}Update Team{% else %}Create Team{% endif %}</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if team %}Update Team{% else %}Create Team{% endif %}
+                        </button>
                         <a href="{{ path('admin_team_index') }}" class="btn btn-outline-primary">Cancel</a>
                     </div>
                 {{ form_end(form) }}
