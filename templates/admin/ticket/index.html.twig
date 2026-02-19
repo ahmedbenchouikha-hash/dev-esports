@@ -1,0 +1,313 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tickets - Admin{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-ticket-alt"></i> Ticket Management
+            </h1>
+            <p class="text-muted mt-2 mb-0">Manage ticket inventory and sales</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('admin_ticket_create') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus-circle"></i> Add New Ticket
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card bg-dark border-secondary shadow-lg mb-4">
+        <div class="card-header bg-dark border-secondary">
+            <h5 class="mb-0" style="color: var(--text-primary);">
+                <i class="fas fa-filter"></i> Search & Filter Tickets
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" id="filterForm" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label" style="color: var(--text-primary); font-weight: 600;">
+                        <i class="fas fa-search"></i> Ticket Number
+                    </label>
+                    <input type="text" class="form-control form-control-dark" id="search" name="search" 
+                           placeholder="Search ticket..." value="{{ search ?? '' }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="status" class="form-label" style="color: var(--text-primary); font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Status
+                    </label>
+                    <select class="form-select form-select-dark" id="status" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="available" {% if status == 'available' %}selected{% endif %}>Available</option>
+                        <option value="sold_out" {% if status == 'sold_out' %}selected{% endif %}>Sold Out</option>
+                        <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-50">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                    <a href="{{ path('admin_ticket_index') }}" class="btn btn-secondary w-50">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark border-primary shadow">
+                <div class="card-body text-center">
+                    <div style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;">
+                        <i class="fas fa-tickets"></i>
+                    </div>
+                    <h5 class="card-title text-muted mb-1">Total Tickets</h5>
+                    <h2 class="text-primary mb-0">{{ total | default(0) }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-secondary shadow">
+                <div class="card-body text-center">
+                    <div style="font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem;">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <h5 class="card-title text-muted mb-1">Displayed</h5>
+                    <h2 class="text-secondary mb-0">{{ tickets|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tickets Grid View -->
+    {% if tickets %}
+    <div class="row">
+        {% for ticket in tickets %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card bg-dark border-primary shadow-lg hover-lift" style="transition: all 0.3s ease;">
+                <!-- Header -->
+                <div class="card-header bg-dark border-primary d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1" style="color: var(--primary); font-weight: 700;">
+                            <i class="fas fa-ticket-alt"></i> {{ ticket.ticketNumber }}
+                        </h5>
+                        <small class="text-muted">Ticket ID: #{{ ticket.id }}</small>
+                    </div>
+                    {% if ticket.status == 'available' %}
+                        <span class="badge bg-success"><i class="fas fa-check"></i> Available</span>
+                    {% elseif ticket.status == 'sold_out' %}
+                        <span class="badge bg-warning"><i class="fas fa-minus"></i> Sold Out</span>
+                    {% else %}
+                        <span class="badge bg-danger"><i class="fas fa-times"></i> Cancelled</span>
+                    {% endif %}
+                </div>
+
+                <!-- Body -->
+                <div class="card-body">
+                    <!-- Match Info -->
+                    <div class="mb-3 p-2" style="background: rgba(0, 242, 254, 0.1); border-radius: 6px;">
+                        <small class="text-muted">Match:</small>
+                        <div style="font-size: 0.9rem; color: var(--primary); font-weight: 600;">
+                            {{ ticket.game.team1.name }} <strong>{{ ticket.game.score1 }}</strong>
+                            vs
+                            <strong>{{ ticket.game.score2 }}</strong> {{ ticket.game.team2.name }}
+                        </div>
+                    </div>
+
+                    <!-- Ticket Details -->
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div style="background: rgba(0, 242, 254, 0.1); padding: 0.7rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                                <small style="color: var(--text-secondary); font-weight: 600;">Type</small>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">
+                                    {{ ticket.type|upper }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background: rgba(37, 211, 102, 0.1); padding: 0.7rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                                <small style="color: #25d366; font-weight: 600;">Price</small>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #25d366;">
+                                    {{ ticket.price|number_format(2) }}€
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <!-- Occupancy Progress -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-muted">Sales Progress</small>
+                            <small style="color: var(--primary); font-weight: 700;">
+                                {{ ticket.sold }}/{{ ticket.quantity }}
+                            </small>
+                        </div>
+                        <div class="progress" style="height: 24px; background-color: rgba(0, 242, 254, 0.1); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-bar bg-success" style="width: {{ ticket.occupancyPercentage }}%; transition: width 0.3s ease;">
+                                <small style="font-weight: 700; font-size: 0.75rem; line-height: 24px;">
+                                    {{ ticket.occupancyPercentage|number_format(1) }}%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div style="font-size: 0.85rem; background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Total Seats:</span>
+                            <span style="color: var(--primary); font-weight: 600;">{{ ticket.quantity }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Available:</span>
+                            <span style="color: #25d366; font-weight: 600;">{{ ticket.getAvailableSeats }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Revenue:</span>
+                            <span style="color: #ffc107; font-weight: 600;">{{ (ticket.sold * ticket.price)|number_format(2) }}€</span>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('admin_ticket_show', {'id': ticket.id}) }}" class="btn btn-sm btn-info flex-grow-1">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ path('admin_ticket_edit', {'id': ticket.id}) }}" class="btn btn-sm btn-warning flex-grow-1">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <form method="POST" action="{{ path('admin_ticket_delete', {'id': ticket.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this ticket?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ticket.id) }}">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if max_pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if current_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_ticket_index', {'page': 1, 'search': search, 'gameId': gameId, 'status': status}) }}">« First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_ticket_index', {'page': current_page - 1, 'search': search, 'gameId': gameId, 'status': status}) }}">‹ Previous</a>
+                </li>
+            {% endif %}
+
+            {% for page in 1..max_pages %}
+                {% if page == current_page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_ticket_index', {'page': page, 'search': search, 'gameId': gameId, 'status': status}) }}">{{ page }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if current_page < max_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_ticket_index', {'page': current_page + 1, 'search': search, 'gameId': gameId, 'status': status}) }}">Next ›</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_ticket_index', {'page': max_pages, 'search': search, 'gameId': gameId, 'status': status}) }}">Last »</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle"></i> <strong>No tickets found</strong>
+        <p class="mb-0 mt-2">Try adjusting your filters or <a href="{{ path('admin_ticket_create') }}">add a new ticket</a>.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .form-control-dark,
+    .form-select-dark {
+        background-color: rgba(30, 58, 95, 0.5);
+        border-color: rgba(0, 242, 254, 0.2);
+        color: #ffffff;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-dark:focus,
+    .form-select-dark:focus {
+        background-color: rgba(30, 58, 95, 0.7);
+        border-color: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 242, 254, 0.25);
+    }
+
+    .form-control-dark::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .form-select-dark option {
+        background-color: #1a2847;
+        color: #ffffff;
+    }
+
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 242, 254, 0.2) !important;
+        border-color: var(--primary) !important;
+    }
+
+    .card {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1rem 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+</style>
+{% endblock %}

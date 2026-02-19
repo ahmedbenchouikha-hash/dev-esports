@@ -1,0 +1,321 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Match Statistic - Admin{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-plus-circle"></i> Create Match Statistic
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('admin_match_statistic_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card bg-dark border-primary shadow-lg">
+                <div class="card-header bg-dark border-primary">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-gamepad"></i> Player Performance Data
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'novalidate': true}}) }}
+
+                    <!-- Display form-level errors -->
+                    {% if form.vars.errors|length > 0 %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> <strong>Validation Errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for error in form.vars.errors %}
+                                <li>{{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.player) }}
+                                {{ form_widget(form.player, {'attr': {'class': 'form-select form-select-dark'}}) }}
+                                {% if form.player.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.player.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.game) }}
+                                {{ form_widget(form.game, {'attr': {'class': 'form-select form-select-dark'}}) }}
+                                {% if form.game.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.game.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.role) }}
+                                {{ form_widget(form.role, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.role.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.role.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <h6 class="mb-3" style="color: var(--primary);">Combat Statistics</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.kills) }}
+                                {{ form_widget(form.kills, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.kills.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.kills.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.deaths) }}
+                                {{ form_widget(form.deaths, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.deaths.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.deaths.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.assists) }}
+                                {{ form_widget(form.assists, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.assists.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.assists.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.objectivesDestroyed) }}
+                                {{ form_widget(form.objectivesDestroyed, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.objectivesDestroyed.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.objectivesDestroyed.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <h6 class="mb-3" style="color: var(--primary);">Damage & Gold</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.damageDealt) }}
+                                {{ form_widget(form.damageDealt, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.damageDealt.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.damageDealt.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.damageTaken) }}
+                                {{ form_widget(form.damageTaken, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.damageTaken.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.damageTaken.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.goldEarned) }}
+                                {{ form_widget(form.goldEarned, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                                {% if form.goldEarned.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-times-circle"></i> {{ form.goldEarned.vars.errors[0].message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <h6 class="mb-3" style="color: var(--primary);">Additional Notes</h6>
+
+                    <div class="mb-3">
+                        {{ form_label(form.notes) }}
+                        {{ form_widget(form.notes, {'attr': {'class': 'form-control form-control-dark', 'rows': 3}}) }}
+                        {% if form.notes.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                <i class="fas fa-times-circle"></i> {{ form.notes.vars.errors[0].message }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Create Statistic
+                        </button>
+                        <a href="{{ path('admin_match_statistic_index') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="mb-0" style="color: var(--secondary);">
+                        <i class="fas fa-lightbulb"></i> Tips
+                    </h5>
+                </div>
+                <div class="card-body text-muted small">
+                    <p><strong>K/D/A:</strong> Kills/Deaths/Assists ratio to evaluate combat performance.</p>
+                    <p><strong>Damage:</strong> Total damage dealt and taken during the match.</p>
+                    <p><strong>Gold:</strong> Resources earned by the player during the match.</p>
+                    <p><strong>Objectives:</strong> Structures or goals destroyed by the player.</p>
+                    <p><strong>Role:</strong> Player's position in the team (ADC, Support, Mid, etc).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-dark,
+    .form-select-dark {
+        background-color: rgba(30, 58, 95, 0.5);
+        border-color: rgba(0, 242, 254, 0.2);
+        color: #ffffff;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-dark:focus,
+    .form-select-dark:focus {
+        background-color: rgba(30, 58, 95, 0.7);
+        border-color: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 242, 254, 0.25);
+    }
+
+    .form-control-dark::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .form-text {
+        color: var(--text-secondary);
+    }
+
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Validation Error Styling */
+    .invalid-feedback {
+        color: #ff6b6b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+        font-weight: 500;
+    }
+
+    .invalid-feedback i {
+        margin-right: 0.5rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #ff6b6b;
+    }
+
+    .form-control-dark.is-invalid:focus {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    }
+
+    /* Alert styling for form-level errors */
+    .alert-danger {
+        background-color: rgba(255, 107, 107, 0.1);
+        border-color: #ff6b6b;
+        color: #ff9999;
+    }
+
+    .alert-danger strong {
+        color: #ff6b6b;
+    }
+
+    .alert-danger ul {
+        color: #ff9999;
+    }
+
+    .alert-danger .btn-close {
+        filter: brightness(0.8);
+    }
+
+    /* Input field validation states */
+    .form-control-dark:invalid {
+        border-color: #ff6b6b;
+        background-image: none;
+    }
+
+    /* Feedback message animations */
+    @keyframes slideInError {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .invalid-feedback {
+        animation: slideInError 0.3s ease;
+    }
+</style>
+{% endblock %}

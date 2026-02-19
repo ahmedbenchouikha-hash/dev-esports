@@ -29,11 +29,21 @@ class MatchAdminController extends AbstractController
             $games = $gameRepository->findAllOrdered($sort);
         }
 
+        // Get counts for summary cards
+        $total = $gameRepository->count([]);
+        $pending_count = $gameRepository->count(['status' => 'pending']);
+        $ongoing_count = $gameRepository->count(['status' => 'ongoing']);
+        $finished_count = $gameRepository->count(['status' => 'finished']);
+
         return $this->render('admin/match/index.html.twig', [
             'games' => $games,
             'search' => $search,
             'status' => $status,
             'sort' => $sort,
+            'total' => $total,
+            'pending_count' => $pending_count,
+            'ongoing_count' => $ongoing_count,
+            'finished_count' => $finished_count,
         ]);
     }
 

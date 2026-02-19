@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Match Statistic - Admin{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-edit"></i> Edit Match Statistic
+            </h1>
+            <p class="text-muted mt-2">Statistic ID: <code>{{ statistic.id }}</code></p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('admin_match_statistic_show', {'id': statistic.id}) }}" class="btn btn-info">
+                <i class="fas fa-eye"></i> View Details
+            </a>
+            <a href="{{ path('admin_match_statistic_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card bg-dark border-warning shadow-lg">
+                <div class="card-header bg-dark border-warning">
+                    <h5 class="mb-0" style="color: var(--warning);">
+                        <i class="fas fa-gamepad"></i> Update Player Performance Data
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'novalidate': true}}) }}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.player, {'attr': {'class': 'form-select form-select-dark', 'disabled': 'disabled'}}) }}
+                            <small class="text-muted">Player cannot be changed</small>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.game, {'attr': {'class': 'form-select form-select-dark', 'disabled': 'disabled'}}) }}
+                            <small class="text-muted">Match cannot be changed</small>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            {{ form_row(form.role, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <h6 class="mb-3" style="color: var(--primary);">Combat Statistics</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.kills, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.deaths, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.assists, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.objectivesDestroyed, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <h6 class="mb-3" style="color: var(--primary);">Damage & Gold</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.damageDealt, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.damageTaken, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.goldEarned, {'attr': {'class': 'form-control form-control-dark'}}) }}
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <h6 class="mb-3" style="color: var(--primary);">Additional Notes</h6>
+
+                    {{ form_row(form.notes, {'attr': {'class': 'form-control form-control-dark', 'rows': 3}}) }}
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Update Statistic
+                        </button>
+                        <a href="{{ path('admin_match_statistic_index') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card bg-dark border-info shadow-lg">
+                <div class="card-header bg-dark border-info">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-chart-bar"></i> Current Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">KDA Ratio</small>
+                        <h3 class="text-success">{{ (statistic.kda)|number_format(2) }}</h3>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Total Damage</small>
+                        <h3 class="text-warning">{{ (statistic.damageDealt + statistic.damageTaken)|number_format(0) }}</h3>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Total Kills</small>
+                        <h3 class="text-danger">{{ statistic.kills }}</h3>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Total Assists</small>
+                        <h3 class="text-info">{{ statistic.assists }}</h3>
+                    </div>
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+                    <small class="text-muted d-block">
+                        <i class="fas fa-calendar"></i> Updated: {{ statistic.updatedAt.format('d M Y H:i') }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-dark,
+    .form-select-dark {
+        background-color: rgba(30, 58, 95, 0.5);
+        border-color: rgba(0, 242, 254, 0.2);
+        color: #ffffff;
+    }
+
+    .form-control-dark:focus,
+    .form-select-dark:focus {
+        background-color: rgba(30, 58, 95, 0.7);
+        border-color: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 242, 254, 0.25);
+    }
+
+    .form-control-dark:disabled,
+    .form-select-dark:disabled {
+        background-color: rgba(30, 58, 95, 0.3);
+        border-color: rgba(0, 242, 254, 0.1);
+        color: var(--text-secondary);
+    }
+
+    .form-control-dark::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .form-text {
+        color: var(--text-secondary);
+    }
+
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

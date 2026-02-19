@@ -3,61 +3,161 @@
 {% block title %}Admin - Match Details - Dev Esports{% endblock %}
 
 {% block body %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <a href="{{ path('admin_match_index') }}" class="btn btn-outline-primary btn-sm">← Back to Matches</a>
+<div class="container-lg mt-5">
+    <!-- Header and Navigation -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <a href="{{ path('admin_match_index') }}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Matches
+            </a>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                    <h1 class="page-title">{{ game.team1.name }} vs {{ game.team2.name }}</h1>
-                    <span class="badge {% if game.status == 'finished' %}badge-success{% elseif game.status == 'ongoing' %}badge-danger{% elseif game.status == 'pending' %}badge-warning{% else %}badge-secondary{% endif %}" style="font-size: 1rem;">
-                        {{ game.status|capitalize }}
+    <!-- Main Match Card -->
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card bg-dark border-primary shadow-lg">
+                <!-- Header -->
+                <div class="card-header bg-dark border-primary d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                        <i class="fas fa-gamepad"></i> Match Details
+                    </h3>
+                    <span class="badge" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        {% if game.status == 'finished' %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Finished</span>
+                        {% elseif game.status == 'ongoing' %}
+                            <span class="badge bg-danger"><i class="fas fa-play-circle"></i> Ongoing</span>
+                        {% elseif game.status == 'pending' %}
+                            <span class="badge bg-warning"><i class="fas fa-hourglass"></i> Pending</span>
+                        {% else %}
+                            <span class="badge bg-secondary"><i class="fas fa-times-circle"></i> Cancelled</span>
+                        {% endif %}
                     </span>
                 </div>
 
-                <!-- Score Board -->
-                <div class="row mb-4">
-                    <div class="col-md-5">
-                        <h5>{{ game.team1.name }}</h5>
-                    </div>
-                    <div class="col-md-2 text-center">
-                        <div style="font-size: 2rem; font-weight: bold;">
-                            <span style="color: var(--highlight-color);">{{ game.score1 }}</span>
-                            <div style="font-size: 1rem; color: #999;">-</div>
-                            <span style="color: var(--highlight-color);">{{ game.score2 }}</span>
+                <!-- Body -->
+                <div class="card-body">
+                    <!-- Scoreboard Section -->
+                    <div class="scoreboard-section mb-4" style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.1)); padding: 2rem; border-radius: 12px;">
+                        <div class="row align-items-center">
+                            <!-- Team 1 -->
+                            <div class="col-md-4 text-center">
+                                <div style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">
+                                    {{ game.team1.name }}
+                                </div>
+                                <div style="font-size: 0.9rem; color: #888;">
+                                    <i class="fas fa-users"></i> Team
+                                </div>
+                            </div>
+
+                            <!-- Score -->
+                            <div class="col-md-4 text-center">
+                                <div style="background: rgba(0, 242, 254, 0.2); padding: 1.5rem; border-radius: 8px;">
+                                    <div style="font-size: 3rem; font-weight: 900; color: var(--primary);">
+                                        {{ game.score1 }}
+                                    </div>
+                                    <div style="font-size: 1.5rem; color: #888; margin: 0.5rem 0;">-</div>
+                                    <div style="font-size: 3rem; font-weight: 900; color: var(--secondary);">
+                                        {{ game.score2 }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team 2 -->
+                            <div class="col-md-4 text-center">
+                                <div style="font-size: 1.3rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">
+                                    {{ game.team2.name }}
+                                </div>
+                                <div style="font-size: 0.9rem; color: #888;">
+                                    <i class="fas fa-users"></i> Team
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-5 text-end">
-                        <h5>{{ game.team2.name }}</h5>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <!-- Match Information Grid -->
+                    <div class="row mb-4">
+                        <!-- Date & Time -->
+                        <div class="col-md-6 mb-3">
+                            <div style="background: rgba(0, 242, 254, 0.1); padding: 1rem; border-left: 3px solid var(--primary); border-radius: 6px;">
+                                <h6 style="color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-calendar"></i> Match Date & Time
+                                </h6>
+                                <p class="mb-0" style="font-size: 0.95rem; color: var(--text-primary);">
+                                    {{ game.matchdate|date('d F Y') }} at {{ game.matchdate|date('H:i') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Tournament -->
+                        <div class="col-md-6 mb-3">
+                            <div style="background: rgba(37, 211, 102, 0.1); padding: 1rem; border-left: 3px solid var(--secondary); border-radius: 6px;">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-trophy"></i> Tournament
+                                </h6>
+                                <p class="mb-0" style="font-size: 0.95rem; color: var(--text-primary);">
+                                    {{ game.tournament.name }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="col-md-6">
+                            <div style="background: rgba(255, 193, 7, 0.1); padding: 1rem; border-left: 3px solid #ffc107; border-radius: 6px;">
+                                <h6 style="color: #ffc107; font-weight: 700; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-map-marker-alt"></i> Location
+                                </h6>
+                                <p class="mb-0" style="font-size: 0.95rem; color: var(--text-primary);">
+                                    {{ game.tournament.location ?? 'No location set' }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <div style="background: rgba(0, 188, 212, 0.1); padding: 1rem; border-left: 3px solid #00bcd4; border-radius: 6px;">
+                                <h6 style="color: #00bcd4; font-weight: 700; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-info-circle"></i> Current Status
+                                </h6>
+                                <p class="mb-0" style="font-size: 0.95rem; color: var(--text-primary);">
+                                    {{ game.status|capitalize }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <!-- Audit Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-user-clock"></i> Created: {{ game.createdAt|date('d M Y H:i') }}
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                <i class="fas fa-edit"></i> Updated: {{ game.updatedAt|date('d M Y H:i') }}
+                            </small>
+                        </div>
                     </div>
                 </div>
 
-                <hr>
-
-                <!-- Match Details -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>📅 Date:</strong> {{ game.matchdate|date('d M Y - H:i') }}</p>
-                        <p><strong>🏆 Tournament:</strong> {{ game.tournament.name }}</p>
+                <!-- Footer - Action Buttons -->
+                <div class="card-footer bg-dark border-primary">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{{ path('admin_match_edit', { id: game.id }) }}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit Match
+                        </a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash"></i> Delete Match
+                        </button>
+                        <a href="{{ path('admin_match_index') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-list"></i> Back to List
+                        </a>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Status:</strong> {{ game.status|capitalize }}</p>
-                        <p><strong>Created:</strong> {{ game.createdAt|date('d M Y - H:i') }}</p>
-                    </div>
-                </div>
-
-                <hr>
-
-                <!-- Action Buttons -->
-                <div class="text-center">
-                    <a href="{{ path('admin_match_edit', { id: game.id }) }}" class="btn btn-warning">Edit Match</a>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Match</button>
-                    <a href="{{ path('admin_match_index') }}" class="btn btn-outline-primary">Back to Matches</a>
                 </div>
             </div>
         </div>
@@ -67,22 +167,42 @@
 <!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content" style="background-color: var(--secondary-color);">
+        <div class="modal-content" style="background-color: #0f1d2d; border-color: rgba(0, 242, 254, 0.3);">
             <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title d-flex align-items-center gap-2">
+                    <i class="fas fa-exclamation-triangle" style="color: #ff6b6b;"></i>
+                    <span>Confirm Delete</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this match?
+                <p>Are you sure you want to delete this match? This action cannot be undone.</p>
+                <div style="background: rgba(255, 107, 107, 0.1); border-left: 3px solid #ff6b6b; padding: 1rem; border-radius: 4px;">
+                    <strong style="color: #ffaaaa;">{{ game.team1.name }} vs {{ game.team2.name }}</strong>
+                    <div style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">
+                        <i class="fas fa-calendar"></i> {{ game.matchdate|date('d M Y H:i') }}
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST" action="{{ path('admin_match_delete', { id: game.id }) }}" style="display: inline;">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ game.id) }}">
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">Delete Match</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .scoreboard-section {
+        box-shadow: 0 4px 12px rgba(0, 242, 254, 0.1);
+    }
+
+    .card {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>
 {% endblock %}
