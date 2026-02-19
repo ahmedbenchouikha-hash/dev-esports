@@ -221,9 +221,17 @@
                 margin-top: 0;
             }
 
+            .sidebar-nav.collapsed {
+                width: 80px;
+            }
+
             body.admin-layout {
                 margin-left: 260px;
                 margin-top: 0;
+            }
+
+            body.admin-layout.sidebar-collapsed {
+                margin-left: 80px;
             }
 
             body.admin-layout.sidebar-hidden {
@@ -232,6 +240,11 @@
 
             body.admin-layout main {
                 width: calc(100% - 260px);
+                transition: width 0.3s ease;
+            }
+
+            body.admin-layout.sidebar-collapsed main {
+                width: calc(100% - 80px);
             }
 
             body.admin-layout.sidebar-hidden main {
@@ -243,6 +256,11 @@
                 padding: 2rem 1.5rem;
                 border-bottom: 1px solid rgba(0, 242, 254, 0.1);
                 flex-shrink: 0;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-nav.collapsed .sidebar-brand {
+                padding: 1.5rem 0.75rem;
             }
 
             .brand-link {
@@ -256,6 +274,11 @@
                 transition: all 0.3s ease;
             }
 
+            .sidebar-nav.collapsed .brand-link {
+                justify-content: center;
+                gap: 0;
+            }
+
             .brand-link:hover {
                 transform: scale(1.05);
                 text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
@@ -266,6 +289,14 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+            }
+
+            .brand-text {
+                transition: opacity 0.3s ease;
+            }
+
+            .sidebar-nav.collapsed .brand-text {
+                display: none;
             }
 
             /* Menu Styles */
@@ -296,6 +327,11 @@
                 color: var(--text-secondary);
                 font-weight: 700;
                 margin-top: 0.5rem;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-nav.collapsed .menu-section-title {
+                display: none;
             }
 
             .menu-item {
@@ -314,11 +350,26 @@
                 position: relative;
             }
 
+            .sidebar-nav.collapsed .menu-item {
+                padding: 0.875rem 0.75rem;
+                justify-content: center;
+                gap: 0;
+            }
+
+            .sidebar-nav.collapsed .menu-item .menu-label,
+            .sidebar-nav.collapsed .menu-item .menu-arrow {
+                display: none;
+            }
+
             .menu-item:hover {
                 color: var(--primary);
                 background: rgba(0, 242, 254, 0.08);
                 border-left-color: var(--primary);
                 transform: translateX(4px);
+            }
+
+            .sidebar-nav.collapsed .menu-item:hover {
+                transform: translateX(0);
             }
 
             .menu-item.active {
@@ -367,6 +418,10 @@
                 font-weight: 500;
                 border-left: 3px solid transparent;
                 position: relative;
+            }
+
+            .sidebar-nav.collapsed .menu-subitem {
+                display: none;
             }
 
             .menu-subitem::before {
@@ -465,6 +520,14 @@
                 transform: scale(0.95);
             }
 
+            .sidebar-toggle i {
+                transition: transform 0.3s ease;
+            }
+
+            body.admin-layout.sidebar-collapsed .sidebar-toggle i {
+                transform: rotate(180deg);
+            }
+
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
                 .sidebar-nav {
@@ -550,6 +613,43 @@
             <script>
                 // Add admin layout class
                 document.body.classList.add('admin-layout');
+
+                // Sidebar Toggle Functionality
+                const sidebarToggle = document.getElementById('sidebarToggle');
+                const sidebarNav = document.querySelector('.sidebar-nav');
+                const body = document.body;
+
+                // Check localStorage for saved state
+                const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (sidebarCollapsed) {
+                    sidebarNav.classList.add('collapsed');
+                    body.classList.add('sidebar-collapsed');
+                }
+
+                // Toggle sidebar on button click
+                sidebarToggle.addEventListener('click', () => {
+                    sidebarNav.classList.toggle('collapsed');
+                    body.classList.toggle('sidebar-collapsed');
+                    
+                    // Save state to localStorage
+                    const isCollapsed = sidebarNav.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                });
+
+                // Add tooltip on hover for collapsed sidebar
+                const menuItems = document.querySelectorAll('.menu-item');
+                const subItems = document.querySelectorAll('.menu-subitem');
+
+                menuItems.forEach(item => {
+                    item.addEventListener('mouseenter', function() {
+                        if (sidebarNav.classList.contains('collapsed')) {
+                            const label = this.querySelector('.menu-label');
+                            if (label) {
+                                this.setAttribute('title', label.textContent);
+                            }
+                        }
+                    });
+                });
             </script>
         {% endif %}
         

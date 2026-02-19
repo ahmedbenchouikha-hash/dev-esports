@@ -41,6 +41,40 @@
             </div>
         </div>
 
+        <!-- Tickets -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#ticketsMenu">
+                <i class="fas fa-ticket-alt menu-icon"></i>
+                <span class="menu-label">Tickets</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="ticketsMenu" class="collapse {% if 'admin_ticket' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('admin_ticket_index') }}" class="menu-subitem {% if 'admin_ticket_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Tickets
+                </a>
+                <a href="{{ path('admin_ticket_create') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Ticket
+                </a>
+            </div>
+        </div>
+
+        <!-- Match Statistics -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#statisticsMenu">
+                <i class="fas fa-chart-bar menu-icon"></i>
+                <span class="menu-label">Match Stats</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="statisticsMenu" class="collapse {% if 'admin_match_statistic' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('admin_match_statistic_index') }}" class="menu-subitem {% if 'admin_match_statistic_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Statistics
+                </a>
+                <a href="{{ path('admin_match_statistic_create') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Add Statistic
+                </a>
+            </div>
+        </div>
+
         <!-- Tournaments -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#tournamentsMenu">
