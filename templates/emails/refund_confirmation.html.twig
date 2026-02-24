@@ -1,0 +1,104 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}Refund Processed{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <!-- Success Header -->
+    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">
+            💰 Refund Processed
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Your refund has been successfully processed</p>
+    </div>
+
+    <!-- Main Content -->
+    <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px;">
+        
+        <!-- Event Details -->
+        <div style="background: white; padding: 20px; border-left: 4px solid #b622d1; margin-bottom: 20px; border-radius: 4px;">
+            <h2 style="color: #b622d1; margin-top: 0; font-size: 20px;">Event Details</h2>
+            <p style="margin: 10px 0; font-size: 18px; font-weight: bold;">
+                <span style="color: #b622d1;">{{ game.team1.name }}</span>
+                <span style="color: #666;"> vs </span>
+                <span style="color: #00d9ff;">{{ game.team2.name }}</span>
+            </p>
+            <p style="margin: 5px 0; color: #666;">
+                📅 <strong>Date:</strong> {{ game.matchdate|date('F d, Y') }}
+            </p>
+            <p style="margin: 5px 0; color: #666;">
+                🏆 <strong>Tournament:</strong> {{ game.tournament.name }}
+            </p>
+        </div>
+
+        <!-- Refund Details -->
+        <div style="background: white; padding: 20px; border-left: 4px solid #28a745; margin-bottom: 20px; border-radius: 4px;">
+            <h2 style="color: #28a745; margin-top: 0; font-size: 20px;">✓ Refund Details</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Ticket Type:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; color: #b622d1; font-weight: bold;">
+                        {{ ticket.type|upper }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Refund Amount:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: bold; color: #28a745;">
+                        €{{ refundAmount|number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Refund Date:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">
+                        {{ 'now'|date('F d, Y') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Original Payment ID:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; font-family: monospace; font-size: 12px;">
+                        {{ payment.paymentIntentId }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Timing Info -->
+        <div style="background: #e7f3ff; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
+            <h3 style="margin-top: 0; color: #0066cc;">⏱️ When will you see the refund?</h3>
+            <p style="margin: 10px 0; color: #666;">
+                The refund has been initiated and will be credited back to your original payment method within:
+            </p>
+            <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
+                <li>Credit Cards: 3-5 business days</li>
+                <li>Debit Cards: 5-7 business days</li>
+                <li>Bank Transfers: 5-10 business days</li>
+            </ul>
+            <p style="margin: 10px 0; color: #666;">
+                <em>Processing times may vary depending on your bank or card issuer.</em>
+            </p>
+        </div>
+
+        <!-- Important Info -->
+        <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <h3 style="margin-top: 0; color: #856404;">ℹ️ Important</h3>
+            <p style="margin: 10px 0; color: #856404;">
+                <strong>Your ticket is no longer valid.</strong> If you wish to attend the event, you'll need to purchase a new ticket.
+            </p>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://dev-esports.com" 
+               style="background: linear-gradient(135deg, #b622d1 0%, #00d9ff 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+                Browse More Events
+            </a>
+        </div>
+
+        <!-- Support -->
+        <div style="background: #f0f0f0; padding: 20px; border-radius: 4px; text-align: center; color: #666; font-size: 14px;">
+            <p style="margin: 0;">Questions about your refund? Contact us at <strong>support@dev-esports.com</strong></p>
+            <p style="margin: 5px 0 0 0;">Response time: 24-48 hours</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

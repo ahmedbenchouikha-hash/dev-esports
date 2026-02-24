@@ -95,7 +95,48 @@
                     <h6>Tournament Information</h6>
                     <p class="mb-0">{{ game.tournament.description ?? 'No description available' }}</p>
                 </div>
+                <!-- Tickets Section -->
+                <div class="mt-5 mb-4">
+                    <h3 style="color: var(--primary); font-weight: 700; margin-bottom: 1.5rem;">
+                        <i class="fas fa-ticket-alt"></i> Buy Tickets
+                    </h3>
+                    
+                    {% if game.tickets|length > 0 %}
+                        <div class="row">
+                            {% for ticket in game.tickets %}
+                                {% if ticket.status == 'available' %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100" style="border: 2px solid var(--secondary); background-color: rgba(0, 217, 255, 0.05);">
+                                            <div class="card-body">
+                                                <h5 class="card-title" style="color: var(--secondary); font-weight: 700;">
+                                                    {{ ticket.type|upper }}
+                                                </h5>
+                                                <p class="card-text text-muted">
+                                                    <strong>Price:</strong> {{ ticket.price }}€
+                                                </p>
+                                                <p class="card-text text-muted">
+                                                    <strong>Available:</strong> {{ ticket.quantity - ticket.sold }} / {{ ticket.quantity }}
+                                                </p>
+                                                <div class="progress mb-3" style="height: 5px;">
+                                                    <div class="progress-bar" style="background-color: var(--secondary); width: {{ (ticket.sold / ticket.quantity * 100)|round }}%"></div>
+                                                </div>
+                                                <a href="{{ path('ticket_checkout', {'id': ticket.id}) }}" class="btn btn-block w-100" style="background-color: var(--primary); color: white; font-weight: 600;">
+                                                    <i class="fas fa-credit-card"></i> Buy Now
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No tickets available for this match yet.
+                        </div>
+                    {% endif %}
+                </div>
 
+                <hr>
                 <!-- Action Buttons -->
                 <div class="text-center">
                     <a href="{{ path('match_index') }}" class="btn btn-outline-primary">← Back to Matches</a>

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\GameRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -53,10 +55,14 @@ class Game
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
+    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'game')]
+    private Collection $tickets;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
+        $this->tickets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -171,5 +177,31 @@ class Game
     public function __toString(): string
     {
         return sprintf('%s vs %s', $this->team1?->getName() ?? 'Team 1', $this->team2?->getName() ?? 'Team 2');
+    }
+
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Ticket $ticket): static
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Ticket $ticket): static
+    {
+        if ($this->tickets->removeElement($ticket)) {
+            if ($ticket->getGame() === $this) {
+                $ticket->setGame(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -1,0 +1,114 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}Ticket Purchase Confirmation{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <!-- Success Header -->
+    <div style="background: linear-gradient(135deg, #b622d1 0%, #00d9ff 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">
+            <i>🎫</i> Purchase Confirmed!
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Your ticket has been purchased successfully</p>
+    </div>
+
+    <!-- Main Content -->
+    <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px;">
+        
+        <!-- Match Details -->
+        <div style="background: white; padding: 20px; border-left: 4px solid #b622d1; margin-bottom: 20px; border-radius: 4px;">
+            <h2 style="color: #b622d1; margin-top: 0; font-size: 20px;">Match Details</h2>
+            <p style="margin: 10px 0; font-size: 18px; font-weight: bold;">
+                <span style="color: #b622d1;">{{ game.team1.name }}</span>
+                <span style="color: #666;"> vs </span>
+                <span style="color: #00d9ff;">{{ game.team2.name }}</span>
+            </p>
+            <p style="margin: 5px 0; color: #666;">
+                📅 <strong>Date:</strong> {{ game.matchdate|date('F d, Y') }}
+            </p>
+            <p style="margin: 5px 0; color: #666;">
+                🕐 <strong>Time:</strong> {{ game.matchdate|date('H:i') }}
+            </p>
+            <p style="margin: 5px 0; color: #666;">
+                🏆 <strong>Tournament:</strong> {{ tournament.name }}
+            </p>
+        </div>
+
+        <!-- Ticket Details -->
+        <div style="background: white; padding: 20px; border-left: 4px solid #00d9ff; margin-bottom: 20px; border-radius: 4px;">
+            <h2 style="color: #00d9ff; margin-top: 0; font-size: 20px;">Ticket Information</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Ticket Type:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; color: #b622d1; font-weight: bold;">
+                        {{ ticket.type|upper }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Ticket Number:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; font-family: monospace;">
+                        {{ ticket.ticketNumber }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Price per Ticket:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">
+                        €{{ payment.amount|number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Quantity:</strong></td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">
+                        {{ payment.quantityPurchased }} ticket(s)
+                    </td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px 8px; font-weight: bold; border-radius: 4px 0 0 4px;"><strong>Total Amount:</strong></td>
+                    <td style="padding: 12px 8px; text-align: right; font-weight: bold; color: #b622d1; font-size: 18px; border-radius: 0 4px 4px 0;">
+                        €{{ (payment.amount * payment.quantityPurchased)|number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Payment Details -->
+        <div style="background: white; padding: 20px; border-left: 4px solid #28a745; border-radius: 4px; margin-bottom: 20px;">
+            <h2 style="color: #28a745; margin-top: 0; font-size: 20px;">✓ Payment Confirmed</h2>
+            <p style="margin: 10px 0; color: #666;">
+                <strong>Payment Status:</strong> <span style="color: #28a745; font-weight: bold;">Succeeded</span>
+            </p>
+            <p style="margin: 10px 0; color: #666;">
+                <strong>Payment ID:</strong> <code style="background: #f0f0f0; padding: 2px 6px;">{{ payment.paymentIntentId }}</code>
+            </p>
+            <p style="margin: 10px 0; color: #666;">
+                <strong>Confirmation Email:</strong> {{ payment.customerEmail }}
+            </p>
+        </div>
+
+        <!-- Important Info -->
+        <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <h3 style="margin-top: 0; color: #856404;">ℹ️ Important Information</h3>
+            <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
+                <li>Please keep this confirmation email safe</li>
+                <li>You'll need your ticket number to enter the event</li>
+                <li>Arrive at least 30 minutes before the match starts</li>
+                <li>Bring a valid photo ID for verification</li>
+            </ul>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://dev-esports.com/matches/{{ game.id }}" 
+               style="background: linear-gradient(135deg, #b622d1 0%, #00d9ff 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+                View Event Details
+            </a>
+        </div>
+
+        <!-- Support -->
+        <div style="background: #f0f0f0; padding: 20px; border-radius: 4px; text-align: center; color: #666; font-size: 14px;">
+            <p style="margin: 0;">Need help? Contact us at <strong>support@dev-esports.com</strong></p>
+            <p style="margin: 5px 0 0 0;">Response time: 24-48 hours</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
