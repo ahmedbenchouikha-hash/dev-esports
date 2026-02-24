@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TicketRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,7 +17,7 @@ class Ticket
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'tickets')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Match is required')]
     private ?Game $game = null;
@@ -54,11 +56,15 @@ class Ticket
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'ticket', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $payments;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
         $this->status = 'available';
+        $this->payments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -165,6 +171,33 @@ class Ticket
         return $this;
     }
 
+    /**
+     * @return Collection<int, Payment>
+     */
+    public function getPayments(): Collection
+    {
+        return $this->payments;
+    }
+
+    public function addPayment(Payment $payment): static
+    {
+        if (!$this->payments->contains($payment)) {
+            $this->payments->add($payment);
+            $payment->setTicket($this);
+        }
+        return $this;
+    }
+
+    public function removePayment(Payment $payment): static
+    {
+        if ($this->payments->removeElement($payment)) {
+            if ($payment->getTicket() === $this) {
+                $payment->setTicket(null);
+            }
+        }
+        return $this;
+    }
+
     public function getAvailableSeats(): int
     {
         return max(0, $this->quantity - $this->sold);
@@ -183,3 +216,4 @@ class Ticket
         return sprintf('[%s] %s - %s', $this->ticketNumber, ucfirst($this->type), $this->price . '€');
     }
 }
+

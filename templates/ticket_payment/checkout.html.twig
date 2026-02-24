@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Purchase Ticket - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card" style="border-color: var(--secondary)">
+                <div class="card-header" style="background-color: var(--bg-tertiary); border-color: var(--secondary)">
+                    <h3 class="mb-0">
+                        <i class="fas fa-ticket-alt" style="color: var(--secondary)"></i>
+                        Purchase Ticket
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Ticket Details -->
+                    <div class="mb-4 p-3" style="background-color: var(--bg-tertiary); border-left: 4px solid var(--secondary); border-radius: 4px;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Match:</strong> 
+                                    {{ ticket.game.team1.name }} vs {{ ticket.game.team2.name }}
+                                </p>
+                                <p><strong>Date:</strong> 
+                                    {{ ticket.game.matchdate|date('Y-m-d H:i') }}
+                                </p>
+                                <p><strong>Location:</strong> 
+                                    {{ ticket.game.tournament.location }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Ticket Type:</strong> 
+                                    <span class="badge" style="background-color: var(--secondary)">
+                                        {{ ticket.type|capitalize }}
+                                    </span>
+                                </p>
+                                <p><strong>Price:</strong> 
+                                    <span style="font-size: 1.5rem; font-weight: bold; color: var(--secondary)">
+                                        ${{ ticket.price|number_format(2) }}
+                                    </span>
+                                </p>
+                                <p><strong>Availability:</strong> 
+                                    <span style="color: var(--success)">{{ ticket.quantity - ticket.sold }} seats available</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div class="mb-4">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" placeholder="your.email@example.com" required>
+                        <small class="form-text" style="color: var(--text-secondary)">
+                            Your ticket confirmation will be sent to this email
+                        </small>
+                    </div>
+
+                    <!-- Stripe Payment Form -->
+                    <div class="mb-4">
+                        <label class="form-label">Payment Information</label>
+                        <div id="card-element" class="form-control" style="height: 40px; padding-top: 8px; background-color: var(--bg-secondary);">
+                            <!-- Stripe will insert the card element here -->
+                        </div>
+                        <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                    </div>
+
+                    <!-- Payment Button -->
+                    <button id="submit-btn" class="btn btn-lg w-100" style="background-color: var(--secondary); color: var(--bg-dark); font-weight: bold;">
+                        <i class="fas fa-lock"></i> Pay Now - ${{ ticket.price|number_format(2) }}
+                    </button>
+
+                    <!-- Processing Message -->
+                    <div id="loading" class="d-none mt-3">
+                        <div class="spinner-border" style="color: var(--secondary);" role="status">
+                            <span class="visually-hidden">Processing...</span>
+                        </div>
+                        <p class="ms-3 d-inline-block">Processing your payment...</p>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="success" class="d-none mt-3 alert alert-success">
+                        <i class="fas fa-check"></i> Payment successful! Redirecting...
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="error" class="d-none mt-3 alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="mt-4 text-center" style="color: var(--text-secondary); font-size: 0.9rem;">
+                        <i class="fas fa-shield-alt"></i> Secure payment powered by Stripe
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stripe JavaScript -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('{{ stripePublicKey }}');
+const elements = stripe.elements();
+const cardElement = elements.create('card');
+
+cardElement.mount('#card-element');
+
+// Handle card errors
+cardElement.on('change', function(event) {
+    const displayError = document.getElementById('card-errors');
+    if (event.error) {
+        displayError.textContent = event.error.message;
+    } else {
+        displayError.textContent = '';
+    }
+});
+
+// Handle form submission
+document.getElementById('submit-btn').addEventListener('click', async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const ticketId = {{ ticket.id }};
+
+    if (!email) {
+        document.getElementById('error-message').textContent = 'Please enter your email address';
+        document.getElementById('error').classList.remove('d-none');
+        return;
+    }
+
+    // Show loading
+    document.getElementById('loading').classList.remove('d-none');
+    document.getElementById('submit-btn').disabled = true;
+
+    try {
+        // Step 1: Create payment intent
+        const createResponse = await fetch('/ticket/payment/' + ticketId + '/create-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+
+        const createData = await createResponse.json();
+
+        if (!createData.success) {
+            throw new Error(createData.error || 'Failed to create payment');
+        }
+
+        // Step 2: Confirm card payment with Stripe
+        const { paymentIntent, error } = await stripe.confirmCardPayment(createData.clientSecret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: { email: email }
+            }
+        });
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        if (paymentIntent.status === 'succeeded') {
+            // Step 3: Confirm payment in backend
+            const confirmResponse = await fetch('/ticket/payment/' + ticketId + '/confirm-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    paymentIntentId: paymentIntent.id,
+                    email: email
+                })
+            });
+
+            const confirmData = await confirmResponse.json();
+
+            if (confirmData.success) {
+                document.getElementById('loading').classList.add('d-none');
+                document.getElementById('success').classList.remove('d-none');
+                
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/ticket/payment/success?ticket=' + ticketId;
+                }, 2000);
+            } else {
+                throw new Error(confirmData.message || 'Payment confirmation failed');
+            }
+        }
+    } catch (err) {
+        document.getElementById('loading').classList.add('d-none');
+        document.getElementById('error-message').textContent = err.message;
+        document.getElementById('error').classList.remove('d-none');
+        document.getElementById('submit-btn').disabled = false;
+    }
+});
+</script>
+
+<style>
+#card-element {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#card-element.StripeElement--focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+#card-element.StripeElement--invalid {
+    border-color: var(--danger);
+}
+</style>
+{% endblock %}

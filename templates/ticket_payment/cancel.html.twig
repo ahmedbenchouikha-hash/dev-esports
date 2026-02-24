@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Payment Cancelled - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center" style="border-color: var(--danger)">
+                <div class="card-body py-5">
+                    <div style="font-size: 4rem; color: var(--danger); margin-bottom: 20px;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+
+                    <h1 class="mb-3">Payment Cancelled</h1>
+
+                    <p class="lead mb-4" style="color: var(--text-secondary);">
+                        Your payment was cancelled. No charges have been made to your account.
+                    </p>
+
+                    <div class="alert alert-info mb-4">
+                        <strong>What's next?</strong><br>
+                        You can try again or choose a different payment method. Your ticket is still available.
+                    </div>
+
+                    <div class="mb-4">
+                        <a href="javascript:history.back()" class="btn btn-lg" style="background-color: var(--secondary); color: var(--bg-dark); font-weight: bold;">
+                            <i class="fas fa-arrow-left"></i> Try Again
+                        </a>
+                    </div>
+
+                    <div class="mb-4">
+                        <a href="/" class="btn btn-lg btn-outline-secondary">
+                            <i class="fas fa-home"></i> Return Home
+                        </a>
+                    </div>
+
+                    <small style="color: var(--text-muted);">
+                        Need help? <a href="/contact" style="color: var(--secondary);">Contact Support</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
