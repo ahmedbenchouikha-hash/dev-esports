@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Player;
 use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +27,10 @@ class UserController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
-        $user = new User();
+        // Determine the user class based on selection
+        $selectedRole = $this->getSelectedRole($request);
+        $user = ($selectedRole === 'ROLE_ADMIN' || !$selectedRole) ? new User() : new Player();
+        
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -53,6 +57,11 @@ class UserController extends AbstractController
                     $user->setTypeuser('user');
                     // Players need approval
                     $user->setApprovalStatus('pending');
+                    
+                    // Set required Player fields
+                    if ($user instanceof Player) {
+                        $user->setNickname($user->getUsername());
+                    }
                     
                     // Handle file upload for players
                     $verificationFile = $form->get('verificationFile')->getData();
@@ -109,6 +118,15 @@ class UserController extends AbstractController
         return $this->render('security/register.html.twig', [
             'registrationForm' => $form,
         ]);
+    }
+    
+    private function getSelectedRole(Request $request)
+    {
+        if ($request->isMethod('POST')) {
+            $data = $request->request->all();
+            return $data['registration_form']['userRole'] ?? null;
+        }
+        return null;
     }
 }
 

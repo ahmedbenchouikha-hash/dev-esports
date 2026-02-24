@@ -28,6 +28,15 @@
             </div>
             
             <div class="team-card-content">
+                {% if currentTeam.logo %}
+                    <div style="flex: 0 0 150px; height: 100px; background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6)); display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.15); margin-right: 1.5rem; padding: 0.5rem;">
+                        <img src="{{ asset('uploads/logos/' ~ currentTeam.logo) }}" alt="{{ currentTeam.name }} logo" style="max-width: 100%; max-height: 100%; object-fit: contain; width: auto;">
+                    </div>
+                {% else %}
+                    <div style="flex: 0 0 150px; height: 100px; background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.1)); display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.15); margin-right: 1.5rem;">
+                        <i class="fas fa-image" style="font-size: 2rem; color: rgba(0, 242, 254, 0.3);"></i>
+                    </div>
+                {% endif %}
                 <div class="team-info">
                     <div class="team-header-info">
                         <h3>{{ currentTeam.name }}</h3>
@@ -56,10 +65,6 @@
                 </div>
 
                 <div class="team-actions">
-                    <a href="{{ path('admin_team_index') }}" class="btn btn-info btn-sm">
-                        <i class="fas fa-eye"></i> View Team
-                    </a>
-                    
                     <form method="POST" action="{{ path('player_leave_team') }}" style="display: inline;">
                         <input type="hidden" name="_token" value="{{ csrf_token('leave_team') }}">
                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to leave this team?')">
@@ -79,6 +84,117 @@
         </div>
     {% endif %}
 
+    <!-- Team Invitations Section -->
+    {% if pendingInvitations|length > 0 %}
+        <div class="team-section invitations-section">
+            <div class="section-header">
+                <i class="fas fa-envelope"></i>
+                <h2>Team Invitations</h2>
+                <span class="team-count" style="background-color: #ff6b6b;">{{ pendingInvitations|length }} pending</span>
+            </div>
+
+            <div class="row">
+                {% for invitation in pendingInvitations %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-primary">
+                            {% if invitation.team.logo %}
+                                <div style="height: 100px; background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6)); display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid rgba(0, 242, 254, 0.15); padding: 0.5rem;">
+                                    <img src="{{ asset('uploads/logos/' ~ invitation.team.logo) }}" alt="{{ invitation.team.name }} logo" style="max-width: 100%; max-height: 100%; object-fit: contain; width: auto;">
+                                </div>
+                            {% endif %}
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-handshake"></i> Invitation from <strong>{{ invitation.team.name }}</strong>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    <strong>Team Manager:</strong> Team needs players!
+                                </p>
+                                <p class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Invited on: {{ invitation.createdAt|date('d M Y H:i') }}
+                                    </small>
+                                </p>
+                                
+                                {% if invitation.team.description %}
+                                    <p class="mb-3">
+                                        <small><strong>About Team:</strong><br>{{ invitation.team.description|slice(0, 150) }}{% if invitation.team.description|length > 150 %}...{% endif %}</small>
+                                    </p>
+                                {% endif %}
+
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-users"></i> Team Members: {{ invitation.team.players|length }}/5
+                                    </small>
+                                </div>
+
+                                <hr>
+
+                                <div class="d-flex gap-2">
+                                    <form method="POST" action="{{ path('team_invitation_accept', { id: invitation.id }) }}" style="flex: 1;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('team_invitation_' ~ invitation.id) }}">
+                                        <button type="submit" class="btn btn-success w-100 btn-sm">
+                                            <i class="fas fa-check-circle"></i> Accept
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ path('team_invitation_reject', { id: invitation.id }) }}" style="flex: 1;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('team_invitation_' ~ invitation.id) }}">
+                                        <button type="submit" class="btn btn-danger w-100 btn-sm">
+                                            <i class="fas fa-times-circle"></i> Decline
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Manager Section -->
+    <div class="team-section manager-section">
+        <div class="section-header">
+            <i class="fas fa-crown"></i>
+            <h2>Management</h2>
+        </div>
+
+        {% if is_granted('ROLE_MANAGER') %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <strong>You are a Manager!</strong> You can now create and manage teams and budgets.
+                <div class="mt-3">
+                    <a href="{{ path('team_new') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus"></i> Create Team
+                    </a>
+                    <a href="{{ path('player_manager_status') }}" class="btn btn-secondary">
+                        <i class="fas fa-history"></i> View Manager Applications
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-crown text-warning"></i> Become a Manager
+                    </h5>
+                    <p class="card-text text-muted">
+                        Ready to lead? Apply for the manager role to create and manage your own teams, handle budgets, and take your competitive career to the next level.
+                    </p>
+                    <div class="mt-3">
+                        <a href="{{ path('player_manager_request') }}" class="btn btn-warning">
+                            <i class="fas fa-paper-plane"></i> Apply for Manager Role
+                        </a>
+                        <a href="{{ path('player_manager_status') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-info-circle"></i> Check Application Status
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
     <!-- Available Teams Section -->
     <div class="team-section">
         <div class="section-header">
@@ -91,6 +207,15 @@
             <div class="teams-grid">
                 {% for team in availableTeams %}
                     <div class="team-card">
+                        {% if team.logo %}
+                            <div style="height: 120px; background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6)); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0.5rem;">
+                                <img src="{{ asset('uploads/logos/' ~ team.logo) }}" alt="{{ team.name }} logo" style="max-width: 100%; max-height: 100%; object-fit: contain; width: auto;">
+                            </div>
+                        {% else %}
+                            <div style="height: 120px; background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.1)); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-image" style="font-size: 2rem; color: rgba(0, 242, 254, 0.3);"></i>
+                            </div>
+                        {% endif %}
                         <div class="team-card-header">
                             <h3>{{ team.name }}</h3>
                             <span class="team-size-badge">
@@ -111,15 +236,6 @@
                                 <span class="stat-label">Founded</span>
                                 <span class="stat-value">{{ team.createdAt|date('Y') }}</span>
                             </div>
-                        </div>
-
-                        <div class="team-card-footer">
-                            <form method="POST" action="{{ path('player_join_team', { id: team.id }) }}" style="width: 100%;">
-                                <input type="hidden" name="_token" value="{{ csrf_token('join_team_' ~ team.id) }}">
-                                <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-plus-circle"></i> Join Team
-                                </button>
-                            </form>
                         </div>
                     </div>
                 {% endfor %}
@@ -168,9 +284,7 @@
             </div>
 
             <div class="profile-actions">
-                <a href="{{ path('admin_player_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-edit"></i> Edit Profile
-                </a>
+                <!-- Players can view their profile but not edit through admin panel -->
             </div>
         </div>
     </div>

@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Review Manager Request - Admin Panel{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="d-flex align-items-center mb-4">
+                <h1 class="mb-0">
+                    <i class="fas fa-eye text-primary"></i> Review Manager Request
+                </h1>
+            </div>
+
+            {% if app.flashes %}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+                <!-- Request Details -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle"></i> Request Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-3">
+                                <strong>Player:</strong>
+                                <br>
+                                {{ managerRequest.player.username }}
+                                <br>
+                                <small class="text-muted">{{ managerRequest.player.email }}</small>
+                            </p>
+
+                            {% if managerRequest.player.firstName or managerRequest.player.lastName %}
+                                <p class="mb-3">
+                                    <strong>Name:</strong>
+                                    {{ managerRequest.player.firstName }} {{ managerRequest.player.lastName }}
+                                </p>
+                            {% endif %}
+
+                            {% if managerRequest.player.team %}
+                                <p class="mb-3">
+                                    <strong>Current Team:</strong>
+                                    <a href="#">{{ managerRequest.player.team.name }}</a>
+                                </p>
+                            {% endif %}
+
+                            <p class="mb-3">
+                                <strong>Requested On:</strong>
+                                {{ managerRequest.createdAt|date('Y-m-d H:i') }}
+                            </p>
+
+                            {% if managerRequest.teamName %}
+                                <p class="mb-3">
+                                    <strong>Desired Team Name:</strong>
+                                    <span class="badge bg-secondary">{{ managerRequest.teamName }}</span>
+                                </p>
+                            {% endif %}
+
+                            {% if managerRequest.motivation %}
+                                <div class="mb-3">
+                                    <strong>Motivation:</strong>
+                                    <p class="text-muted mt-2 p-3 bg-light rounded">
+                                        {{ managerRequest.motivation }}
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Form -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-check-square"></i> Make a Decision
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form, {'method': 'POST', 'attr': {'novalidate': true}}) }}
+
+                            <div class="mb-4">
+                                {{ form_label(form.status) }}
+                                {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
+                                {% if form.status.vars.errors|length > 0 %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form_errors(form.status) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                {{ form_label(form.adminComment) }}
+                                {{ form_widget(form.adminComment) }}
+                                {% if form.adminComment.vars.errors|length > 0 %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form_errors(form.adminComment) }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-1">
+                                    Provide constructive feedback to the player. They will see this comment.
+                                </small>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Note:</strong> This action cannot be undone. The player will be notified of your decision.
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Submit Decision
+                                </button>
+                                <a href="{{ path('admin_manager_requests_list') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

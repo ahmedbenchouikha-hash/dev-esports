@@ -1,0 +1,476 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Team - RankUp{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="{{ path('team_index') }}" class="btn btn-outline-primary btn-sm">← Back to Teams</a>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% if app.session.flashbag.all %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            {% for type, messages in app.session.flashbag.all %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                        <strong>{{ type|upper }}:</strong> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Form Errors -->
+{% if form.vars.errors|length > 0 %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h5><i class="fas fa-exclamation-circle"></i> Form Errors</h5>
+                {% for error in form.vars.errors %}
+                    <div>{{ error.message }}</div>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="page-title">Create Team</h1>
+
+                {{ form_start(form, { 'method': 'POST', 'attr': {'enctype': 'multipart/form-data'}, 'novalidate': false }) }}
+                    <!-- Display all form-level errors -->
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                            <strong><i class="fas fa-exclamation-circle"></i> Please fix the following errors:</strong>
+                            <ul class="mb-0 ms-3 mt-2">
+                                {% for error in form.vars.errors %}
+                                    <li>{{ error.message }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        {{ form_label(form.name) }}
+                        {{ form_widget(form.name, {
+                            'attr': { 
+                                'class': 'form-control' ~ (form.name.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'Enter team name',
+                                'required': true,
+                                'minlength': 2
+                            }
+                        }) }}
+                        {% if form.name.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.name.vars.errors %}
+                                    <small class="text-danger">{{ error.message }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <small class="form-text text-muted"><strong>Required:</strong> Minimum 2 characters</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.country) }}
+                        {{ form_widget(form.country, {
+                            'attr': { 
+                                'class': 'form-control' ~ (form.country.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'e.g., Tunisia',
+                                'required': true,
+                                'minlength': 2
+                            }
+                        }) }}
+                        {% if form.country.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.country.vars.errors %}
+                                    <small class="text-danger">{{ error.message }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <small class="form-text text-muted"><strong>Required:</strong> Minimum 2 characters</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description, {
+                            'attr': { 
+                                'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'Team description (min 10 characters)',
+                                'rows': 4,
+                                'required': true,
+                                'minlength': 10
+                            }
+                        }) }}
+                        {% if form.description.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.vars.errors %}
+                                    <small class="text-danger">{{ error.message }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <small class="form-text text-muted"><strong>Required:</strong> Minimum 10 characters</small>
+                        {% endif %}
+                    </div>
+
+                    {% for field in form %}
+                        {% if field.vars.name not in ['name', 'country', 'description', '_token'] %}
+                            <div class="mb-3">
+                                {{ form_label(field) }}
+                                {{ form_widget(field, {
+                                    'attr': { 
+                                        'class': 'form-control' ~ (field.vars.errors|length > 0 ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                {% if field.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in field.vars.errors %}
+                                            <small class="text-danger">{{ error.message }}</small><br>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Players Selection Section -->
+                    {% if available_players is defined and available_players|length > 0 %}
+                        <hr>
+                        <h4>👥 Add Players to Team</h4>
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <p class="text-muted mb-3">Select players to add to your team (optional):</p>
+                                <div class="row">
+                                    {% for player in available_players %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border p-3 player-card" style="cursor: pointer;">
+                                                <div class="d-flex align-items-center">
+                                                    <input type="checkbox" name="team_players[]" value="{{ player.id }}" class="me-3">
+                                                    <div>
+                                                        <strong>{{ player.nickname }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ player.firstName }} {{ player.lastName }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <style>
+                            .player-card {
+                                transition: all 0.3s ease;
+                            }
+                            .player-card:hover {
+                                background-color: rgba(13, 110, 253, 0.05);
+                                border-color: #0d6efd !important;
+                                transform: translateY(-2px);
+                                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                            }
+                            .player-card.border-primary {
+                                border-color: #0d6efd !important;
+                                background-color: rgba(13, 110, 253, 0.1);
+                                font-weight: 500;
+                            }
+                            .player-card input[type="checkbox"] {
+                                cursor: pointer;
+                                width: 20px;
+                                height: 20px;
+                            }
+                        </style>
+                    {% else %}
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i> No players available to add.
+                        </div>
+                    {% endif %}
+
+                    <!-- Submit Button Section -->
+                    <hr>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Click the button below to create your team with the selected players.
+                    </div>
+                    <div class="text-center mt-4 p-3 bg-light rounded border">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-team-btn" name="submit">
+                            <i class="fas fa-check-circle"></i> Create Team
+                        </button>
+                        <div class="mt-2">
+                            <a href="{{ path('team_index') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Suggested Players Section (after team creation) -->
+{% if team_created and suggested_players|length > 0 %}
+<div class="row mt-5">
+    <div class="col-lg-10 mx-auto">
+        <div class="card border-success shadow">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-users-cog"></i> 🎯 Suggested Players for Your Team
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Based on AI analysis, here are the top players that might be a great fit for your team.
+                    Click <strong>"Invite"</strong> to send them an invitation!
+                </p>
+
+                <div class="row">
+                    {% for suggestion in suggested_players %}
+                        <div class="col-md-6 col-lg-5 mb-4">
+                            <div class="card h-100 shadow-sm suggestion-card" data-player-id="{{ suggestion.player.id }}">
+                                <div class="card-body">
+                                    <!-- Player Header -->
+                                    <div class="d-flex align-items-start mb-3 pb-3 border-bottom">
+                                        <div>
+                                            <h5 class="card-title mb-1">{{ suggestion.player.nickname }}</h5>
+                                            <small class="text-muted">{{ suggestion.player.firstName }} {{ suggestion.player.lastName }}</small>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <span class="badge bg-info">
+                                                AI Score: {{ (suggestion.score|round(1)) }}/50
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Statistics Grid -->
+                                    <div class="row g-3 mb-3">
+                                        <!-- Matches Played -->
+                                        <div class="col-6">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="display-5 fw-bold text-primary">
+                                                    {{ suggestion.stats.total_matches }}
+                                                </div>
+                                                <small class="text-muted d-block">{{ suggestion.stats.total_matches == 1 ? 'Match' : 'Matches' }}</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Average Score -->
+                                        <div class="col-6">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="display-5 fw-bold text-success">
+                                                    {{ (suggestion.stats.average_score|round(2)) }}
+                                                </div>
+                                                <small class="text-muted d-block">Avg Score</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Best Score -->
+                                        <div class="col-6">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="display-5 fw-bold text-warning">
+                                                    {{ suggestion.stats.best_score }}
+                                                </div>
+                                                <small class="text-muted d-block">Best Score</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Consistency -->
+                                        <div class="col-6">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="display-5 fw-bold text-danger">
+                                                    {{ (suggestion.stats.consistency|round(1)) }}/10
+                                                </div>
+                                                <small class="text-muted d-block">Consistency</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Recent Form & Performance Trend -->
+                                    <div class="mb-3 p-3 bg-light rounded">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong class="d-block text-muted mb-1">Recent Form:</strong>
+                                                <span class="badge {% if 'Hot' in suggestion.stats.recent_form %}bg-danger{% elseif 'Stable' in suggestion.stats.recent_form %}bg-primary{% else %}bg-info{% endif %}">
+                                                    {{ suggestion.stats.recent_form }}
+                                                </span>
+                                            </div>
+                                            <div class="col-6">
+                                                <strong class="d-block text-muted mb-1">Trend:</strong>
+                                                <span class="badge {% if suggestion.stats.performance_trend == 'improving' %}bg-success{% elseif suggestion.stats.performance_trend == 'stable' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                                    {{ suggestion.stats.performance_trend|capitalize }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Invite Button -->
+                                    <button class="btn btn-success w-100 invite-player-btn" 
+                                            data-player-id="{{ suggestion.player.id }}" 
+                                            data-player-name="{{ suggestion.player.nickname }}"
+                                            data-team-id="{{ created_team.id }}">
+                                        <i class="fas fa-envelope"></i> Send Invitation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Info Message -->
+                <div class="alert alert-info mt-4" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>💡 Tip:</strong> You can also manually add players from the team management page.
+                    Check the player profiles to see their full statistics before inviting.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submit-team-btn');
+    
+    if (submitBtn && form) {
+        submitBtn.addEventListener('click', function(e) {
+            console.log('Submit button clicked');
+            console.log('Form is valid (HTML5):', form.checkValidity());
+            
+            // If form is not valid, let HTML5 validation handle it
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                console.log('Form validation failed, preventing submission');
+                return false;
+            }
+        });
+    }
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitted!');
+            console.log('Form method:', form.method);
+            console.log('Form action:', form.action);
+            console.log('Selected players:', Array.from(form.querySelectorAll('input[name="team_players[]"]:checked')).map(el => el.value));
+        });
+    }
+    
+    // Make player cards clickable
+    const playerCards = document.querySelectorAll('.player-card');
+    playerCards.forEach(card => {
+        const checkbox = card.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            card.addEventListener('click', function(e) {
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
+            
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    card.classList.add('border-primary');
+                } else {
+                    card.classList.remove('border-primary');
+                }
+            });
+        }
+    });
+
+    // Handle suggestion card invitations
+    const inviteButtons = document.querySelectorAll('.invite-player-btn');
+    inviteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const playerId = this.getAttribute('data-player-id');
+            const playerName = this.getAttribute('data-player-name');
+            const teamId = this.getAttribute('data-team-id');
+            const btn = this;
+
+            // Disable button during request
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            // Send invitation via AJAX
+            fetch(`{{ path('team_invite_from_suggestions', {'id': ''}) }}${teamId}/invite/${playerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    '_token': '{{ csrf_token("invite_player") }}' // You may not need this for AJAX requests
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success - update UI
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-success');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Invitation Sent';
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <strong>✅ Success!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    // Insert at top of suggestions section
+                    const suggestionsSection = document.querySelector('.card-header.bg-success');
+                    if (suggestionsSection) {
+                        suggestionsSection.parentElement.insertBefore(alertDiv, suggestionsSection.parentElement.firstChild);
+                    }
+                } else {
+                    // Error
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-warning alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <strong>⚠️ Info:</strong> ${data.error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    const suggestionsSection = document.querySelector('.card-header.bg-success');
+                    if (suggestionsSection) {
+                        suggestionsSection.parentElement.insertBefore(alertDiv, suggestionsSection.parentElement.firstChild);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <strong>❌ Error:</strong> An error occurred while sending the invitation.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                const suggestionsSection = document.querySelector('.card-header.bg-success');
+                if (suggestionsSection) {
+                    suggestionsSection.parentElement.insertBefore(alertDiv, suggestionsSection.parentElement.firstChild);
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

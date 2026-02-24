@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Team;
 use App\Entity\Player;
+use App\Repository\TeamInvitationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PlayerDashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'player_dashboard', methods: ['GET'])]
-    public function dashboard(EntityManagerInterface $em): Response
+    public function dashboard(EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
     {
         $user = $this->getUser();
         
@@ -26,18 +27,26 @@ class PlayerDashboardController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
-        $currentTeam = $user->getTeam();
+        $currentTeams = $user->getTeams();
         $availableTeams = $em->getRepository(Team::class)->findAll();
         
-        // Remove current team from available teams
-        $availableTeams = array_filter($availableTeams, function($team) use ($currentTeam) {
-            return $team !== $currentTeam;
+        // Remove teams the player is already in from available teams
+        $availableTeams = array_filter($availableTeams, function($team) use ($currentTeams) {
+            return !$currentTeams->contains($team);
         });
+        
+        // Reindex array for Twig
+        $availableTeams = array_values($availableTeams);
+
+        // Get pending invitations for this player
+        $pendingInvitations = $invitationRepo->findPendingInvitationForPlayer($user);
 
         return $this->render('player/dashboard.html.twig', [
             'player' => $user,
-            'currentTeam' => $currentTeam,
+            'currentTeam' => $currentTeams->first() ?: null,  // For backward compatibility with template
+            'currentTeams' => $currentTeams,
             'availableTeams' => $availableTeams,
+            'pendingInvitations' => $pendingInvitations,
         ]);
     }
 
@@ -57,10 +66,28 @@ class PlayerDashboardController extends AbstractController
             return $this->redirectToRoute('player_dashboard');
         }
 
-        $user->setTeam($team);
-        $em->flush();
+        try {
+            // Check if player is already in the team
+            if ($team->getPlayers()->contains($user)) {
+                $this->addFlash('warning', 'You are already a member of this team.');
+                return $this->redirectToRoute('player_dashboard');
+            }
 
-        $this->addFlash('success', 'You have successfully joined ' . $team->getName() . '!');
+            // Check if team is full
+            if ($team->getPlayers()->count() >= 5) {
+                $this->addFlash('error', '❌ This team is full (maximum 5 players). You cannot join.');
+                return $this->redirectToRoute('player_dashboard');
+            }
+
+            $user->addTeam($team);
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', '✅ You have successfully joined ' . $team->getName() . '!');
+        } catch (\Exception $e) {
+            $this->addFlash('error', '❌ Error joining team: ' . $e->getMessage());
+            \error_log('Join team error: ' . $e->getTraceAsString());
+        }
         
         return $this->redirectToRoute('player_dashboard');
     }
@@ -80,11 +107,29 @@ class PlayerDashboardController extends AbstractController
             return $this->redirectToRoute('player_dashboard');
         }
 
-        $teamName = $user->getTeam()?->getName() ?? 'Unknown Team';
-        $user->setTeam(null);
-        $em->flush();
-
-        $this->addFlash('success', 'You have left ' . $teamName . '.');
+        $teamId = $request->request->get('team_id');
+        if ($teamId) {
+            // Leave specific team
+            $team = $em->getRepository(Team::class)->find($teamId);
+            if ($team && $user->getTeams()->contains($team)) {
+                $teamName = $team->getName();
+                $user->removeTeam($team);
+                $em->flush();
+                $this->addFlash('success', 'You have left ' . $teamName . '.');
+            }
+        } else {
+            // For backward compatibility: leave first team
+            $teams = $user->getTeams();
+            if ($teams->count() > 0) {
+                $team = $teams->first();
+                $teamName = $team->getName();
+                $user->removeTeam($team);
+                $em->flush();
+                $this->addFlash('success', 'You have left ' . $teamName . '.');
+            } else {
+                $this->addFlash('warning', 'You are not part of any team.');
+            }
+        }
         
         return $this->redirectToRoute('player_dashboard');
     }

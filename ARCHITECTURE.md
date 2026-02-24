@@ -1,4 +1,4 @@
-# Dev Esports - Project Architecture Overview
+# RankUp - Project Architecture Overview
 
 ## System Architecture
 
@@ -379,4 +379,4 @@ Security:
 ---
 
 Generated: February 7, 2026
-PIDEV - Dev Esports Tournament Management System
+PIDEV - RankUp Tournament Management System
