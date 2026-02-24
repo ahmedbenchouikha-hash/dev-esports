@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PlayerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -12,9 +14,7 @@ class Player extends User // <--- 1. Extends User
     // 2. REMOVED: #[ORM\Id], #[ORM\GeneratedValue], and the $id property.
     // They are now inherited from the User entity.
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Player name is required')]
-    #[Assert\Length(min: 2, max: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $nickname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -23,10 +23,8 @@ class Player extends User // <--- 1. Extends User
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $playerStatus = null;
 
-    #[ORM\ManyToOne(inversedBy: 'players')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: 'Player must belong to a team')]
-    private ?Team $team = null;
+    #[ORM\ManyToMany(targetEntity: Team::class, mappedBy: 'players')]
+    private Collection $teams;
 
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
@@ -36,6 +34,7 @@ class Player extends User // <--- 1. Extends User
 
     public function __construct()
     {
+        $this->teams = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
@@ -47,7 +46,7 @@ class Player extends User // <--- 1. Extends User
         return $this->nickname;
     }
 
-    public function setNickname(string $nickname): static
+    public function setNickname(?string $nickname): static
     {
         $this->nickname = $nickname;
         return $this;
@@ -75,14 +74,40 @@ class Player extends User // <--- 1. Extends User
         return $this;
     }
 
+    public function getTeams(): Collection
+    {
+        return $this->teams;
+    }
+
+    public function addTeam(Team $team): static
+    {
+        if (!$this->teams->contains($team)) {
+            $this->teams->add($team);
+            $team->addPlayer($this);
+        }
+        return $this;
+    }
+
+    public function removeTeam(Team $team): static
+    {
+        if ($this->teams->removeElement($team)) {
+            $team->removePlayer($this);
+        }
+        return $this;
+    }
+
     public function getTeam(): ?Team
     {
-        return $this->team;
+        return $this->teams->first() ?: null;
     }
 
     public function setTeam(?Team $team): static
     {
-        $this->team = $team;
+        // For backward compatibility, clear teams and add the new one
+        $this->teams->clear();
+        if ($team !== null) {
+            $this->addTeam($team);
+        }
         return $this;
     }
 

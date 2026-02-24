@@ -10,8 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/teams', name: 'admin_team_')]
+#[IsGranted('ROLE_ADMIN')]
 class TeamAdminController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
@@ -76,9 +78,27 @@ class TeamAdminController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Team $team): Response
+    #[Route('/{id}', name: 'show', methods: ['GET', 'POST'])]
+    public function show(Team $team, Request $request, EntityManagerInterface $entityManager): Response
     {
+        if ($request->isMethod('POST')) {
+            $action = $request->request->get('action');
+
+            if ($action === 'approve') {
+                $team->setStatut('approuvé');
+                $team->setDateValidation(new \DateTime());
+                $entityManager->flush();
+                $this->addFlash('success', '✅ Team approved successfully!');
+            } elseif ($action === 'reject') {
+                $team->setStatut('refusé');
+                $team->setDateValidation(new \DateTime());
+                $entityManager->flush();
+                $this->addFlash('error', '❌ Team rejected successfully!');
+            }
+
+            return $this->redirectToRoute('admin_team_show', ['id' => $team->getId()]);
+        }
+
         return $this->render('admin/team/show.html.twig', [
             'team' => $team,
         ]);

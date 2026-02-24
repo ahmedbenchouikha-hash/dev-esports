@@ -128,23 +128,6 @@ class TeamType extends AbstractType
                 ],
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('membres', TextareaType::class, [
-                'mapped' => false,
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'Separate members by commas',
-                    'class' => 'form-control',
-                    'rows' => 3
-                ]
-            ])
-            ->add('captainId', TextType::class, [
-                'label' => 'Captain ID',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'Captain ID',
-                    'class' => 'form-control'
-                ]
-            ])
         ;
     }
 

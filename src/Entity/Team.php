@@ -63,14 +63,6 @@ class Team
     )]
     private ?string $couleurEquipe = null;
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    #[Assert\Type(type: 'array')]
-    private array $membres = [];
-
-    #[ORM\Column(nullable: true)]
-    #[Assert\Positive(message: 'Captain ID must be a positive number')]
-    private ?int $captainId = null;
-
     #[ORM\Column(length: 50)]
     #[Assert\Choice(
         choices: ['en attente', 'approuvé', 'refusé'],
@@ -92,14 +84,15 @@ class Team
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'team', targetEntity: Player::class, cascade: ['remove'])]
-    private Collection $players;
-
     #[ORM\OneToMany(mappedBy: 'team1', targetEntity: Game::class)]
     private Collection $gamesAsTeam1;
 
     #[ORM\OneToMany(mappedBy: 'team2', targetEntity: Game::class)]
     private Collection $gamesAsTeam2;
+
+    #[ORM\ManyToMany(targetEntity: Player::class, inversedBy: 'teams')]
+    #[ORM\JoinTable(name: 'player_team')]
+    private Collection $players;
 
     public function __construct()
     {
@@ -214,28 +207,6 @@ class Team
         return $this;
     }
 
-    public function getMembres(): array
-    {
-        return $this->membres;
-    }
-
-    public function setMembres(?array $membres): static
-    {
-        $this->membres = $membres ?? [];
-        return $this;
-    }
-
-    public function getCaptainId(): ?int
-    {
-        return $this->captainId;
-    }
-
-    public function setCaptainId(?int $captainId): static
-    {
-        $this->captainId = $captainId;
-        return $this;
-    }
-
     public function getStatut(): ?string
     {
         return $this->statut;
@@ -292,7 +263,9 @@ class Team
     {
         if (!$this->players->contains($player)) {
             $this->players->add($player);
-            $player->setTeam($this);
+            if (!$player->getTeams()->contains($this)) {
+                $player->addTeam($this);
+            }
         }
         return $this;
     }
@@ -300,9 +273,7 @@ class Team
     public function removePlayer(Player $player): static
     {
         if ($this->players->removeElement($player)) {
-            if ($player->getTeam() === $this) {
-                $player->setTeam(null);
-            }
+            $player->removeTeam($this);
         }
         return $this;
     }
