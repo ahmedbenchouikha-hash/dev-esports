@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manager Request Status{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="fas fa-crown text-warning"></i> Manager Request Status
+                    </h1>
+                </div>
+                {% if not isManager %}
+                    <a href="{{ path('player_manager_request') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Request
+                    </a>
+                {% else %}
+                    <div class="alert alert-success mb-0">
+                        <i class="fas fa-check-circle"></i> You are a Manager!
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if app.flashes %}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            {% if requests is empty %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    {% if isManager %}
+                        You are currently a manager. Visit your <a href="{{ path('player_dashboard') }}">dashboard</a> to manage teams and budgets.
+                    {% else %}
+                        No manager requests found. <a href="{{ path('player_manager_request') }}">Submit your first request</a>!
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="row">
+                    {% for request in requests %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header {% if request.status == 'pending' %}bg-warning{% elseif request.status == 'approved' %}bg-success{% else %}bg-danger{% endif %} text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">
+                                            {% if request.status == 'pending' %}
+                                                <i class="fas fa-hourglass-half"></i> Pending
+                                            {% elseif request.status == 'approved' %}
+                                                <i class="fas fa-check-circle"></i> Approved
+                                            {% else %}
+                                                <i class="fas fa-times-circle"></i> Rejected
+                                            {% endif %}
+                                        </h5>
+                                        <small>{{ request.createdAt|date('Y-m-d H:i') }}</small>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    {% if request.teamName %}
+                                        <p class="mb-2">
+                                            <strong>Team Name:</strong> {{ request.teamName }}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if request.motivation %}
+                                        <p class="mb-2">
+                                            <strong>Your Motivation:</strong>
+                                        </p>
+                                        <p class="text-muted small">{{ request.motivation|slice(0, 200) }}{% if request.motivation|length > 200 %}...{% endif %}</p>
+                                    {% endif %}
+
+                                    {% if request.status != 'pending' %}
+                                        <hr>
+                                        <p class="mb-2">
+                                            <strong>Reviewed By:</strong> 
+                                            {% if request.reviewedBy %}
+                                                {{ request.reviewedBy.email }}
+                                            {% else %}
+                                                Admin
+                                            {% endif %}
+                                        </p>
+                                        
+                                        <p class="mb-2">
+                                            <strong>Reviewed Date:</strong> 
+                                            {% if request.reviewedAt %}
+                                                {{ request.reviewedAt|date('Y-m-d H:i') }}
+                                            {% endif %}
+                                        </p>
+
+                                        {% if request.adminComment %}
+                                            <p class="mb-0">
+                                                <strong>Admin Comment:</strong>
+                                            </p>
+                                            <p class="text-muted small">{{ request.adminComment }}</p>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="{{ path('player_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

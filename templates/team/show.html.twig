@@ -11,9 +11,41 @@
 
 <div class="row">
     <div class="col-lg-8 mx-auto">
+        {% if team.statut != 'approuvé' and not is_granted('ROLE_MANAGER') %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">⏳ Team Pending Approval</h4>
+                <p>This team is waiting for admin approval and will be visible to all players once approved.</p>
+            </div>
+        {% elseif team.statut == 'refusé' %}
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">❌ Team Rejected</h4>
+                <p>This team has been rejected by the admin.</p>
+            </div>
+        {% endif %}
+
         <div class="card mb-4">
+            {% if team.logo %}
+                <div style="height: 180px; background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6)); display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid rgba(0, 242, 254, 0.15); padding: 1rem;">
+                    <img src="{{ asset('uploads/logos/' ~ team.logo) }}" alt="{{ team.name }} logo" style="max-width: 100%; max-height: 100%; object-fit: contain; width: auto;">
+                </div>
+            {% else %}
+                <div style="height: 180px; background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.1)); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0, 242, 254, 0.15);">
+                    <i class="fas fa-image" style="font-size: 3rem; color: rgba(0, 242, 254, 0.3);"></i>
+                </div>
+            {% endif %}
             <div class="card-body">
-                <h1 class="page-title">{{ team.name }}</h1>
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h1 class="page-title">{{ team.name }}</h1>
+                        {% if team.statut == 'approuvé' %}
+                            <span class="badge bg-success">✓ Approved</span>
+                        {% elseif team.statut == 'en attente' %}
+                            <span class="badge bg-warning">⏳ Pending</span>
+                        {% else %}
+                            <span class="badge bg-danger">✗ Rejected</span>
+                        {% endif %}
+                    </div>
+                </div>
                 
                 {% if team.country %}
                     <p class="text-muted">📍 <strong>Country:</strong> {{ team.country }}</p>
@@ -41,7 +73,7 @@
                 <!-- Players Section -->
                 {% if team.players|length > 0 %}
                     <hr>
-                    <h3>Players</h3>
+                    <h3>👥 Current Members ({{ team.players|length }})</h3>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -63,6 +95,58 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                {% else %}
+                    <hr>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No members yet. 
+                        {% if is_granted('ROLE_MANAGER') and team.statut == 'approuvé' %}
+                            Invite players below to join the team!
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Invite Players Section (for team managers) -->
+                {% if is_granted('ROLE_MANAGER') and team.statut == 'approuvé' %}
+                    <hr>
+                    <h3>📤 Invite Players</h3>
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <form method="POST" action="{{ path('team_invite') }}" class="mb-3">
+                                <input type="hidden" name="team_id" value="{{ team.id }}">
+                                <div class="row g-2">
+                                    <div class="col-lg-9">
+                                        <select name="player_id" class="form-select" required>
+                                            <option value="">-- Select a player to invite --</option>
+                                            {% for player in available_players %}
+                                                <option value="{{ player.id }}">{{ player.nickname }} ({{ player.firstName }} {{ player.lastName }})</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if available_players|length == 0 %}
+                                            <small class="text-muted">All players are already team members.</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <button type="submit" class="btn btn-primary w-100" {% if available_players|length == 0 %}disabled{% endif %}>
+                                            <i class="fas fa-paper-plane"></i> Send Invite
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {% if pending_invitations|length > 0 %}
+                                <div class="mt-3 p-3 bg-light rounded">
+                                    <h5>⏳ Pending Invitations</h5>
+                                    <ul class="list-unstyled">
+                                        {% for invitation in pending_invitations %}
+                                            <li class="mb-2 p-2 border-bottom">
+                                                <strong>{{ invitation.player.nickname }}</strong> - Invited {{ invitation.createdAt|date('d M Y H:i') }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endif %}
 
