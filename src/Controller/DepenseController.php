@@ -4,13 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Depense;
 use App\Entity\Team;
+use App\Entity\Player;
 use App\Form\DepenseType;
 use App\Repository\DepenseRepository;
+use App\Service\BudgetAlertService;
+use App\Service\AuthorizationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/depense', name: 'depense_')]
@@ -39,8 +43,19 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/team/{teamId}', name: 'by_team', methods: ['GET'])]
-    public function byTeam(int $teamId, DepenseRepository $depenseRepository): Response
+    public function byTeam(int $teamId, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
     {
+        // Load team from repository to check access
+        $teamRepo = $this->getDoctrine()->getRepository(Team::class);
+        $team = $teamRepo->find($teamId);
+
+        if (!$team) {
+            throw $this->createNotFoundException('Team not found');
+        }
+
+        // Check if user has access to this team
+        $authService->ensureCanAccessTeam($team);
+
         $depenses = $depenseRepository->findBy(['team' => $teamId]);
         
         return $this->render('depense/by_team.html.twig', [
@@ -50,7 +65,7 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, DepenseRepository $depenseRepository): Response
+    public function index(Request $request, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
     {
         // Paramètres de recherche et tri
         $search = $request->query->get('search', '');
@@ -74,9 +89,20 @@ class DepenseController extends AbstractController
         // Récupérer toutes les dépenses
         $allDepenses = $depenseRepository->findBy([], [$sort => $order]);
 
+        // Filter by team access for managers (admins see everything)
+        $currentPlayer = $authService->getCurrentPlayer();
+        $managerTeams = $currentPlayer ? $currentPlayer->getTeams()->toArray() : [];
+
         // Filtrer
         $depenses = [];
         foreach ($allDepenses as $depense) {
+            // Managers can only see their own team's expenses
+            if ($currentPlayer && !in_array('ROLE_ADMIN', $currentPlayer->getRoles())) {
+                if (!$depense->getTeam() || !in_array($depense->getTeam(), $managerTeams)) {
+                    continue;
+                }
+            }
+
             $pass = true;
 
             // Filtre statut
@@ -148,7 +174,7 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, AuthorizationService $authService): Response
     {
         $depense = new Depense();
         $form = $this->createForm(DepenseType::class, $depense);
@@ -206,6 +232,11 @@ class DepenseController extends AbstractController
             // REQUIRED: Team
             if ($depense->getTeam() === null) {
                 $validationErrors[] = '❌ Vous devez sélectionner une équipe';
+            } else {
+                // Check if user can manage this team
+                if (!$authService->canManageTeam($depense->getTeam())) {
+                    $validationErrors[] = '❌ Vous n\'avez pas accès à cette équipe';
+                }
             }
 
             // OPTIONAL: Description
@@ -259,8 +290,13 @@ class DepenseController extends AbstractController
     // Parameterized routes (must be last)
     
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Depense $depense, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function edit(Request $request, Depense $depense, EntityManagerInterface $entityManager, ValidatorInterface $validator, AuthorizationService $authService): Response
     {
+        // Check if user has access to this expense's team
+        if (!$this->isGranted('ROLE_ADMIN') && $depense->getTeam()) {
+            $authService->ensureCanManageTeam($depense->getTeam());
+        }
+
         $form = $this->createForm(DepenseType::class, $depense);
         $form->handleRequest($request);
 
@@ -341,8 +377,13 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, Depense $depense, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Depense $depense, EntityManagerInterface $entityManager, AuthorizationService $authService): Response
     {
+        // Check if user has access to this expense's team
+        if (!$this->isGranted('ROLE_ADMIN') && $depense->getTeam()) {
+            $authService->ensureCanManageTeam($depense->getTeam());
+        }
+
         if ($this->isCsrfTokenValid('delete'.$depense->getId(), $request->request->get('_token'))) {
             try {
                 $entityManager->remove($depense);
@@ -357,12 +398,23 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/{id}/valider', name: 'valider', methods: ['POST'])]
-    public function valider(Request $request, Depense $depense, EntityManagerInterface $entityManager): Response
+    public function valider(Request $request, Depense $depense, EntityManagerInterface $entityManager, BudgetAlertService $budgetAlertService, AuthorizationService $authService): Response
     {
+        // Allow only admin to validate expenses or manager of the team
+        if (!$this->isGranted('ROLE_ADMIN') && $depense->getTeam() && !$authService->canManageTeam($depense->getTeam())) {
+            throw $this->createAccessDeniedException('You cannot validate this expense');
+        }
+
         if ($this->isCsrfTokenValid('valider'.$depense->getId(), $request->request->get('_token'))) {
             try {
                 $depense->setStatut('validée');
                 $entityManager->flush();
+                
+                // Check budget and send alerts if needed
+                if ($depense->getTeam()) {
+                    $budgetAlertService->checkBudgetAndAlert($depense->getTeam());
+                }
+                
                 $this->addFlash('success', '✅ Dépense validée!');
             } catch (\Exception $e) {
                 $this->addFlash('error', '❌ Une erreur est survenue: ' . $e->getMessage());
@@ -373,8 +425,13 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/{id}/refuser', name: 'refuser', methods: ['POST'])]
-    public function refuser(Request $request, Depense $depense, EntityManagerInterface $entityManager): Response
+    public function refuser(Request $request, Depense $depense, EntityManagerInterface $entityManager, AuthorizationService $authService): Response
     {
+        // Allow only admin to refuse expenses or manager of the team
+        if ($depense->getTeam() && !$authService->canManageTeam($depense->getTeam())) {
+            throw $this->createAccessDeniedException('You cannot refuse this expense');
+        }
+
         if ($this->isCsrfTokenValid('refuser'.$depense->getId(), $request->request->get('_token'))) {
             try {
                 $depense->setStatut('refusée');
@@ -389,8 +446,13 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Depense $depense): Response
+    public function show(Depense $depense, AuthorizationService $authService): Response
     {
+        // Check if user has access to this expense's team
+        if ($depense->getTeam()) {
+            $authService->ensureCanAccessTeam($depense->getTeam());
+        }
+
         return $this->render('depense/show.html.twig', [
             'depense' => $depense,
         ]);

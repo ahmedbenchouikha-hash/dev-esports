@@ -15,6 +15,8 @@ class BudgetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $teams = $options['teams'] ?? [];
+        
         $builder
             ->add('montantAlloue', MoneyType::class, [
                 'label' => 'Allocated Amount (€) *',
@@ -29,6 +31,7 @@ class BudgetType extends AbstractType
             ])
             ->add('team', EntityType::class, [
                 'class' => Team::class,
+                'choices' => $teams,
                 'choice_label' => 'name',
                 'placeholder' => 'Select a team',
                 'required' => true,
@@ -52,6 +55,7 @@ class BudgetType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Budget::class,
+            'teams' => [],
         ]);
     }
 }

@@ -64,6 +64,16 @@
                 backdrop-filter: blur(10px);
             }
 
+            /* When sidebar is visible */
+            body.has-sidebar .navbar-custom {
+                margin-left: 260px;
+                transition: margin 0.3s ease;
+            }
+
+            body.has-sidebar.sidebar-collapsed .navbar-custom {
+                margin-left: 80px;
+            }
+
             .navbar-brand-custom {
                 font-size: 1.5rem;
                 font-weight: 800;
@@ -245,16 +255,26 @@
             }
 
             body.admin-layout main {
-                width: calc(100% - 260px);
-                transition: width 0.3s ease;
+                transition: margin 0.3s ease;
             }
 
-            body.admin-layout.sidebar-collapsed main {
-                width: calc(100% - 80px);
+            /* Ensure main content is visible */
+            main {
+                display: block;
+                visibility: visible;
+                position: relative;
+                z-index: 1;
+                background: transparent;
             }
 
-            body.admin-layout.sidebar-hidden main {
-                width: 100%;
+            /* Player Sidebar - Adjust main content */
+            body.has-sidebar main {
+                margin-left: 260px;
+                transition: margin 0.3s ease;
+            }
+
+            body.has-sidebar.sidebar-collapsed main {
+                margin-left: 80px;
             }
 
             /* Sidebar Brand */
@@ -593,6 +613,31 @@
                 margin-bottom: 1rem;
                 backdrop-filter: blur(10px);
                 animation: slideIn 0.3s ease;
+                margin-top: 1rem;
+            }
+
+            .alert-custom.alert-success {
+                background-color: rgba(37, 211, 102, 0.1);
+                color: #25d366;
+                border-left: 4px solid #25d366;
+            }
+
+            .alert-custom.alert-danger {
+                background-color: rgba(255, 68, 68, 0.1);
+                color: #ff4444;
+                border-left: 4px solid #ff4444;
+            }
+
+            .alert-custom.alert-warning {
+                background-color: rgba(255, 149, 0, 0.1);
+                color: #ff9500;
+                border-left: 4px solid #ff9500;
+            }
+
+            .alert-custom.alert-info {
+                background-color: rgba(13, 217, 255, 0.1);
+                color: #0dd9ff;
+                border-left: 4px solid #0dd9ff;
             }
 
             @keyframes slideIn {
@@ -611,20 +656,28 @@
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
     </head>
-    <body>
-        {% set is_admin = 'admin' in app.request.attributes.get('_route', '') %}
+    {% set is_admin = 'admin' in app.request.attributes.get('_route', '') %}
+    {% set is_logged_in_player = app.user and is_granted('ROLE_USER') %}
+    <body{% if is_admin %} class="admin-layout"{% endif %}>
         
         {% if is_admin %}
             {% include 'partials/sidebar.html.twig' %}
-            <script>
-                // Add admin layout class
-                document.body.classList.add('admin-layout');
+        {% elseif is_logged_in_player %}
+            {% include 'partials/player_sidebar.html.twig' %}
+        {% endif %}
+        
+        <script>
+            // Mark body as having sidebar
+            if (document.querySelector('.sidebar-nav')) {
+                document.body.classList.add('has-sidebar');
+            }
 
-                // Sidebar Toggle Functionality
-                const sidebarToggle = document.getElementById('sidebarToggle');
-                const sidebarNav = document.querySelector('.sidebar-nav');
-                const body = document.body;
+            // Sidebar Toggle Functionality
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            const body = document.body;
 
+            if (sidebarToggle && sidebarNav) {
                 // Check localStorage for saved state
                 const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
                 if (sidebarCollapsed) {
@@ -644,8 +697,6 @@
 
                 // Add tooltip on hover for collapsed sidebar
                 const menuItems = document.querySelectorAll('.menu-item');
-                const subItems = document.querySelectorAll('.menu-subitem');
-
                 menuItems.forEach(item => {
                     item.addEventListener('mouseenter', function() {
                         if (sidebarNav.classList.contains('collapsed')) {
@@ -656,8 +707,8 @@
                         }
                     });
                 });
-            </script>
-        {% endif %}
+            }
+        </script>
         
         <!-- Navigation Bar - Hide on auth pages -->
         {% if app.request.attributes.get('_route') not in ['app_login', 'app_register', 'app_forgot_password', 'app_reset_password'] %}
@@ -694,19 +745,18 @@
                                         <i class="fas fa-user-check"></i> User Approvals
                                     </a>
                                 </li>
+                                <li class="nav-item-custom">
+                                    <a href="{{ path('admin_dashboard') }}">
+                                        <span class="admin-badge">
+                                            <i class="fas fa-lock"></i> Admin
+                                        </span>
+                                    </a>
+                                </li>
                             {% endif %}
-
-                            <li class="nav-item-custom">
-                                <a href="{{ path('admin_dashboard') }}">
-                                    <span class="admin-badge">
-                                        <i class="fas fa-lock"></i> Admin
-                                    </span>
-                                </a>
-                            </li>
                             <li class="nav-item-custom dropdown">
                                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                                     <i class="fas fa-user-circle"></i> 
-                                    {{ app.user.email|slice(0, 20) }}
+                                    {{ app.user.nickname|default(app.user.email|slice(0, 20)) }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-custom">
                                     <a class="dropdown-item" href="{{ path('player_dashboard') }}">
@@ -735,6 +785,24 @@
             </div>
         </nav>
         {% endif %}
+
+        <!-- Flash Messages -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    {% if app.flashes %}
+                        {% for type, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-custom alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                                    {{ message|raw }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="container-fluid py-4">

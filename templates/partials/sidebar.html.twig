@@ -15,6 +15,7 @@
 
     <!-- Navigation Menu -->
     <nav class="sidebar-menu">
+        {% if is_granted('ROLE_ADMIN') %}
         <!-- Admin Section Header -->
         <div class="menu-section-title">ADMINISTRATION</div>
 
@@ -23,7 +24,9 @@
             <i class="fas fa-chart-line menu-icon"></i>
             <span class="menu-label">Dashboard</span>
         </a>
+        {% endif %}
 
+        {% if is_granted('ROLE_ADMIN') %}
         <!-- Matches -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#matchesMenu">
@@ -127,6 +130,20 @@
                 </a>
                 <a href="{{ path('admin_player_create') }}" class="menu-subitem">
                     <i class="fas fa-plus"></i> Create Player
+                </a>
+            </div>
+        </div>
+
+        <!-- Manager Requests -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#managerMenu">
+                <i class="fas fa-crown menu-icon" style="color: #ffd700;"></i>
+                <span class="menu-label">Manager Requests</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="managerMenu" class="collapse {% if 'admin_manager' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('admin_manager_requests_list') }}" class="menu-subitem {% if 'admin_manager_requests_list' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Requests
                 </a>
             </div>
         </div>
@@ -250,23 +267,10 @@
                 </a>
             </div>
         </div>
+        {% endif %}
 
         <!-- Divider -->
         <div class="menu-divider"></div>
-
-        <!-- Player Section -->
-        {% if is_granted('ROLE_USER') and app.user is not null %}
-            <div class="menu-section-title">PLAYER</div>
-
-            <!-- Player Dashboard -->
-            <a href="{{ path('player_dashboard') }}" class="menu-item {% if 'player_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
-                <i class="fas fa-user-circle menu-icon"></i>
-                <span class="menu-label">My Dashboard</span>
-            </a>
-
-            <!-- Divider -->
-            <div class="menu-divider"></div>
-        {% endif %}
 
         <!-- Public Section Header -->
         <div class="menu-section-title">PUBLIC</div>
