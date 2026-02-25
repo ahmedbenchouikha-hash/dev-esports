@@ -1,0 +1,568 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Récompenses{% endblock %}
+
+{% block body %}
+    <div class="min-vh-100 py-5">
+        <!-- Messages flash -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                    <i class="fe fe-alert-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Header Principal -->
+        <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+            <div>
+                <h1 class="mb-2 fw-bold text-primary" style="font-size: 2.5rem;">
+                    <i class="fe fe-gift me-3"></i>La liste des récompenses disponibles
+                </h1>
+                <p class="text-muted mb-0">{{ recompenses|length }} récompense(s) disponible(s)</p>
+            </div>
+            <a href="{{ path('recompense_index') }}" class="btn btn-violet btn-lg px-5 py-3 rounded-pill shadow" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border: none;" data-action="create">
+                <i class="fe fe-plus me-2"></i> Ajouter une récompense
+            </a>
+        </div>
+
+        <!-- Barre de Recherche et Tri -->
+        <div class="card bg-surface border-0 rounded-4 shadow-sm mb-5" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%);">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Recherche par Nom -->
+                    <div class="col-md-4">
+                        <form method="GET" action="{{ path('recompense_index') }}" class="position-relative d-flex gap-2">
+                            <input type="text" name="searchName" class="form-control form-control-lg flex-grow-1" placeholder="Rechercher par nom..." 
+                                value="{{ searchName ?? '' }}" style="background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); padding: 12px 15px; border-radius: 10px; color: #ffffff;">
+                            <input type="hidden" name="searchType" value="{{ searchType ?? '' }}">
+                            <input type="hidden" name="sort" value="{{ sort ?? '' }}">
+                            <button type="submit" class="btn btn-sm rounded-pill px-3 py-2" style="background: rgba(0, 242, 254, 0.3); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.5); font-weight: 600;">
+                                <i class="fe fe-search"></i>
+                            </button>
+                        </form>
+                        <style>
+                            input::placeholder { color: rgba(255,255,255,0.6) !important; }
+                            input:focus { background: rgba(255,255,255,0.12) !important; border-color: #00f2fe !important; box-shadow: 0 0 15px rgba(0, 242, 254, 0.3) !important; }
+                        </style>
+                    </div>
+
+                    <!-- Recherche par Type -->
+                    <div class="col-md-4">
+                        <form method="GET" action="{{ path('recompense_index') }}" class="position-relative d-flex gap-2">
+                            <input type="text" name="searchType" class="form-control form-control-lg flex-grow-1" placeholder="Rechercher par type..." 
+                                value="{{ searchType ?? '' }}" style="background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); padding: 12px 15px; border-radius: 10px; color: #ffffff;">
+                            <input type="hidden" name="searchName" value="{{ searchName ?? '' }}">
+                            <input type="hidden" name="sort" value="{{ sort ?? '' }}">
+                            <button type="submit" class="btn btn-sm rounded-pill px-3 py-2" style="background: rgba(0, 242, 254, 0.3); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.5); font-weight: 600;">
+                                <i class="fe fe-search"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tri -->
+                    <div class="col-md-4">
+                        <div class="hstack gap-2">
+                            <label class="text-primary fw-bold me-2" style="white-space: nowrap;">Trier :</label>
+                            <a href="{{ path('recompense_index', {searchName: searchName ?? '', searchType: searchType ?? '', sort: 'asc'}) }}" class="btn btn-sm rounded-pill px-3 py-2" 
+                                style="background: {% if sort == 'asc' %}#00f2fe{% else %}rgba(0, 242, 254, 0.2){% endif %}; color: #0a0e1f; border: none; font-weight: 600; white-space: nowrap;">
+                                <i class="fe fe-arrow-up me-1" style="font-size: 0.9rem;"></i> A → Z
+                            </a>
+                            <a href="{{ path('recompense_index', {searchName: searchName ?? '', searchType: searchType ?? '', sort: 'desc'}) }}" class="btn btn-sm rounded-pill px-3 py-2" 
+                                style="background: {% if sort == 'desc' %}#00ff9d{% else %}rgba(0, 255, 157, 0.2){% endif %}; color: #0a0e1f; border: none; font-weight: 600; white-space: nowrap;">
+                                <i class="fe fe-arrow-down me-1" style="font-size: 0.9rem;"></i> Z → A
+                            </a>
+                            <a href="{{ path('recompense_index') }}" class="btn btn-sm rounded-pill px-3 py-2" 
+                                style="background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                                <i class="fe fe-refresh-ccw me-1" style="font-size: 0.9rem;"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau Principal -->
+        <div class="card border-0 rounded-4 overflow-hidden shadow-lg mb-5" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle" style="color: #ffffff;">
+                        <thead style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.3);">
+                            <tr>
+                                <th class="ps-5 py-4 fw-bold">ID</th>
+                                <th class="py-4 fw-bold">Nom récompense</th>
+                                <th class="py-4 fw-bold">Type</th>
+                                <th class="py-4 fw-bold">Classement</th>
+                                <th class="py-4 fw-bold">Description</th>
+                                <th class="text-center py-4 fw-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recompenses is empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-6 text-muted fs-5">
+                                        <i class="fe fe-inbox me-2"></i>Aucune récompense trouvée
+                                    </td>
+                                </tr>
+                            {% else %}
+                                {% for r in recompenses %}
+                                    <tr style="border-bottom: 1px solid rgba(0, 242, 254, 0.1); transition: all 0.3s ease;">
+                                        <td class="ps-5 fw-bold text-primary">{{ r.id }}</td>
+                                        <td class="fw-medium" style="color: #000000;">{{ r.recompense }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 fw-600" 
+                                                style="background: rgba(0, 242, 254, 0.2); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4);">
+                                                {{ r.type }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 fw-600" 
+                                                style="background: rgba(0, 255, 157, 0.2); color: #00ff9d; border: 1px solid rgba(0, 255, 157, 0.4);">
+                                                {{ r.classement }}
+                                            </span>
+                                        </td>
+                                        <td class="text-muted" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">{{ r.description ?: '—' }}</td>
+                                        <td class="text-center">
+                                            <div class="hstack gap-2 justify-content-center flex-wrap">
+                                                <!-- Bouton Modifier -->
+                                                <button type="button" class="btn btn-sm edit-btn" data-id="{{ r.id }}"
+                                                    style="background: rgba(253, 126, 20, 0.2); color: #fd7e14; border: 1px solid rgba(253, 126, 20, 0.4); border-radius: 8px; padding: 6px 12px; font-size: 0.9rem; white-space: nowrap; font-weight: 500;"
+                                                    data-bs-toggle="tooltip" title="Éditer">
+                                                    <i class="fe fe-edit-2" style="width: 16px; height: 16px; margin-right: 4px;"></i>Modifier
+                                                </button>
+
+                                                <!-- Bouton Supprimer -->
+                                                <button type="button" class="btn btn-sm delete-btn" data-id="{{ r.id }}"
+                                                    style="background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.4); border-radius: 8px; padding: 6px 12px; font-size: 0.9rem; white-space: nowrap; font-weight: 500;"
+                                                    data-bs-toggle="tooltip" title="Supprimer définitivement">
+                                                    <i class="fe fe-trash-2" style="width: 16px; height: 16px; margin-right: 4px;"></i>Supprimer
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques et Graphique -->
+        <div class="row g-4 mb-5">
+            <!-- Stats Cards (basées sur les récompenses filtrées) -->
+            <div class="col-md-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4" style="background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%); min-height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                    <p class="text-white mb-2 fw-bold">Total Récompenses (affichées)</p>
+                    <h2 class="text-white mb-0" style="font-size: 2.5rem;">{{ recompenses|length }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4" style="background: linear-gradient(135deg, #4ECDC4 0%, #44B0A3 100%); min-height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                    <p class="text-white mb-2 fw-bold">Classement Minimum</p>
+                    <h2 class="text-white mb-0" style="font-size: 2.5rem;">{{ minClassement ?? '—' }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4" style="background: linear-gradient(135deg, #95E1D3 0%, #7FD8BE 100%); min-height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                    <p class="text-white mb-2 fw-bold">Classement Maximum</p>
+                    <h2 class="text-white mb-0" style="font-size: 2.5rem;">{{ maxClassement ?? '—' }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques Circulaires Statistiques (basées sur TOUTES les récompenses) -->
+        {% if allRecompenses|length > 0 %}
+        <div class="row g-4 mb-5">
+            <!-- Graphique 1: Nombre Total de Récompenses -->
+            <div class="col-lg-6">
+                <div class="card border-0 rounded-4 overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+                    <div class="card-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+                        <h5 class="mb-0 fw-bold text-white">
+                            <i class="fe fe-pie-chart me-2"></i>Nombre Total de Récompenses
+                        </h5>
+                    </div>
+                    <div class="card-body p-4" style="display: flex; justify-content: center; align-items: center; min-height: 280px;">
+                        <div style="width: 100%; max-width: 250px;">
+                            <canvas id="totalRecompenseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique 2: Distribution par Type -->
+            <div class="col-lg-6">
+                <div class="card border-0 rounded-4 overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+                    <div class="card-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+                        <h5 class="mb-0 fw-bold text-white">
+                            <i class="fe fe-pie-chart me-2"></i>Distribution par Type
+                        </h5>
+                    </div>
+                    <div class="card-body p-4" style="display: flex; justify-content: center; align-items: center; min-height: 280px;">
+                        <div style="width: 100%; max-width: 250px;">
+                            <canvas id="typeDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique Circulaire Statistiques par Type (basé sur TOUTES les récompenses) -->
+        <div class="card border-0 rounded-4 overflow-hidden shadow-lg mb-4" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+            <div class="card-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+                <h4 class="mb-0 fw-bold text-white">
+                    <i class="fe fe-bar-chart-2 me-2"></i>Détails des Récompenses par Type
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <canvas id="typeChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- Script Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+        <script>
+            // Attendre que Chart.js soit chargé
+            function waitForChart(callback, attempts = 0) {
+                if (typeof Chart !== 'undefined') {
+                    console.log('Chart.js loaded successfully');
+                    callback();
+                } else if (attempts < 50) {
+                    console.log('Waiting for Chart.js...', attempts);
+                    setTimeout(() => waitForChart(callback, attempts + 1), 100);
+                } else {
+                    console.error('Chart.js failed to load after 5 seconds');
+                }
+            }
+
+            function initializeCharts() {
+                console.log('Starting chart initialization');
+                
+                // Construire les statistiques par type à partir de TOUTES les récompenses
+                const typeStats = {};
+                {% for r in allRecompenses %}
+                    const type = "{{ r.type }}";
+                    typeStats[type] = (typeStats[type] || 0) + 1;
+                {% endfor %}
+                
+                const typeLabels = Object.keys(typeStats);
+                const typeData = Object.values(typeStats);
+                const totalCount = {{ allRecompenses|length }};
+                const typePercentages = typeData.map(value => {
+                    if (!totalCount) {
+                        return 0;
+                    }
+                    return Math.round((value / totalCount) * 100);
+                });
+                
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+                
+                console.log('Chart data (from all recompenses):', {totalCount, typeLabels, typeData});
+                
+                // Chart 1: Nombre Total de Récompenses
+                const ctx1 = document.getElementById('totalRecompenseChart');
+                if (ctx1) {
+                    console.log('✓ Found totalRecompenseChart canvas');
+                    new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Récompenses'],
+                            datasets: [{
+                                data: [totalCount, 100 - totalCount],
+                                backgroundColor: ['#00f2fe', 'rgba(0, 242, 254, 0.1)'],
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: '#ffffff',
+                                        font: { size: 12, weight: 'bold' },
+                                        padding: 15
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('✓ Chart 1 created successfully');
+                } else {
+                    console.error('✗ totalRecompenseChart canvas not found');
+                }
+                
+                // Chart 2: Distribution par Type
+                const ctx2 = document.getElementById('typeDistributionChart');
+                if (ctx2 && typeLabels.length > 0) {
+                    console.log('✓ Found typeDistributionChart canvas');
+                    new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            // Afficher les pourcentages directement dans le label, ex: "Argent 30%"
+                            labels: typeLabels.map((label, index) => `${label} ${typePercentages[index]}%`),
+                            datasets: [{
+                                data: typeData,
+                                backgroundColor: colors.slice(0, typeLabels.length),
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                borderWidth: 2,
+                                hoverOffset: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: '#ffffff',
+                                        font: { size: 12, weight: 'bold' },
+                                        padding: 15
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = typeLabels[context.dataIndex] || '';
+                                            const value = context.raw || 0;
+                                            const percent = typePercentages[context.dataIndex] || 0;
+                                            return `${label}: ${value} (${percent}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('✓ Chart 2 created successfully');
+                } else {
+                    console.error('✗ typeDistributionChart canvas not found or no data');
+                }
+                
+                // Chart 3: Détails par Type
+                const ctx3 = document.getElementById('typeChart');
+                if (ctx3 && typeLabels.length > 0) {
+                    console.log('✓ Found typeChart canvas');
+                    new Chart(ctx3, {
+                        type: 'bar',
+                        data: {
+                            labels: typeLabels,
+                            datasets: [{
+                                label: 'Nombre de récompenses',
+                                data: typeData,
+                                backgroundColor: colors.slice(0, typeLabels.length).map(c => c + '80'),
+                                borderColor: colors.slice(0, typeLabels.length),
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                hoverBackgroundColor: colors.slice(0, typeLabels.length)
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {
+                                        color: '#ffffff',
+                                        font: { size: 12, weight: 'bold' },
+                                        padding: 15
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: { color: '#ffffff', font: { size: 12, weight: 'bold' } },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false }
+                                },
+                                x: {
+                                    ticks: { color: '#ffffff', font: { size: 11 } },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                    console.log('✓ Chart 3 created successfully');
+                } else {
+                    console.error('✗ typeChart canvas not found or no data');
+                }
+                
+                console.log('All charts initialization complete!');
+            }
+
+            // Attendre que le DOM soit prêt ET que Chart.js soit chargé
+            waitForChart(function() {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeCharts);
+                } else {
+                    initializeCharts();
+                }
+            });
+        </script>
+        {% endif %}
+
+        <!-- Bouton Export PDF -->
+        <div class="text-center mt-5 mb-3">
+            <a href="{{ path('recompense_export_pdf') }}" class="btn btn-lg rounded-pill px-5 shadow" 
+                style="background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%); color: white; border: none; font-weight: 600;">
+                <i class="fe fe-download me-2"></i> Exporter en PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Hidden div with CSRF token -->
+    <input type="hidden" id="csrfToken" value="{{ csrf_token('recompense_delete') }}">
+
+    <!-- Tooltip Bootstrap -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Modal pour Ajouter/Modifier Récompense
+            const recompenseModal = new bootstrap.Modal(document.getElementById('recompenseFormModal'));
+            let currentRecompenseId = null;
+
+            // Bouton Ajouter
+            document.querySelector('[data-action="create"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                currentRecompenseId = null;
+                fetch('{{ path("recompense_modal_form") }}?action=create')
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('recompenseFormContent').innerHTML = data.html;
+                        recompenseModal.show();
+                        attachFormListeners();
+                    });
+            });
+
+            // Boutons Modifier
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    currentRecompenseId = id;
+                    fetch(`{{ path("recompense_modal_form") }}?action=edit&id=${id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('recompenseFormContent').innerHTML = data.html;
+                            recompenseModal.show();
+                            attachFormListeners();
+                        });
+                });
+            });
+
+            // Boutons Supprimer
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentRecompenseId = this.dataset.id;
+                    deleteModal.show();
+                });
+            });
+
+            // Confirmer la suppression
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                const csrfToken = document.getElementById('csrfToken').value;
+                
+                if (!csrfToken || !currentRecompenseId) {
+                    alert('Erreur: Token CSRF ou ID manquant');
+                    return;
+                }
+
+                fetch('{{ path("recompense_modal_delete") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `id=${currentRecompenseId}&_token=${csrfToken}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        deleteModal.hide();
+                        location.reload();
+                    } else {
+                        alert('Erreur: ' + (data.error || 'Impossible de supprimer'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur s\'est produite lors de la suppression');
+                });
+            });
+
+            function attachFormListeners() {
+                const form = document.getElementById('recompenseForm');
+                if (!form) return;
+
+                document.getElementById('submitRecompenseForm').addEventListener('click', function() {
+                    const formData = new FormData(form);
+                    
+                    fetch('{{ path("recompense_modal_form") }}', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            recompenseModal.hide();
+                            location.reload();
+                        } else if (data.html) {
+                            document.getElementById('recompenseFormContent').innerHTML = data.html;
+                            attachFormListeners();
+                        } else if (data.error) {
+                            // Afficher l'erreur dans le formulaire
+                            const errorsDiv = document.getElementById('formErrors');
+                            if (errorsDiv) {
+                                errorsDiv.innerHTML = data.error;
+                                errorsDiv.classList.remove('d-none');
+                            } else {
+                                alert(data.error);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    <!-- Modal Formulaire Récompense -->
+    <div class="modal fade" id="recompenseFormModal" tabindex="-1" role="dialog" aria-labelledby="recompenseFormLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 15px;">
+                <div id="recompenseFormContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmation Suppression -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(220, 53, 69, 0.2); border-radius: 15px;">
+                <div class="modal-header p-4" style="background: rgba(220, 53, 69, 0.1); border-bottom: 1px solid rgba(220, 53, 69, 0.2);">
+                    <h5 class="modal-title fw-bold text-danger">
+                        <i class="fe fe-alert-triangle me-2"></i>Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-white">
+                    <p class="mb-0">Êtes-vous sûr de vouloir supprimer cette récompense ? Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer p-4" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(220, 53, 69, 0.1);">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmDeleteBtn">
+                        <i class="fe fe-trash-2 me-2"></i>Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

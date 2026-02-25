@@ -1,0 +1,250 @@
+<!-- Formulaire Modal pour Récompense -->
+<div class="modal-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+    <h5 class="modal-title fw-bold text-white">
+        {% if action == 'edit' %}
+            <i class="fe fe-edit me-2"></i>Modifier la Récompense
+        {% else %}
+            <i class="fe fe-plus-circle me-2"></i>Ajouter une Récompense
+        {% endif %}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body p-4">
+    <form id="recompenseForm" method="POST" action="{{ path('recompense_modal_form') }}">
+        <input type="hidden" name="action" value="{{ action }}">
+        
+        <!-- Nom de la récompense -->
+        <div class="mb-4">
+            {{ form_label(form.recompense, 'Nom de la récompense *', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+            <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.recompense.vars.errors|length == 0 %}display: none;{% endif %}">
+                {% for error in form.recompense.vars.errors %}
+                    <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                {% endfor %}
+            </div>
+            {{ form_widget(form.recompense, {
+                'attr': {
+                    'placeholder': 'Ex: Trophée Or',
+                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem;',
+                    'class': 'form-control form-control-lg' ~ (form.recompense.vars.errors|length > 0 ? ' is-invalid' : '')
+                }
+            }) }}
+        </div>
+
+        <!-- Type -->
+        <div class="mb-4">
+            {{ form_label(form.type, 'Type de récompense *', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+            <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.type.vars.errors|length == 0 %}display: none;{% endif %}">
+                {% for error in form.type.vars.errors %}
+                    <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                {% endfor %}
+            </div>
+            {{ form_widget(form.type, {
+                'attr': {
+                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem;',
+                    'class': 'form-control form-control-lg' ~ (form.type.vars.errors|length > 0 ? ' is-invalid' : '')
+                }
+            }) }}
+        </div>
+
+        <!-- Classement -->
+        <div class="mb-4">
+            {{ form_label(form.classement, 'Classement (1-30) *', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+            <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.classement.vars.errors|length == 0 %}display: none;{% endif %}">
+                {% for error in form.classement.vars.errors %}
+                    <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                {% endfor %}
+            </div>
+            {{ form_widget(form.classement, {
+                'attr': {
+                    'placeholder': '5',
+                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem;',
+                    'class': 'form-control form-control-lg' ~ (form.classement.vars.errors|length > 0 ? ' is-invalid' : ''),
+                    'type': 'number',
+                    'min': '1',
+                    'max': '30'
+                }
+            }) }}
+        </div>
+
+        <!-- Description -->
+        <div class="mb-5">
+            {{ form_label(form.description, 'Description', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+            {{ form_widget(form.description, {
+                'attr': {
+                    'placeholder': 'Décrivez cette récompense...',
+                    'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(0, 242, 254, 0.2); color: #ffffff; padding: 12px 15px; border-radius: 10px; font-size: 1rem; height: 120px; resize: vertical;',
+                    'class': 'form-control form-control-lg'
+                }
+            }) }}
+        </div>
+
+        <!-- Messages d'erreur globaux -->
+        <div id="formErrors" class="alert alert-danger d-none mb-3" role="alert">
+            <ul class="mb-0" id="errorsList"></ul>
+        </div>
+
+        {{ form_rest(form) }}
+    </form>
+</div>
+
+<div class="modal-footer p-4" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(0, 242, 254, 0.1);">
+    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+    <button type="button" class="btn btn-lg rounded-pill px-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); color: white; border: none; font-weight: 600;" id="submitRecompenseForm">
+        {% if action == 'edit' %}
+            <i class="fe fe-save me-2"></i>Modifier
+        {% else %}
+            <i class="fe fe-check me-2"></i>Ajouter
+        {% endif %}
+    </button>
+</div>
+
+<style>
+    .form-control, .form-select {
+        color: #ffffff !important;
+        transition: all 0.3s;
+    }
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.6) !important;
+    }
+    .form-control:focus, .form-select:focus {
+        background: rgba(255,255,255,0.12) !important;
+        border-color: #6a1b9a !important;
+        box-shadow: 0 0 15px rgba(106, 27, 154, 0.3) !important;
+        color: #ffffff !important;
+    }
+    .form-select option {
+        background: #222a4a;
+        color: #ffffff;
+    }
+    
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #dc3545 !important;
+        background: rgba(220, 53, 69, 0.1) !important;
+    }
+    
+    .form-control.is-valid, .form-select.is-valid {
+        border-color: #28a745 !important;
+        background: rgba(40, 167, 69, 0.08) !important;
+    }
+    .field-errors div {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .field-errors i {
+        flex-shrink: 0;
+    }
+</style>
+
+<script>
+    // Établir les validateurs dès que le DOM est prêt
+    function initRecompenseValidation() {
+        const form = document.getElementById('recompenseForm');
+        if (!form) {
+            console.log('recompenseForm not found, retrying...');
+            setTimeout(initRecompenseValidation, 100);
+            return;
+        }
+        
+        console.log('Initializing recompense form validation');
+        
+        // Validation pour le Nom de récompense (max 30)
+        const textInputs = form.querySelectorAll('input[type="text"]');
+        console.log('Found text inputs:', textInputs.length);
+        
+        textInputs.forEach((input, idx) => {
+            console.log('Setting up text input', idx);
+            input.addEventListener('input', function() {
+                const container = this.closest('.mb-4');
+                const errorDiv = container ? container.querySelector('.field-errors') : null;
+                
+                console.log('Text input changed, value:', this.value, 'error div:', !!errorDiv);
+                
+                if (this.value.trim().length > 0 && this.value.trim().length <= 30) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                } else if (this.value.trim().length > 0) {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                    if (errorDiv) {
+                        errorDiv.innerHTML = '<i class="fe fe-alert-circle"></i> Maximum 30 caractères';
+                        errorDiv.style.display = 'block';
+                        console.log('Showing error: Maximum 30 caractères');
+                    }
+                } else {
+                    this.classList.remove('is-valid', 'is-invalid');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }
+            });
+        });
+        
+        // Validation pour Type (select)
+        const selects = form.querySelectorAll('select');
+        console.log('Found selects:', selects.length);
+        
+        selects.forEach((select, idx) => {
+            console.log('Setting up select', idx);
+            select.addEventListener('change', function() {
+                const container = this.closest('.mb-4');
+                const errorDiv = container ? container.querySelector('.field-errors') : null;
+                
+                console.log('Select changed, value:', this.value, 'error div:', !!errorDiv);
+                
+                if (this.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                    if (errorDiv) {
+                        errorDiv.innerHTML = '<i class="fe fe-alert-circle"></i> Sélectionnez un type';
+                        errorDiv.style.display = 'block';
+                        console.log('Showing error: Sélectionnez un type');
+                    }
+                }
+            });
+        });
+        
+        // Validation pour Classement (1-30)
+        const numberInputs = form.querySelectorAll('input[type="number"]');
+        console.log('Found number inputs:', numberInputs.length);
+        
+        numberInputs.forEach((input, idx) => {
+            console.log('Setting up number input', idx);
+            input.addEventListener('input', function() {
+                const container = this.closest('.mb-4');
+                const errorDiv = container ? container.querySelector('.field-errors') : null;
+                const value = parseInt(this.value) || 0;
+                
+                console.log('Number input changed, value:', this.value, 'parsed:', value, 'error div:', !!errorDiv);
+                
+                if (value > 0 && value <= 30) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                } else if (this.value.trim().length > 0) {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                    if (errorDiv) {
+                        errorDiv.innerHTML = '<i class="fe fe-alert-circle"></i> Entrez un chiffre entre 1 et 30';
+                        errorDiv.style.display = 'block';
+                        console.log('Showing error: Entrez un chiffre entre 1 et 30');
+                    }
+                } else {
+                    this.classList.remove('is-valid', 'is-invalid');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Initialiser dès que le document est prêt
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRecompenseValidation);
+    } else {
+        initRecompenseValidation();
+    }
+</script>

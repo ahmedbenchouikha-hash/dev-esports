@@ -1,0 +1,320 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une récompense{% endblock %}
+
+{% block body %}
+    <div class="min-vh-100 py-5">
+        <!-- Retour à la liste -->
+        <a href="{{ path('recompense_index') }}" class="btn btn-sm rounded-pill mb-4" 
+            style="background: rgba(0, 242, 254, 0.2); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); font-weight: 600;">
+            <i class="fe fe-arrow-left me-2"></i> Retour à la liste
+        </a>
+
+        <!-- Conteneur principal -->
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <!-- Card Formulaire -->
+                <div class="card border-0 rounded-4 overflow-hidden shadow-lg" 
+                    style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+                    
+                    <!-- Header -->
+                    <div class="card-header p-5" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+                        <h1 class="mb-0 fw-bold text-white" style="font-size: 1.8rem;">
+                            <i class="fe fe-plus-circle me-3"></i>Ajouter une récompense
+                        </h1>
+                    </div>
+
+                    <!-- Contenu du formulaire -->
+                    <div class="card-body p-5">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+
+                        <!-- Afficher les erreurs du formulaire -->
+                        {% if form.vars.errors|length > 0 %}
+                            <div class="alert alert-dismissible fade show rounded-3 mb-4" role="alert" style="background: #dc3545; border: 2px solid #a02834; color: white;">
+                                <i class="fe fe-alert-triangle me-2" style="font-size: 1.2em;"></i>
+                                <strong>⚠️ Erreurs détectées :</strong>
+                                {% for error in form.vars.errors %}
+                                    <div style="margin-top: 8px; padding-left: 10px; border-left: 3px solid #ff6b6b;">{{ error.message }}</div>
+                                {% endfor %}
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Nom de la récompense -->
+                        <div class="mb-4">
+                            {{ form_label(form.recompense, 'Nom de la récompense *', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.recompense.vars.errors|length == 0 %}display: none;{% endif %}">
+                                {% for error in form.recompense.vars.errors %}
+                                    <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                                {% endfor %}
+                            </div>
+                            {{ form_widget(form.recompense, {
+                                'attr': {
+                                    'placeholder': 'Ex: Trophée Or',
+                                    'class': 'form-control form-control-lg rounded-3 custom-input' ~ (form.recompense.vars.errors|length > 0 ? ' is-invalid' : '')
+                                }
+                            }) }}
+                        </div>
+
+                        <!-- Type -->
+                        <div class="mb-4">
+                            {{ form_label(form.type, 'Type de récompense *', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.type.vars.errors|length == 0 %}display: none;{% endif %}">
+                                {% for error in form.type.vars.errors %}
+                                    <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                                {% endfor %}
+                            </div>
+                            {{ form_widget(form.type, {
+                                'attr': {
+                                    'class': 'form-select form-select-lg rounded-3 custom-input' ~ (form.type.vars.errors|length > 0 ? ' is-invalid' : '')
+                                }
+                            }) }}
+                        </div>
+
+                        <!-- Classement -->
+                        <div class="mb-4">
+                            {{ form_label(form.classement, 'Classement (1-30) *', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.classement.vars.errors|length == 0 %}display: none;{% endif %}">
+                                {% for error in form.classement.vars.errors %}
+                                    <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                                {% endfor %}
+                            </div>
+                            {{ form_widget(form.classement, {
+                                'attr': {
+                                    'placeholder': '5',
+                                    'class': 'form-control form-control-lg rounded-3 custom-input' ~ (form.classement.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                    'type': 'number',
+                                    'min': '1',
+                                    'max': '30'
+                                }
+                            }) }}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-5">
+                            {{ form_label(form.description, 'Description', {label_attr: {class: 'form-label fw-bold text-primary mb-2'}}) }}
+                            {{ form_widget(form.description, {
+                                'attr': {
+                                    'placeholder': 'Décrivez cette récompense...',
+                                    'class': 'form-control form-control-lg rounded-3 custom-input',
+                                    'style': 'height: 120px; resize: vertical;'
+                                }
+                            }) }}
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-grid gap-3 d-md-flex">
+                            <button type="submit" class="btn btn-modern-violet flex-grow-1">
+                                <i class="fe fe-plus-circle me-2"></i> Ajouter la récompense
+                            </button>
+                            <a href="{{ path('recompense_index') }}" class="btn btn-modern-secondary flex-grow-1">
+                                <i class="fe fe-x me-2"></i> Annuler
+                            </a>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Styles personnalisés -->
+                <style>
+                    .custom-input {
+                        background: rgba(255, 255, 255, 0.05) !important;
+                        border: 2px solid rgba(106, 27, 154, 0.2) !important;
+                        color: #ffffff !important;
+                        padding: 12px 18px !important;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    }
+
+                    .custom-input:focus {
+                        background: rgba(255, 255, 255, 0.1) !important;
+                        border-color: #8e24aa !important;
+                        box-shadow: 0 0 20px rgba(142, 36, 170, 0.2) !important;
+                        transform: translateY(-2px);
+                    }
+
+                    .custom-input::placeholder {
+                        color: rgba(255, 255, 255, 0.4) !important;
+                    }
+
+                    .btn-modern-violet {
+                        background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);
+                        color: white !important;
+                        border: none;
+                        padding: 14px 28px;
+                        border-radius: 12px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        transition: all 0.4s;
+                        box-shadow: 0 4px 15px rgba(106, 27, 154, 0.3);
+                    }
+
+                    .btn-modern-violet:hover {
+                        transform: translateY(-3px) scale(1.02);
+                        box-shadow: 0 8px 25px rgba(106, 27, 154, 0.5);
+                    }
+
+                    .btn-modern-secondary {
+                        background: rgba(255, 255, 255, 0.1);
+                        color: #ffffff !important;
+                        border: 2px solid rgba(255, 255, 255, 0.2);
+                        padding: 14px 28px;
+                        border-radius: 12px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        transition: all 0.4s;
+                    }
+
+                    .btn-modern-secondary:hover {
+                        background: rgba(255, 255, 255, 0.2);
+                        border-color: #ffffff;
+                        transform: translateY(-3px);
+                    }
+
+                    .form-control.is-invalid, .form-select.is-invalid {
+                        border-color: #ff4b2b !important;
+                        background: rgba(255, 75, 43, 0.1) !important;
+                        box-shadow: 0 0 15px rgba(255, 75, 43, 0.2) !important;
+                    }
+                    
+                    .form-control.is-invalid:focus, .form-select.is-invalid:focus {
+                        border-color: #dc3545 !important;
+                        box-shadow: 0 0 20px rgba(220, 53, 69, 0.3) !important;
+                        background: rgba(220, 53, 69, 0.12) !important;
+                    }
+                    
+                    /* Style pour les messages d'erreur sous label */
+                    .field-errors {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.5rem;
+                    }
+                    
+                    .field-errors div {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        font-size: 0.9rem;
+                        color: #dc3545;
+                    }
+                    
+                    .field-errors i {
+                        flex-shrink: 0;
+                    }
+                    
+                    /* Styles pour les champs valides */
+                    .form-control.is-valid, .form-select.is-valid {
+                        border-color: #28a745 !important;
+                        background: rgba(40, 167, 69, 0.08) !important;
+                        box-shadow: 0 0 15px rgba(40, 167, 69, 0.2) !important;
+                    }
+                    
+                    .form-control.is-valid:focus, .form-select.is-valid:focus {
+                        border-color: #28a745 !important;
+                        box-shadow: 0 0 20px rgba(40, 167, 69, 0.3) !important;
+                        background: rgba(40, 167, 69, 0.12) !important;
+                    }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Gestion des options de couleur
+                        const selectType = document.querySelector('select[name="recompense_type[type]"]');
+                        if (selectType) {
+                            const options = selectType.querySelectorAll('option');
+                            options.forEach(option => {
+                                const color = option.getAttribute('data-color');
+                                if (color) {
+                                    option.style.backgroundColor = color;
+                                    option.style.color = '#000';
+                                }
+                            });
+                        }
+                        
+                        // Validation en temps réel pour le nom (recompense)
+                        const recompenseInput = document.querySelector('input[name="recompense_type[recompense]"]');
+                        if (recompenseInput) {
+                            recompenseInput.addEventListener('input', function() {
+                                const container = this.closest('.mb-4');
+                                const errorDiv = container ? container.querySelector('.field-errors') : null;
+                                
+                                if (this.value.trim().length > 0 && this.value.length <= 30) {
+                                    this.classList.remove('is-invalid');
+                                    this.classList.add('is-valid');
+                                    if (errorDiv) errorDiv.style.display = 'none';
+                                } else if (this.value.trim().length === 0) {
+                                    this.classList.remove('is-valid');
+                                    this.classList.remove('is-invalid');
+                                    if (errorDiv) errorDiv.style.display = 'none';
+                                } else {
+                                    this.classList.remove('is-valid');
+                                    this.classList.add('is-invalid');
+                                    if (errorDiv) {
+                                        errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Maximum 30 caractères</div>';
+                                        errorDiv.style.display = 'flex';
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Validation en temps réel pour le type
+                        if (selectType) {
+                            selectType.addEventListener('change', function() {
+                                const container = this.closest('.mb-4');
+                                const errorDiv = container ? container.querySelector('.field-errors') : null;
+                                
+                                if (this.value) {
+                                    this.classList.remove('is-invalid');
+                                    this.classList.add('is-valid');
+                                    if (errorDiv) errorDiv.style.display = 'none';
+                                } else {
+                                    this.classList.remove('is-valid');
+                                    this.classList.add('is-invalid');
+                                    if (errorDiv) {
+                                        errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Sélectionnez un type</div>';
+                                        errorDiv.style.display = 'flex';
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Validation en temps réel pour le classement
+                        const classementInput = document.querySelector('input[name="recompense_type[classement]"]');
+                        if (classementInput) {
+                            classementInput.addEventListener('input', function() {
+                                const container = this.closest('.mb-4');
+                                const errorDiv = container ? container.querySelector('.field-errors') : null;
+                                const value = parseInt(this.value);
+                                
+                                if (!isNaN(value) && value >= 1 && value <= 30) {
+                                    this.classList.remove('is-invalid');
+                                    this.classList.add('is-valid');
+                                    if (errorDiv) errorDiv.style.display = 'none';
+                                } else if (this.value.trim().length === 0) {
+                                    this.classList.remove('is-valid');
+                                    this.classList.remove('is-invalid');
+                                    if (errorDiv) errorDiv.style.display = 'none';
+                                } else {
+                                    this.classList.remove('is-valid');
+                                    this.classList.add('is-invalid');
+                                    if (errorDiv) {
+                                        errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Entrez un chiffre entre 1 et 30</div>';
+                                        errorDiv.style.display = 'flex';
+                                    }
+                                }
+                            });
+                        }
+                    });
+                </script>
+
+                <!-- Conseil -->
+                <div class="alert alert-info rounded-3 mt-4" style="background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;">
+                    <i class="fe fe-info me-2"></i>
+                    <strong>Conseil :</strong> Assurez-vous que le nom et le type sont bien remplis avant de soumettre le formulaire.
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

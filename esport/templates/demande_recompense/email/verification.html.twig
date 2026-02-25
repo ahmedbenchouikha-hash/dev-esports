@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification d'email - RankUp Esports</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .greeting strong {
+            color: #667eea;
+        }
+        .message {
+            background-color: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .verify-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 40px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .verify-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        .backup-link {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+            word-break: break-all;
+        }
+        .backup-link-label {
+            font-weight: 600;
+            color: #666;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .backup-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎮 RankUp Esports</h1>
+            <p style="margin: 10px 0 0 0; font-size: 13px; opacity: 0.9;">Vérification de votre demande de récompense</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Bonjour <strong>{{ demande.nomDemandeur }}</strong>,
+            </div>
+
+            <p>Merci d'avoir soumis votre demande de récompense ! 🎉</p>
+
+            <div class="message">
+                <strong>📋 Recapitulatif de votre demande:</strong><br>
+                • Recompense: <strong>{{ demande.recompense.recompense }}</strong><br>
+                • Type: <strong>{{ demande.recompense.type }}</strong><br>
+                • Date: <strong>{{ demande.dateDemande|date('d/m/Y \\à H:i') }}</strong><br>
+                • Motif: {{ demande.motif|slice(0, 100) }}{% if demande.motif|length > 100 %}...{% endif %}
+            </div>
+
+            <p style="font-size: 15px; font-weight: 500; color: #667eea; margin: 25px 0 15px 0;">
+                ✓ Vérifiez votre email pour finaliser votre demande
+            </p>
+
+            <p>
+                Pour que votre demande soit prise en compte et marquée comme <strong>prioritaire</strong>, 
+                vous devez vérifier votre adresse email en cliquant sur le bouton ci-dessous:
+            </p>
+
+            <!-- Verify Button -->
+            <div class="button-container">
+                <a href="{{ verificationUrl }}" class="verify-button">✓ Vérifier mon email</a>
+            </div>
+
+            <!-- Info boxes -->
+            <div class="info-box">
+                <strong>ℹ️ Important:</strong> Une fois vérifié, votre demande sera automatiquement marquée comme prioritaire et sera traitée en priorité.
+            </div>
+
+            <!-- Backup Link -->
+            <div class="backup-link">
+                <span class="backup-link-label">📎 Ou copiez ce lien si le bouton ne fonctionne pas:</span>
+                <a href="{{ verificationUrl }}">{{ verificationUrl }}</a>
+            </div>
+
+            <p style="margin-top: 25px; font-size: 14px;">
+                Si vous n'avez pas fait cette demande, ignorez simplement cet email.<br>
+                <strong>Votre demande restera visible dans votre tableau de bord.</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>🏆 RankUp Esports</strong></p>
+            <p>Plateforme de gestion des demandes de récompenses esports</p>
+            <p style="color: #999; margin-top: 10px;">Cet email a été envoyé automatiquement. Veuillez ne pas répondre.</p>
+            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                © 2026 RankUp Esports - Tous droits réservés
+            </p>
+        </div>
+    </div>
+</body>
+</html>

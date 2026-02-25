@@ -1,0 +1,300 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Éditer la Demande - {{ demande.nomDemandeur }}{% endblock %}
+
+{% block body %}
+    <div class="min-vh-100 py-5">
+        <!-- Header -->
+        <div class="mb-5">
+            <a href="{{ path('demande_recompense_show', {id: demande.id}) }}" class="btn btn-sm rounded-pill mb-4" 
+                style="background: rgba(25, 118, 210, 0.2); color: #1976d2; border: 1px solid rgba(25, 118, 210, 0.4); font-weight: 600;">
+                <i class="fe fe-arrow-left me-2"></i>Retour
+            </a>
+            <h1 class="mb-2 fw-bold text-primary" style="font-size: 2.5rem;">
+                <i class="fe fe-edit-2 me-3"></i>Éditer la Demande
+            </h1>
+            <p class="text-muted">Modifiez les informations de la demande ci-dessous</p>
+        </div>
+
+        <!-- Messages flash -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                    <i class="fe fe-alert-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Formulaire -->
+        <div class="card border-0 rounded-4 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%); max-width: 600px;">
+            <div class="card-body p-5">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                
+                {# Champ Récompense #}
+                <div class="mb-4">
+                    {{ form_label(form.recompense, 'Récompense demandée *', {'label_attr': {'class': 'form-label fw-bold text-primary mb-2'}}) }}
+                    <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.recompense.vars.errors|length == 0 %}display: none;{% endif %}">
+                        {% for error in form.recompense.vars.errors %}
+                            <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                    {{ form_widget(form.recompense, {'attr': {'class': 'form-select form-select-lg rounded-2' ~ (form.recompense.vars.errors|length > 0 ? ' is-invalid' : ''), 'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(25, 118, 210, 0.3); color: #ffffff; padding: 12px 15px;'}}) }}
+                </div>
+
+                {# Champ Nom #}
+                <div class="mb-4">
+                    {{ form_label(form.nomDemandeur, 'Votre nom *', {'label_attr': {'class': 'form-label fw-bold text-primary mb-2'}}) }}
+                    <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.nomDemandeur.vars.errors|length == 0 %}display: none;{% endif %}">
+                        {% for error in form.nomDemandeur.vars.errors %}
+                            <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                    {{ form_widget(form.nomDemandeur, {'attr': {'class': 'form-control form-control-lg rounded-2' ~ (form.nomDemandeur.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Entrez votre nom complet', 'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(25, 118, 210, 0.3); color: #ffffff; padding: 12px 15px;'}}) }}
+                </div>
+
+                {# Champ Email #}
+                <div class="mb-4">
+                    {{ form_label(form.email, 'Votre email *', {'label_attr': {'class': 'form-label fw-bold text-primary mb-2'}}) }}
+                    <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.email.vars.errors|length == 0 %}display: none;{% endif %}">
+                        {% for error in form.email.vars.errors %}
+                            <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control form-control-lg rounded-2' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'votre.email@example.com', 'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(25, 118, 210, 0.3); color: #ffffff; padding: 12px 15px;'}}) }}
+                </div>
+
+                {# Champ Motif #}
+                <div class="mb-4">
+                    {{ form_label(form.motif, 'Description de la demande *', {'label_attr': {'class': 'form-label fw-bold text-primary mb-2'}}) }}
+                    <div class="field-errors text-danger fw-bold mb-2" style="font-size: 0.9rem; {% if form.motif.vars.errors|length == 0 %}display: none;{% endif %}">
+                        {% for error in form.motif.vars.errors %}
+                            <div><i class="fe fe-alert-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Minimum 50 caractères</small>
+                        <small class="text-muted"><span id="charCount">0</span>/1000</small>
+                    </div>
+                    {{ form_widget(form.motif, {'attr': {'class': 'form-control form-control-lg rounded-2' ~ (form.motif.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Décrivez votre demande de récompense en détails (minimum 50 caractères)...', 'rows': 4, 'style': 'background: rgba(255,255,255,0.08); border: 2px solid rgba(25, 118, 210, 0.3); color: #ffffff; padding: 12px 15px; font-family: monospace;', 'id': 'motifInput', 'maxlength': '1000'}}) }}
+                </div>
+
+                {# Boutons #}
+                <div class="d-flex gap-3 mt-5">
+                    <button type="submit" class="btn btn-sm rounded-pill px-4 py-2 shadow" style="background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white; border: none; font-weight: 600; flex: 1;">
+                        <i class="fe fe-save me-2"></i>Enregistrer les modifications
+                    </button>
+                    <a href="{{ path('demande_recompense_show', {id: demande.id}) }}" class="btn btn-sm rounded-pill px-4 py-2" style="background: rgba(25, 118, 210, 0.2); color: #1976d2; border: 1px solid rgba(25, 118, 210, 0.4); font-weight: 600; flex: 1;">
+                        <i class="fe fe-x me-2"></i>Annuler
+                    </a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <!-- Style personnalisé -->
+        <style>
+            .form-control, .form-select {
+                color: #ffffff !important;
+                transition: all 0.3s;
+            }
+            .form-control::placeholder {
+                color: rgba(255,255,255,0.6) !important;
+            }
+            .form-control:focus, .form-select:focus {
+                background: rgba(255,255,255,0.12) !important;
+                border-color: #1976d2 !important;
+                box-shadow: 0 0 15px rgba(25, 118, 210, 0.3) !important;
+                color: #ffffff !important;
+            }
+            .form-select option {
+                background: #1a1f3a;
+                color: #ffffff;
+            }
+            
+            /* Styles pour les champs avec erreurs */
+            .form-control.is-invalid, .form-select.is-invalid {
+                border-color: #dc3545 !important;
+                background: rgba(220, 53, 69, 0.1) !important;
+                box-shadow: 0 0 15px rgba(220, 53, 69, 0.2) !important;
+            }
+            
+            .form-control.is-invalid:focus, .form-select.is-invalid:focus {
+                border-color: #dc3545 !important;
+                box-shadow: 0 0 20px rgba(220, 53, 69, 0.3) !important;
+                background: rgba(220, 53, 69, 0.12) !important;
+            }
+            
+            /* Style pour les messages d'erreur sous label */
+            .field-errors {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .field-errors div {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.9rem;
+                color: #dc3545;
+            }
+            
+            .field-errors i {
+                flex-shrink: 0;
+            }
+            
+            /* Styles pour les champs valides */
+            .form-control.is-valid, .form-select.is-valid {
+                border-color: #28a745 !important;
+                background: rgba(40, 167, 69, 0.08) !important;
+                box-shadow: 0 0 15px rgba(40, 167, 69, 0.2) !important;
+            }
+            
+            .form-control.is-valid:focus, .form-select.is-valid:focus {
+                border-color: #28a745 !important;
+                box-shadow: 0 0 20px rgba(40, 167, 69, 0.3) !important;
+                background: rgba(40, 167, 69, 0.12) !important;
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Compteur de caractères pour le motif
+                const motifInput = document.getElementById('motifInput');
+                if (motifInput) {
+                    const charCount = document.getElementById('charCount');
+                    
+                    // Initialiser le compteur
+                    charCount.textContent = motifInput.value.length;
+                    
+                    // Mettre à jour le compteur en temps réel
+                    motifInput.addEventListener('input', function() {
+                        charCount.textContent = this.value.length;
+                        
+                        // Mise à jour dynamique des erreurs
+                        const container = this.closest('.mb-4');
+                        const errorDiv = container ? container.querySelector('.field-errors') : null;
+                        
+                        // Validation en temps réel
+                        if (this.value.length < 50) {
+                            charCount.parentElement.style.color = '#dc3545';
+                            charCount.style.color = '#dc3545';
+                            charCount.style.fontWeight = 'bold';
+                            this.classList.remove('is-valid');
+                            this.classList.add('is-invalid');
+                            if (errorDiv) {
+                                errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Minimum 50 caractères requis (' + this.value.length + '/50)</div>';
+                                errorDiv.style.display = 'flex';
+                            }
+                        } else {
+                            charCount.parentElement.style.color = 'rgba(255,255,255,0.7)';
+                            charCount.style.color = '#28a745';
+                            charCount.style.fontWeight = 'normal';
+                            this.classList.add('is-valid');
+                            this.classList.remove('is-invalid');
+                            if (errorDiv) {
+                                errorDiv.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    // Vérifier au chargement
+                    motifInput.dispatchEvent(new Event('input'));
+                }
+                
+                // Validation en temps réel pour le nom
+                const nomInput = document.querySelector('input[name="demande_recompense[nomDemandeur]"]');
+                if (nomInput) {
+                    nomInput.addEventListener('input', function() {
+                        const container = this.closest('.mb-4');
+                        const errorDiv = container ? container.querySelector('.field-errors') : null;
+                        
+                        if (this.value.trim().length > 0) {
+                            // Regex: au minimum un espace entre deux mots
+                            const hasSpace = /^[a-zA-Zàâäçèéêëîïôùûüœæ]+\s[a-zA-Zàâäçèéêëîïôùûüœæ\s]*$/.test(this.value);
+                            if (!hasSpace) {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                                if (errorDiv) {
+                                    errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Le nom doit contenir au minimum un espace (ex: Jean Dupont)</div>';
+                                    errorDiv.style.display = 'flex';
+                                }
+                            } else {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                                if (errorDiv) {
+                                    errorDiv.style.display = 'none';
+                                }
+                            }
+                        } else {
+                            this.classList.remove('is-valid');
+                            this.classList.remove('is-invalid');
+                            if (errorDiv) {
+                                errorDiv.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+                
+                // Validation en temps réel pour l'email
+                const emailInput = document.querySelector('input[name="demande_recompense[email]"]');
+                if (emailInput) {
+                    emailInput.addEventListener('input', function() {
+                        const container = this.closest('.mb-4');
+                        const errorDiv = container ? container.querySelector('.field-errors') : null;
+                        
+                        if (this.value.trim().length > 0) {
+                            const emailRegex = /^[^@]+@[^@]+\.(com|tn|fr|org|net|co|ca|de|it|es|uk|be|ch|nl|au|us|jp|cn|in|br|mx|kr|tr)$/i;
+                            if (!emailRegex.test(this.value)) {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                                if (errorDiv) {
+                                    errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Email invalide (domaine valide requis: .com, .tn, .fr, etc.)</div>';
+                                    errorDiv.style.display = 'flex';
+                                }
+                            } else {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                                if (errorDiv) {
+                                    errorDiv.style.display = 'none';
+                                }
+                            }
+                        } else {
+                            this.classList.remove('is-valid');
+                            this.classList.remove('is-invalid');
+                            if (errorDiv) {
+                                errorDiv.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+                
+                // Validation en temps réel pour la récompense
+                const recompenseSelect = document.querySelector('select[name="demande_recompense[recompense]"]');
+                if (recompenseSelect) {
+                    recompenseSelect.addEventListener('change', function() {
+                        const container = this.closest('.mb-4');
+                        const errorDiv = container ? container.querySelector('.field-errors') : null;
+                        
+                        if (this.value) {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                            if (errorDiv) {
+                                errorDiv.style.display = 'none';
+                            }
+                        } else {
+                            this.classList.remove('is-valid');
+                            this.classList.add('is-invalid');
+                            if (errorDiv) {
+                                errorDiv.innerHTML = '<div><i class="fe fe-alert-circle"></i> Sélectionnez une récompense</div>';
+                                errorDiv.style.display = 'flex';
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+    </div>
+{% endblock %}

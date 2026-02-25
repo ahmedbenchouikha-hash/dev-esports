@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ recompense.recompense }} - Détails{% endblock %}
+
+{% block body %}
+    <div class="min-vh-100 py-5">
+        <!-- Retour à la liste -->
+        <a href="{{ path('recompense_index') }}" class="btn btn-sm rounded-pill mb-4" 
+            style="background: rgba(0, 242, 254, 0.2); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); font-weight: 600;">
+            <i class="fe fe-arrow-left me-2"></i> Retour à la liste
+        </a>
+
+        <!-- Card Détails -->
+        <div class="card border-0 rounded-4 overflow-hidden shadow-lg" 
+            style="background: linear-gradient(135deg, #222a4a 0%, #1d243f 100%); border: 1px solid rgba(0, 242, 254, 0.1);">
+            
+            <!-- Header -->
+            <div class="card-header p-5" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+                <h1 class="mb-0 fw-bold text-white" style="font-size: 2rem;">
+                    <i class="fe fe-gift me-3"></i>{{ recompense.recompense }}
+                </h1>
+            </div>
+
+            <!-- Contenu -->
+            <div class="card-body p-5">
+                <div class="row g-5">
+                    <!-- Colonne 1 -->
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label class="text-primary fw-bold mb-2 d-block" style="font-size: 0.95rem;">
+                                <i class="fe fe-tag me-2"></i>Type de récompense
+                            </label>
+                            <span class="badge rounded-pill px-4 py-3 fw-600" 
+                                style="background: rgba(0, 242, 254, 0.2); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); font-size: 1rem;">
+                                {{ recompense.type }}
+                            </span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="text-primary fw-bold mb-2 d-block" style="font-size: 0.95rem;">
+                                <i class="fe fe-award me-2"></i>Classement
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge rounded-pill px-4 py-3 fw-600" 
+                                    style="background: rgba(0, 255, 157, 0.2); color: #00ff9d; border: 1px solid rgba(0, 255, 157, 0.4); font-size: 1.1rem;">
+                                    #{{ recompense.classement }}
+                                </span>
+                                <small class="text-muted">Position dans le classement</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne 2 -->
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label class="text-primary fw-bold mb-2 d-block" style="font-size: 0.95rem;">
+                                <i class="fe fe-info me-2"></i>ID
+                            </label>
+                            <p class="text-white fw-medium" style="font-size: 1.1rem;">{{ recompense.id }}</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="text-primary fw-bold mb-2 d-block" style="font-size: 0.95rem;">
+                                <i class="fe fe-file-text me-2"></i>Description
+                            </label>
+                            <p class="text-muted" style="font-size: 0.95rem; line-height: 1.6;">
+                                {{ recompense.description ?: '<em>Aucune description</em>'|raw }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="row g-3 mt-4 pt-4" style="border-top: 1px solid rgba(0, 242, 254, 0.1);">
+                    <div class="col-sm-6">
+                        <div class="bg-surface p-3 rounded-3" style="background: rgba(0, 242, 254, 0.05)!important;">
+                            <p class="text-muted mb-2" style="font-size: 0.9rem;">Nombre de demandes</p>
+                            <h3 class="text-primary mb-0">{{ recompense.demandes|length }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="bg-surface p-3 rounded-3" style="background: rgba(0, 255, 157, 0.05)!important;">
+                            <p class="text-muted mb-2" style="font-size: 0.9rem;">Créée</p>
+                            <h3 class="text-accent mb-0">Enregistrée</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-footer p-5" style="background: rgba(0, 242, 254, 0.03); border-top: 1px solid rgba(0, 242, 254, 0.1);">
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ path('recompense_edit', {id: recompense.id}) }}" class="btn btn-lg rounded-pill px-5" 
+                        style="background: linear-gradient(135deg, #fd7e14 0%, #fb6a0a 100%); color: white; border: none; font-weight: 600;">
+                        <i class="fe fe-edit-2 me-2"></i> Modifier
+                    </a>
+                    <form method="post" action="{{ path('recompense_delete', {id: recompense.id}) }}" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ recompense.id) }}">
+                        <button type="submit" class="btn btn-lg rounded-pill px-5" 
+                            style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none; font-weight: 600;"
+                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette récompense ?');">
+                            <i class="fe fe-trash-2 me-2"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Récompenses{% endblock %}
+
+{% block body %}
+    <h1>Liste des Récompenses</h1>
+
+    <a href="{{ path('recompense_new') }}" style="background:#6a1b9a; color:white; padding:10px 20px; border-radius:5px; text-decoration:none; display:inline-block; margin-bottom:20px;">
+        Ajouter une récompense
+    </a>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#6a1b9a; color:white;">
+                <th style="padding:12px;">ID</th>
+                <th style="padding:12px;">Nom</th>
+                <th style="padding:12px;">Type</th>
+                <th style="padding:12px;">Classement</th>
+                <th style="padding:12px;">Description</th>
+                <th style="padding:12px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if recompenses is empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; padding:20px;">Aucune récompense</td>
+                </tr>
+            {% else %}
+                {% for r in recompenses %}
+                    <tr style="border-bottom:1px solid #ddd;">
+                        <td style="padding:12px;">{{ r.id }}</td>
+                        <td style="padding:12px;">{{ r.recompense }}</td>
+                        <td style="padding:12px;">{{ r.type }}</td>
+                        <td style="padding:12px;">{{ r.classement }}</td>
+                        <td style="padding:12px;">{{ r.description ?: '-' }}</td>
+                        <td style="padding:12px;">
+                            <a href="{{ path('recompense_show', {id: r.id}) }}" style="color:#6a1b9a;">Voir</a> |
+                            <a href="{{ path('recompense_edit', {id: r.id}) }}" style="color:#fd7e14;">Modifier</a> |
+                            <form method="post" action="{{ path('recompense_delete', {id: r.id}) }}" style="display:inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ r.id) }}">
+                                <button type="submit" style="background:#dc3545; color:white; border:none; padding:5px 10px; cursor:pointer;" onclick="return confirm('Confirmer ?')">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+{% endblock %}
