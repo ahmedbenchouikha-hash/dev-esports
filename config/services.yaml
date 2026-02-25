@@ -4,14 +4,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-<<<<<<< HEAD
     logos_directory: '%kernel.project_dir%/public/uploads/logos'
     rawg_api_key: '%env(default::RAWG_API_KEY)%'
     rawg_allow_insecure_ssl: '%env(bool:RAWG_ALLOW_INSECURE_SSL)%'
     gemini_api_key: '%env(default::GEMINI_API_KEY)%'
     gemini_model: '%env(default::GEMINI_MODEL)%'
-=======
->>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 
 services:
     # default configuration for services in *this* file
@@ -30,8 +27,5 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
