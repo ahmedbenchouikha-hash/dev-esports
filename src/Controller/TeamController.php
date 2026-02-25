@@ -58,6 +58,18 @@ class TeamController extends AbstractController
         ]);
     }
 
+    #[Route('/leaderboard', name: 'leaderboard', methods: ['GET'])]
+    public function leaderboard(TeamRepository $teamRepository, Request $request): Response
+    {
+        $limit = max(1, min(100, (int) $request->query->get('limit', 20)));
+        $teams = $teamRepository->findTopByScore($limit);
+
+        return $this->render('team/leaderboard.html.twig', [
+            'teams' => $teams,
+            'limit' => $limit,
+        ]);
+    }
+
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(int $id, TeamRepository $teamRepository): Response
     {

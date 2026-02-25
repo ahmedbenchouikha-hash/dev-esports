@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\AdminResponse;
-use App\Entity\Notification;
 use App\Form\AdminResponseType;
 use App\Repository\AdminResponseRepository;
 use App\Service\EmailService;
+use App\Service\MistralAssistantService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,13 +19,15 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AdminResponseController extends AbstractController
 {
     private EmailService $emailService;
+    private MessageBusInterface $bus;
 
-    public function __construct(EmailService $emailService)
+    public function __construct(EmailService $emailService, MessageBusInterface $bus)
     {
         $this->emailService = $emailService;
+        $this->bus = $bus;
     }
 
-    #[Route(name: 'app_admin_response_index', methods: ['GET'])]
+    #[Route('', name: 'app_admin_response_index', methods: ['GET'])]
     public function index(AdminResponseRepository $adminResponseRepository): Response
     {
         return $this->render('admin_response/index.html.twig', [
@@ -40,7 +44,6 @@ final class AdminResponseController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $reclamation = $adminResponse->getReclamation();
-            
             // Validate that reclamation is selected
             if (!$reclamation) {
                 $this->addFlash('error', 'Veuillez sélectionner une réclamation.');
@@ -50,13 +53,12 @@ final class AdminResponseController extends AbstractController
             $entityManager->persist($adminResponse);
             $entityManager->flush();
 
-            // Auto-create notification for new admin response
-            $notif = new Notification();
-            $notif->setTitle('Réponse à réclamation #' . $reclamation->getId());
-            $notif->setMessage(substr($adminResponse->getMessage(), 0, 200));
-            $notif->setReclamation($reclamation);
-            $entityManager->persist($notif);
-            $entityManager->flush();
+            // Dispatch Messenger message for Mercure
+            $this->bus->dispatch(new \App\DTO\NewResponseNotification(
+                $reclamation->getId(),
+                $reclamation->getTitre(),
+                $this->getUser()?->getUserIdentifier() ?? 'Admin'
+            ));
 
             $this->addFlash('success', 'Réponse d\'administration créée avec succès.');
             return $this->redirectToRoute('app_admin_response_index', [], Response::HTTP_SEE_OTHER);
@@ -66,6 +68,26 @@ final class AdminResponseController extends AbstractController
             'admin_response' => $adminResponse,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/chatbot', name: 'app_admin_response_chatbot', methods: ['POST'])]
+    public function chatbot(Request $request, MistralAssistantService $assistant): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        $message = trim((string) ($payload['message'] ?? ''));
+
+        $prompt = "Tu es un assistant e-sport pour les administrateurs et joueurs. "
+            . "Tu peux discuter librement des jeux e-sport populaires, des joueurs connus, des scènes compétitives et des performances. "
+            . "Tu réponds en français, de manière claire, utile et naturelle. "
+            . "Si la question concerne une sanction, recommande uniquement parmi: ban from this match, ban from this game, ban from this tournament. "
+            . "Donne une justification courte selon la gravité, la répétition et l'impact compétitif. "
+            . "Tu peux aussi aider à rédiger des réponses admin professionnelles et équilibrées.";
+
+        $result = $assistant->askWithPrompt($message, $prompt);
+        $status = $result['status'];
+        unset($result['status']);
+
+        return $this->json($result, $status);
     }
 
     #[Route('/{id}', name: 'app_admin_response_show', methods: ['GET'])]
@@ -92,6 +114,13 @@ final class AdminResponseController extends AbstractController
             }
 
             $entityManager->flush();
+
+            // Dispatch Messenger message for Mercure notification (edit)
+            $this->bus->dispatch(new \App\DTO\NewResponseNotification(
+                $reclamation->getId(),
+                $reclamation->getTitre(),
+                $this->getUser()?->getUserIdentifier() ?? 'Admin'
+            ));
 
             $this->addFlash('success', 'Réponse d\'administration modifiée avec succès.');
             return $this->redirectToRoute('app_admin_response_index', [], Response::HTTP_SEE_OTHER);

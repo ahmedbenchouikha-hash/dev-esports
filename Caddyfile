@@ -1,0 +1,10 @@
+:2019 {
+    route {
+        mercure {
+            transport_url bolt://mercure.db
+            publisher_jwt dev-esports-mercure-secret-2026
+            subscriber_jwt dev-esports-mercure-secret-2026
+            anonymous
+        }
+    }
+}

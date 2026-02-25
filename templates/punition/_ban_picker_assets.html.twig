@@ -1,0 +1,128 @@
+<style>
+    .ban-picker-toggle {
+        border-color: #4b5f88;
+        background: rgba(15, 23, 42, 0.7);
+        color: #e2e8f0;
+    }
+
+    .ban-picker-menu {
+        background: #1f2d4f;
+        border: 1px solid #334155;
+    }
+
+    .ban-option-card {
+        font-weight: 600;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .js-ban-option:hover .ban-option-card {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .js-ban-option.active .ban-option-card {
+        outline: 2px solid #ffffff;
+        outline-offset: 1px;
+    }
+
+    .ban-option-tournament {
+        background: #dc3545;
+        color: #ffffff;
+    }
+
+    .ban-option-match {
+        background: #ffc107;
+        color: #111827;
+    }
+
+    .ban-option-game {
+        background: #0dcaf0;
+        color: #111827;
+    }
+</style>
+
+<script>
+(function () {
+    const initBanPickers = () => {
+        const pickers = document.querySelectorAll('.ban-picker');
+
+        pickers.forEach((picker) => {
+            if (picker.dataset.initialized === '1') {
+                return;
+            }
+            picker.dataset.initialized = '1';
+
+            const targetId = picker.dataset.targetId;
+            const select = document.getElementById(targetId);
+            const label = picker.querySelector('.js-ban-label');
+            const toggle = picker.querySelector('.ban-picker-toggle');
+            const options = picker.querySelectorAll('.js-ban-option');
+
+            if (!select || !label) {
+                return;
+            }
+
+            const normalize = (value) => (value || '').toString().trim().toLowerCase();
+
+            const setActive = (value) => {
+                const normalizedValue = normalize(value);
+                options.forEach((btn) => {
+                    btn.classList.toggle('active', normalize(btn.dataset.value) === normalizedValue);
+                });
+            };
+
+            const setSelectValue = (value) => {
+                const normalizedValue = normalize(value);
+                const selectOption = Array.from(select.options).find((option) => normalize(option.value) === normalizedValue);
+
+                if (!selectOption) {
+                    return false;
+                }
+
+                Array.from(select.options).forEach((option) => {
+                    option.selected = false;
+                });
+
+                selectOption.selected = true;
+                select.value = selectOption.value;
+                select.dispatchEvent(new Event('input', { bubbles: true }));
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                return true;
+            };
+
+            const syncLabel = () => {
+                const selected = select.options[select.selectedIndex];
+                if (selected && selected.value) {
+                    label.textContent = selected.textContent;
+                    setActive(selected.value);
+                }
+            };
+
+            options.forEach((optionBtn) => {
+                optionBtn.addEventListener('click', () => {
+                    const selected = setSelectValue(optionBtn.dataset.value);
+                    if (selected) {
+                        syncLabel();
+                    } else {
+                        label.textContent = optionBtn.dataset.label || 'Select a ban';
+                        setActive(optionBtn.dataset.value);
+                    }
+
+                    if (toggle && window.bootstrap && bootstrap.Dropdown) {
+                        bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+                    }
+                });
+            });
+
+            syncLabel();
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBanPickers);
+    } else {
+        initBanPickers();
+    }
+})();
+</script>

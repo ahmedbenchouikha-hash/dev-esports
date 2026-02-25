@@ -1,40 +1,69 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Edit Reclamation #{{ reclamation.id }} - Dev Esports{% endblock %}
+{% block title %}Edit Reclamation - Dev Esports{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .module-form-shell {
+            background: rgba(30, 41, 79, 0.72);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+        }
+
+        .module-form-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
 <div class="container py-4">
-    <h1>Edit Reclamation #{{ reclamation.id }}</h1>
+    <div class="mb-4">
+        <h1 class="mb-0">Edit Reclamation</h1>
+        <p class="module-form-subtitle">Mettez à jour les informations de la demande en conservant un historique cohérent.</p>
+    </div>
 
-    <div class="card mt-4">
+    {% if reclamation.etat.value != 'EN_COURS' %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-lock"></i>
+        <strong>Réclamation verrouillée!</strong> Vous ne pouvez pas modifier une réclamation qui n'est pas en cours. État actuel: <strong>{{ reclamation.etat.value|replace({'_': ' '}) }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="card mt-4 module-form-shell">
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">
                     {{ form_label(form.titre, 'Title') }}
-                    {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'disabled': reclamation.etat.value != 'EN_COURS'}}) }}
                     {{ form_errors(form.titre) }}
                 </div>
 
                 <div class="mb-3">
                     {{ form_label(form.description, 'Description') }}
-                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5, 'disabled': reclamation.etat.value != 'EN_COURS'}}) }}
                     {{ form_errors(form.description) }}
                 </div>
 
                 <div class="mb-3">
                     {{ form_label(form.attachment, 'Attachment') }}
-                    {{ form_widget(form.attachment, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_widget(form.attachment, {'attr': {'class': 'form-control', 'disabled': reclamation.etat.value != 'EN_COURS'}}) }}
                     {{ form_errors(form.attachment) }}
                 </div>
 
                 <div class="mb-3">
                     {{ form_label(form.player, 'Player') }}
-                    {{ form_widget(form.player, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_widget(form.player, {'attr': {'class': 'form-control', 'disabled': reclamation.etat.value != 'EN_COURS'}}) }}
                     {{ form_errors(form.player) }}
                 </div>
 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success" {% if reclamation.etat.value != 'EN_COURS' %}disabled{% endif %}>
                         <i class="fas fa-save"></i> Save Changes
                     </button>
                     <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-secondary">Cancel</a>

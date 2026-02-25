@@ -16,6 +16,15 @@ final class Version20260212000000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        if (!$this->connection->createSchemaManager()->tablesExist(['player'])) {
+            return;
+        }
+
+        $columns = $this->connection->createSchemaManager()->listTableColumns('player');
+        if (isset($columns['player_status'])) {
+            return;
+        }
+
         $this->addSql('ALTER TABLE player ADD player_status VARCHAR(50) DEFAULT NULL');
     }
 

@@ -1,0 +1,16 @@
+{% set list = banList|default([]) %}
+{% if list|length > 0 %}
+    <div class="{{ containerClass|default('d-flex flex-wrap gap-2') }}">
+        {% for ban in list %}
+            {% set visual = ban == 'banned from this tournament'
+                ? {'label': 'Tournament Ban', 'class': 'bg-danger text-white'}
+                : (ban == 'banned from this match'
+                    ? {'label': 'Match Ban', 'class': 'bg-warning text-dark'}
+                    : {'label': 'Game Ban', 'class': 'bg-info text-dark'})
+            %}
+            <span class="badge rounded-pill px-3 py-2 {{ visual.class }}">{{ visual.label }}</span>
+        {% endfor %}
+    </div>
+{% else %}
+    <span class="text-muted">N/A</span>
+{% endif %}

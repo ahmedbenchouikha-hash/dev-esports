@@ -6,6 +6,7 @@ use App\Entity\Punition;
 use App\Form\PunitionType;
 use App\Repository\PunitionRepository;
 use App\Repository\ReclamationRepository;
+use App\Service\MistralAssistantService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,40 @@ final class PunitionController extends AbstractController
     {
         return $this->render('punition/index.html.twig', [
             'punitions' => $punitionRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/leaderboard/stats', name: 'app_punition_leaderboard_stats', methods: ['GET'])]
+    public function leaderboardStats(PunitionRepository $punitionRepository): JsonResponse
+    {
+        $punitions = $punitionRepository->findAll();
+
+        $bannedPlayers = count($punitions);
+        $bannedFromGame = 0;
+        $bannedFromMatch = 0;
+        $bannedFromTournament = 0;
+
+        foreach ($punitions as $punition) {
+            $banList = $punition->getBanList();
+
+            if (in_array('banned from this game', $banList, true)) {
+                ++$bannedFromGame;
+            }
+
+            if (in_array('banned from this match', $banList, true)) {
+                ++$bannedFromMatch;
+            }
+
+            if (in_array('banned from this tournament', $banList, true)) {
+                ++$bannedFromTournament;
+            }
+        }
+
+        return $this->json([
+            'banned_players' => $bannedPlayers,
+            'banned_from_game' => $bannedFromGame,
+            'banned_from_match' => $bannedFromMatch,
+            'banned_from_tournament' => $bannedFromTournament,
         ]);
     }
 
@@ -69,6 +104,19 @@ final class PunitionController extends AbstractController
         ]);
     }
 
+    #[Route('/voice-assistant', name: 'app_punition_voice_assistant', methods: ['POST'])]
+    public function voiceAssistant(Request $request, MistralAssistantService $assistant): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        $message = trim((string) ($payload['message'] ?? ''));
+
+        $result = $assistant->ask($message);
+        $status = $result['status'];
+        unset($result['status']);
+
+        return $this->json($result, $status);
+    }
+
     #[Route('/new', name: 'app_punition_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -84,6 +132,10 @@ final class PunitionController extends AbstractController
                 $this->addFlash('error', 'Veuillez sélectionner une réclamation.');
                 return $this->redirectToRoute('app_punition_new');
             }
+
+            $selectedBan = (string) $form->get('playerStatus')->getData();
+            $punition->setPlayerStatus('');
+            $punition->addBan($selectedBan);
 
             if ($rec->getPlayer()) {
                 $player = $rec->getPlayer();
@@ -115,7 +167,9 @@ final class PunitionController extends AbstractController
     #[Route('/{id}/edit', name: 'app_punition_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Punition $punition, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(PunitionType::class, $punition);
+        $form = $this->createForm(PunitionType::class, $punition, [
+            'edit_mode' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -125,6 +179,11 @@ final class PunitionController extends AbstractController
             if (!$rec) {
                 $this->addFlash('error', 'Veuillez sélectionner une réclamation.');
                 return $this->redirectToRoute('app_punition_edit', ['id' => $punition->getId()]);
+            }
+
+            $newBan = $form->get('newBan')->getData();
+            if (is_string($newBan) && $newBan !== '') {
+                $punition->addBan($newBan);
             }
 
             if ($rec->getPlayer()) {

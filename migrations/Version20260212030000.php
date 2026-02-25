@@ -16,6 +16,15 @@ final class Version20260212030000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        if (!$this->connection->createSchemaManager()->tablesExist(['user'])) {
+            return;
+        }
+
+        $columns = $this->connection->createSchemaManager()->listTableColumns('user');
+        if (isset($columns['approval_status'])) {
+            return;
+        }
+
         $this->addSql('ALTER TABLE `user` ADD approval_status VARCHAR(20) DEFAULT \'pending\' NOT NULL');
     }
 

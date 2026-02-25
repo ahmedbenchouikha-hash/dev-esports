@@ -12,6 +12,8 @@ use App\Enum\StatutPunition;
 #[ORM\HasLifecycleCallbacks]
 class Punition
 {
+    private const BAN_SEPARATOR = '|';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -30,8 +32,8 @@ class Punition
     #[ORM\JoinColumn(nullable: false)]
     private ?Reclamation $reclamation = null;
 
-    #[ORM\Column(length: 20)]
-    private string $playerStatus = 'ACTIF';
+    #[ORM\Column(length: 255)]
+    private string $playerStatus = '';
 
     // Getters / Setters
     public function getId(): ?int 
@@ -95,7 +97,41 @@ class Punition
 
     public function setPlayerStatus(string $playerStatus): static
     {
-        $this->playerStatus = $playerStatus;
+        $this->playerStatus = trim($playerStatus);
+        return $this;
+    }
+
+    public function getBanList(): array
+    {
+        if ($this->playerStatus === '') {
+            return [];
+        }
+
+        $allowedBans = StatutPunition::values();
+        $bans = array_values(array_unique(array_filter(array_map(
+            static fn(string $ban): string => trim($ban),
+            explode(self::BAN_SEPARATOR, $this->playerStatus)
+        ))));
+
+        return array_values(array_filter(
+            $bans,
+            static fn(string $ban): bool => in_array($ban, $allowedBans, true)
+        ));
+    }
+
+    public function addBan(string $ban): static
+    {
+        if (!in_array($ban, StatutPunition::values(), true)) {
+            return $this;
+        }
+
+        $existingBans = $this->getBanList();
+
+        if (!in_array($ban, $existingBans, true)) {
+            $existingBans[] = $ban;
+            $this->playerStatus = implode(self::BAN_SEPARATOR, $existingBans);
+        }
+
         return $this;
     }
 
