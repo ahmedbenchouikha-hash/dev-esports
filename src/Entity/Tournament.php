@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\TournamentRepository;
+<<<<<<< HEAD
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -39,7 +42,11 @@ class Tournament
     #[Assert\Choice(choices: ['pending', 'ongoing', 'completed', 'cancelled'])]
     private ?string $status = 'pending';
 
+<<<<<<< HEAD
     #[ORM\Column(length: 255)]
+=======
+    #[ORM\Column(length: 255, nullable: true)]
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     #[Assert\NotBlank(message: 'Location is required')]
     private ?string $location = null;
 
@@ -57,6 +64,7 @@ class Tournament
     ])]
     private ?array $rules = null;
 
+<<<<<<< HEAD
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
 
@@ -73,6 +81,16 @@ class Tournament
     {
         $this->games = new ArrayCollection();
         $this->registrations = new ArrayCollection();
+=======
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $createdAt = null;
+
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $updatedAt = null;
+
+    public function __construct()
+    {
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     }
 
     #[ORM\PrePersist]
@@ -204,17 +222,21 @@ class Tournament
         return $this->createdAt;
     }
 
+<<<<<<< HEAD
     public function setCreatedAt(\DateTime $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
 
+<<<<<<< HEAD
     public function setUpdatedAt(\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
@@ -284,8 +306,14 @@ class Tournament
         return $this->registrations->filter(fn(TournamentRegistration $reg) => $reg->isRejected());
     }
 
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     public function __toString(): string
     {
         return $this->name ?? 'Tournament';
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e

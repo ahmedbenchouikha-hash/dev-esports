@@ -1,0 +1,100 @@
+/* Light GeeksUI-like styling for admin tournaments page */
+
+/* Layout */
+.admin-shell{display:flex;gap:24px;align-items:flex-start}
+.admin-sidebar{
+  width:260px;
+  background:#0f1724; /* dark sidebar like mock */
+  color:#cbd5e1;
+  padding:24px 18px;
+  border-radius:8px;
+  min-height:calc(100vh - 40px);
+}
+.admin-sidebar .brand-link{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:700}
+.admin-sidebar .logo{font-size:20px}
+.admin-sidebar .nav{margin-top:18px}
+.admin-sidebar .nav .nav-item{display:block;padding:8px 6px;color:#cbd5e1;text-decoration:none}
+.admin-sidebar .nav .nav-item:hover{color:#fff}
+.admin-sidebar .nav-section{font-weight:700;color:#94a3b8;margin-top:12px;margin-bottom:6px}
+
+/* Main area */
+.admin-main{flex:1;padding:28px 36px;background:#f6f9fb;border-radius:8px}
+
+/* Top hero */
+.hero{margin-bottom:18px}
+.hero-inner{display:flex;align-items:center;justify-content:space-between}
+.hero-title{font-size:40px;color:#0b2545;margin:0;font-weight:800;display:flex;align-items:center;gap:12px}
+.hero-title .gear{font-size:28px;color:#06b6d4}
+.btn-accent{
+  display:inline-block;padding:10px 18px;border-radius:999px;
+  background:linear-gradient(90deg,#12c2d6,#c471ed);
+  color:#04202a;font-weight:700;text-decoration:none;box-shadow:0 6px 18px rgba(18,67,88,0.08)
+}
+
+/* Filters/Search */
+.search-row{margin-top:18px;margin-bottom:18px}
+.search-form{display:flex;gap:12px;align-items:center}
+.search-input{flex:1;padding:12px 16px;border-radius:8px;border:1px solid #e6eef7;background:#fff;color:#0b2545}
+.search-select{padding:10px 12px;border-radius:8px;border:1px solid #e6eef7;background:#fff;color:#0b2545;min-width:160px}
+.btn-search{padding:11px 20px;border-radius:999px;background:linear-gradient(90deg,#12c2d6,#00b894);color:#04202a;border:none;font-weight:700}
+
+/* Cards */
+.card{background:#fff;border:1px solid #e6eef7;border-radius:12px;box-shadow:0 6px 20px rgba(15,23,42,0.04)}
+.card .card-body{padding:18px}
+
+/* Table */
+.table-wrap{padding:8px 12px}
+.tournaments-table{width:100%;border-collapse:collapse}
+.tournaments-table thead th{
+  padding:16px 18px;text-align:left;font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #eef3f7;background:#f8fafc
+}
+.tournaments-table tbody td{
+  padding:18px;border-top:1px solid #f1f5f9;background:#fff;color:#0b2545;vertical-align:middle
+}
+.tournaments-table .name{font-weight:700;color:#0b2545}
+.tournaments-table .t-desc{display:block;color:#64748b;font-size:13px;margin-top:6px}
+
+/* Date columns small */
+.date-day{font-weight:700;color:#0b2545}
+.date-year{font-size:12px;color:#94a3b8}
+
+/* Status badges */
+.status-pill{display:inline-block;padding:6px 12px;border-radius:999px;font-size:13px;color:#fff}
+.status-pending{background:#6b5b3b}
+.status-ongoing{background:#8b3c9a}
+.status-completed{background:#059669}
+.status-cancelled{background:#ef4444}
+
+/* Actions */
+.actions{display:flex;gap:8px;justify-content:flex-end}
+.action-btn{
+  display:inline-block;padding:8px 14px;border-radius:20px;text-decoration:none;font-weight:700;font-size:13px;
+  color:#04202a;background:#f1f5f9;border:1px solid rgba(10,20,40,0.04)
+}
+.action-btn.view{background:#e6f8ff;color:#034a57}
+.action-btn.edit{background:#fff4d9;color:#6d4c00}
+.action-btn.delete{background:#ffe6e8;color:#7a1220}
+
+/* Responsive cards for small screens */
+@media (max-width:900px){
+  .admin-shell{flex-direction:column}
+  .admin-sidebar{width:100%;min-height:auto;border-radius:8px;margin-bottom:12px}
+  .admin-main{padding:18px}
+  .tournaments-table thead th{font-size:11px}
+  .actions{justify-content:flex-start}
+}
+
+/* Table responsive tweaks */
+.table-responsive{overflow:auto}
+
+/* Pagination / footer */
+.pagination-wrap{padding:14px 18px;display:flex;justify-content:center;border-top:1px solid #eef3f7}
+
+/* small helpers */
+.empty{text-align:center;padding:28px;color:#64748b}
+
+/* Form validation visuals */
+.form-control.is-invalid{border-color:#e3342f;background-color:#fff}
+.invalid-feedback{color:#e3342f;font-size:0.9rem;margin-top:6px}
+.form-group label{font-weight:600;margin-bottom:6px}
+.form-control:focus.is-invalid{box-shadow:none}

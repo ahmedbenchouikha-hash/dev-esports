@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "6231dcebe0abc090b086fd90477a8537",
+=======
+    "content-hash": "59b0d7d8aace9ca744e9c6cdbead75fa",
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     "packages": [
         {
             "name": "composer/semver",
@@ -1264,6 +1268,7 @@
             "time": "2025-03-06T22:45:56+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "knplabs/knp-components",
             "version": "v5.2.0",
             "source": {
@@ -1428,6 +1433,8 @@
             "time": "2025-11-29T09:14:09+00:00"
         },
         {
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
             "name": "monolog/monolog",
             "version": "3.10.0",
             "source": {
@@ -7859,6 +7866,7 @@
     ],
     "packages-dev": [
         {
+<<<<<<< HEAD
             "name": "doctrine/data-fixtures",
             "version": "2.2.0",
             "source": {
@@ -8028,6 +8036,8 @@
             "time": "2025-12-03T16:05:42+00:00"
         },
         {
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
             "name": "masterminds/html5",
             "version": "2.10.0",
             "source": {
@@ -10392,5 +10402,9 @@
         "ext-iconv": "*"
     },
     "platform-dev": [],
+<<<<<<< HEAD
     "plugin-api-version": "2.3.0"
+=======
+    "plugin-api-version": "2.6.0"
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 }

@@ -4,7 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Tournament;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+<<<<<<< HEAD
 use Doctrine\ORM\QueryBuilder;
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -17,6 +20,7 @@ class TournamentRepository extends ServiceEntityRepository
         parent::__construct($registry, Tournament::class);
     }
 
+<<<<<<< HEAD
     public function findBySearchTerm(string $searchTerm): array
     {
         return $this->createQueryBuilder('t')
@@ -24,10 +28,21 @@ class TournamentRepository extends ServiceEntityRepository
             ->orWhere('t.description LIKE :searchTerm')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
             ->orderBy('t.name', 'ASC')
+=======
+    public function findAllOrdered(string $sort = 'startDate', string $direction = 'ASC'): array
+    {
+        $validSortFields = ['startDate', 'name', 'createdAt', 'status', 'prizePool'];
+        $sortField = in_array($sort, $validSortFields) ? $sort : 'startDate';
+        $sortDirection = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
+        return $this->createQueryBuilder('t')
+            ->orderBy('t.' . $sortField, $sortDirection)
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
             ->getQuery()
             ->getResult();
     }
 
+<<<<<<< HEAD
     public function findByStatus(string $status): array
     {
         return $this->createQueryBuilder('t')
@@ -119,4 +134,33 @@ class TournamentRepository extends ServiceEntityRepository
 
         return $statusCounts;
     }
+=======
+    public function findBySearchTerm(string $term, string $sort = 'startDate', string $direction = 'ASC'): array
+    {
+        $validSortFields = ['startDate', 'name', 'createdAt', 'status', 'prizePool'];
+        $sortField = in_array($sort, $validSortFields) ? $sort : 'startDate';
+        $sortDirection = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
+        return $this->createQueryBuilder('t')
+            ->where('t.name LIKE :term OR t.description LIKE :term')
+            ->setParameter('term', '%' . $term . '%')
+            ->orderBy('t.' . $sortField, $sortDirection)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByStatus(string $status, string $sort = 'startDate', string $direction = 'ASC'): array
+    {
+        $validSortFields = ['startDate', 'name', 'createdAt', 'status', 'prizePool'];
+        $sortField = in_array($sort, $validSortFields) ? $sort : 'startDate';
+        $sortDirection = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
+        return $this->createQueryBuilder('t')
+            ->where('t.status = :status')
+            ->setParameter('status', $status)
+            ->orderBy('t.' . $sortField, $sortDirection)
+            ->getQuery()
+            ->getResult();
+    }
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 }

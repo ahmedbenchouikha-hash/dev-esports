@@ -3,6 +3,7 @@
    ================================================ */
 
 :root {
+<<<<<<< HEAD
     --primary: #00f2fe;
     --primary-dark: #0099cc;
     --accent: #00ff9d;
@@ -19,6 +20,25 @@
     --border-color: rgba(0, 242, 254, 0.15);
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
+=======
+    /* Colors tuned to match the admin screenshot */
+    --primary: #12c2d6;       /* bright cyan */
+    --primary-dark: #0aa3b0;
+    --accent: #00e6a8;        /* teal/green accent */
+    --accent-dark: #00b889;
+    --bg-dark: #071428;       /* page outermost dark */
+    --bg-secondary: #0d1726;  /* top header */
+    --bg-tertiary: #0f2233;   /* cards / main surface */
+    --bg-surface: #0b1a2a;    /* table/card interior */
+    --text-primary: #e9ffff;  /* brighter near-white for main text */
+    --text-secondary: #c9f7f3; /* brighter muted for secondary text */
+    --text-muted: #9fc2d6; /* slightly brighter muted */
+    --text-on-dark: #ffffff;
+    --text-on-light: #071428;
+    --border-color: rgba(255,255,255,0.03);
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.04);
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
     --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.35);
@@ -148,7 +168,11 @@ a:hover {
 
 /* Navbar - Fixed Contrast */
 .navbar {
+<<<<<<< HEAD
     background: rgba(18, 23, 45, 0.95);
+=======
+    background: rgba(8,12,20,0.9);
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
@@ -171,6 +195,113 @@ a:hover {
     gap: 10px;
 }
 
+<<<<<<< HEAD
+=======
+/* Sidebar (admin layout) */
+.sidebar-inner,
+.admin-sidebar{
+    width:260px;
+    background: linear-gradient(180deg,#0b1422 0%, #0d1b2d 100%);
+    color: var(--text-secondary);
+    padding:24px 18px;
+    min-height:100vh;
+    position:fixed;
+    left:0;top:0;bottom:0;
+    box-shadow: inset -2px 0 0 rgba(255,255,255,0.02);
+}
+
+.sidebar-inner .brand-link, .admin-sidebar .brand-link{
+    display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.02)
+}
+
+.brand .logo{font-size:22px;display:inline-block}
+.brand .brand-text{color:var(--primary);font-weight:900;margin-left:6px;letter-spacing:0.4px}
+
+.sidebar-inner .nav{margin-top:18px}
+.sidebar-inner .nav ul{list-style:none;padding:0}
+.sidebar-inner .nav-section{font-weight:800;color:var(--text-muted);margin-top:16px;margin-bottom:6px;letter-spacing:0.08em;font-size:12px}
+.sidebar-inner .nav-sub{list-style:none;padding-left:0;margin:6px 0 12px}
+.sidebar-inner .nav-item{display:block;padding:12px 14px;color:var(--text-primary);text-decoration:none;border-radius:8px;position:relative;font-weight:700;font-size:0.98rem}
+
+/* Active item styling (green highlighted row) */
+.sidebar-inner .nav-item.active,
+.sidebar-inner .nav-item:hover{
+    color:var(--text-on-dark);
+    background: linear-gradient(90deg, rgba(0,242,254,0.08), rgba(0,255,157,0.04));
+    box-shadow: 0 6px 18px rgba(6,177,187,0.06);
+}
+
+/* Left neon indicator for active item */
+.sidebar-inner .nav-item.active::before{
+    content:'';position:absolute;left:-18px;top:8px;width:6px;height:calc(100% - 16px);background:var(--primary);border-radius:6px}
+
+/* Neon scrollbar for sidebar */
+.sidebar-inner{overflow:auto}
+.sidebar-inner::-webkit-scrollbar{width:8px}
+.sidebar-inner::-webkit-scrollbar-track{background:transparent}
+.sidebar-inner::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--primary),var(--accent));border-radius:999px}
+
+.admin-main{margin-left:300px;padding:28px 36px;background:linear-gradient(180deg,var(--bg-dark),rgba(0,0,0,0.02));min-height:100vh}
+
+/* Hero - big cyan heading like screenshot */
+.hero-title{font-size:56px;color:var(--primary);font-weight:900;margin:0;text-shadow:0 6px 24px rgba(0,242,254,0.06)}
+
+/* Search boxes */
+.search-input{background:var(--bg-surface);border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:14px;color:var(--text-primary);font-weight:600}
+.search-select{background:var(--bg-surface);border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:12px;color:var(--text-primary);font-weight:600}
+
+/* Table header & rows */
+.tournaments-table thead th{background:var(--bg-surface);color:var(--text-primary);border-bottom:1px solid rgba(255,255,255,0.02);font-weight:800}
+.tournaments-table tbody td{background:linear-gradient(180deg,var(--bg-tertiary),var(--bg-surface));color:var(--text-primary);font-weight:600}
+
+/* Strong override for table header to avoid Bootstrap's .table-light */
+.table-head th,
+.table thead.table-head th {
+    background: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+}
+.table-head { background: var(--bg-surface) !important; }
+
+/* Strong overrides for Bootstrap table defaults to avoid white rows */
+.table.tournaments-table tbody tr,
+.tournaments-table tbody tr {
+    background: transparent !important;
+}
+.table.tournaments-table tbody td,
+.tournaments-table tbody td {
+    background: linear-gradient(180deg,var(--bg-tertiary),var(--bg-surface)) !important;
+    color: var(--text-primary) !important;
+    border-top: 1px solid rgba(255,255,255,0.02) !important;
+}
+.table.tournaments-table tbody tr:first-child td {
+    border-top: none !important;
+}
+
+/* Force per-row background using the explicit class to override any external rules */
+.t-row { background: linear-gradient(180deg,var(--bg-tertiary),var(--bg-surface)) !important; }
+.t-row td { background: linear-gradient(180deg,var(--bg-tertiary),var(--bg-surface)) !important; color:var(--text-primary) !important }
+
+/* Action pill buttons */
+.action-btn.view{background:var(--primary);color:#04202a;border-radius:999px;padding:10px 18px;font-weight:800}
+.action-btn.edit{background:#ffc107;color:#04202a;border-radius:999px;padding:10px 18px;font-weight:800}
+.action-btn.delete{background:#ff5c6c;color:#fff;border-radius:999px;padding:10px 18px;font-weight:800}
+
+/* Status badges */
+.badge-pending{background:#6b5b3b;color:#fff;padding:6px 10px;border-radius:999px}
+.badge-ongoing{background:#8b3c9a;color:#fff;padding:6px 10px;border-radius:999px}
+.badge-completed{background:#059669;color:#fff;padding:6px 10px;border-radius:999px}
+
+/* Card adjustments to match screenshot */
+.card { background: linear-gradient(180deg,var(--bg-surface),var(--bg-tertiary)); border: none; box-shadow: none }
+
+/* Improve general readability inside cards/forms */
+.card-body{color:var(--text-primary);font-size:1rem}
+.form-label{color:var(--text-primary);font-weight:700}
+.form-control{color:var(--text-primary);font-weight:600}
+
+
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 .nav-link {
     color: var(--text-secondary) !important;
     font-weight: 600;
@@ -254,6 +385,7 @@ a:hover {
     transform: scaleX(1);
 }
 
+<<<<<<< HEAD
 /* Teams Section - Better Contrast */
 .teams {
     display: flex;
@@ -359,6 +491,8 @@ a:hover {
     box-shadow: var(--shadow-sm);
 }
 
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 /* Forms - Fixed Contrast */
 .form-control,
 .form-select,
@@ -398,7 +532,11 @@ textarea:focus {
     margin-bottom: 2rem;
 }
 
+<<<<<<< HEAD
 /* Buttons - Fixed Contrast Issues */
+=======
+/* Buttons */
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 .btn {
     display: inline-flex;
     align-items: center;
@@ -429,6 +567,7 @@ textarea:focus {
     box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
+<<<<<<< HEAD
 .btn-secondary {
     background: transparent;
     color: var(--text-primary) !important; /* White text on dark background */
@@ -685,6 +824,13 @@ textarea:focus {
 }
 
 /* Utility Classes - Fixed */
+=======
+/* Validation styles (keep minimal, compatible) */
+.form-control.is-invalid{border-color:#e3342f;background-color:rgba(255,255,255,0.02)}
+.invalid-feedback{color:#e3342f;font-size:0.9rem;margin-top:6px}
+
+/* Utility classes - Fixed */
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 .text-primary { color: var(--primary) !important; }
 .text-secondary { color: var(--text-secondary) !important; }
 .text-muted { color: var(--text-muted) !important; }
@@ -694,6 +840,7 @@ textarea:focus {
 .bg-tertiary { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .bg-surface { background: var(--bg-surface) !important; color: var(--text-primary) !important; }
 
+<<<<<<< HEAD
 /* Match Card Link Button - Fixed Contrast */
 .match-card a {
     display: inline-flex;
@@ -798,6 +945,8 @@ textarea:focus {
     background: var(--accent);
 }
 
+=======
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
 /* Focus States for Accessibility */
 :focus-visible {
     outline: 3px solid var(--primary);
@@ -812,3 +961,11 @@ textarea:focus {
         --border-color: rgba(0, 242, 254, 0.5);
     }
 }
+<<<<<<< HEAD
+=======
+
+/* Responsiveness tweaks kept minimal to avoid conflicts */
+@media (max-width: 768px) {
+    .container { padding: 0 1rem; }
+}
+>>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
