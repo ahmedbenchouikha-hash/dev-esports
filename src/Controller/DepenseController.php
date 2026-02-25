@@ -10,6 +10,7 @@ use App\Repository\DepenseRepository;
 use App\Service\BudgetAlertService;
 use App\Service\AuthorizationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -65,7 +66,7 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
+    public function index(Request $request, DepenseRepository $depenseRepository, AuthorizationService $authService, PaginatorInterface $paginator): Response
     {
         // Paramètres de recherche et tri
         $search = $request->query->get('search', '');
@@ -75,6 +76,7 @@ class DepenseController extends AbstractController
         $categorie = $request->query->get('categorie', 'all');
         $minAmount = $request->query->get('min_amount', '');
         $maxAmount = $request->query->get('max_amount', '');
+        $page = $request->query->getInt('page', 1);
 
         // Validations
         if (!in_array($order, ['ASC', 'DESC'])) {
@@ -140,6 +142,13 @@ class DepenseController extends AbstractController
             });
         }
 
+        // Pagination
+        $pagination = $paginator->paginate(
+            $depenses,
+            $page,
+            3  // 3 items per page
+        );
+
         // Stats
         $stats = [
             'total_montant' => 0,
@@ -161,7 +170,8 @@ class DepenseController extends AbstractController
         }
 
         return $this->render('depense/index.html.twig', [
-            'depenses' => $depenses,
+            'pagination' => $pagination,
+            'depenses' => $pagination->getItems(),
             'stats' => $stats,
             'search' => $search,
             'sort' => $sort,

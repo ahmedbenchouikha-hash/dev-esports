@@ -10,6 +10,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 
 class BudgetType extends AbstractType
 {
@@ -47,6 +49,19 @@ class BudgetType extends AbstractType
                     'rows' => 4,
                     'placeholder' => 'Add notes about this budget...'
                 ],
+            ])
+            ->add('justificatifFile', FileType::class, [
+                'label' => 'Justification Document (PDF, Image)',
+                'required' => false,
+                'mapped' => true,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'],
+                        'mimeTypesMessage' => 'Please upload a valid PDF or image file',
+                    ])
+                ],
+                'attr' => ['class' => 'form-control', 'accept' => '.pdf,.jpg,.jpeg,.png,.gif']
             ])
         ;
     }

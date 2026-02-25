@@ -16,18 +16,6 @@
     </div>
 </div>
 
-<!-- Flash Messages -->
-{% if app.flashes %}
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endfor %}
-{% endif %}
-
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
@@ -170,6 +158,13 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            {% if pagination is defined %}
+            <nav aria-label="Page navigation" class="mt-4">
+                {{ knp_pagination_render(pagination) }}
+            </nav>
+            {% endif %}
         {% endif %}
     </div>
 </div>

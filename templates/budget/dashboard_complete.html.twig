@@ -1,0 +1,263 @@
+{# Exemple Dashboard Complet - Budget + Graphiques + Pagination #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Budget & Dépenses{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    
+    {# Header #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-0">
+                <i class="fas fa-chart-line"></i> Dashboard Financier
+            </h1>
+            <p class="text-muted">Suivi des budgets et dépenses en temps réel</p>
+        </div>
+    </div>
+
+    {# KPI Cards #}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <h6 class="card-title text-primary font-weight-bold">Budget Total</h6>
+                    <h2 class="card-text">
+                        {{ budgets_total|default(0)|number_format(2, ',', '.') }} €
+                    </h2>
+                    <small class="text-muted">Alloué à toutes les équipes</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-left-danger">
+                <div class="card-body">
+                    <h6 class="card-title text-danger font-weight-bold">Dépenses Totales</h6>
+                    <h2 class="card-text">
+                        {{ depenses_total|default(0)|number_format(2, ',', '.') }} €
+                    </h2>
+                    <small class="text-muted">Montant utilisé</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <h6 class="card-title text-success font-weight-bold">Budget Restant</h6>
+                    <h2 class="card-text">
+                        {{ (budgets_total - depenses_total)|default(0)|number_format(2, ',', '.') }} €
+                    </h2>
+                    <small class="text-muted">Disponible</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <h6 class="card-title text-info font-weight-bold">% Utilisation</h6>
+                    <h2 class="card-text">
+                        {{ ((depenses_total / budgets_total) * 100)|default(0)|round(1) }} %
+                    </h2>
+                    <div class="progress mt-2" style="height: 5px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ ((depenses_total / budgets_total) * 100)|default(0) }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Graphiques - Row 1 #}
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Budget par Équipe
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% include 'partials/_chart_teams_budget_comparison.html.twig' with {'budgets': budgets} %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Répartition par Catégorie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% include 'partials/_chart_depenses_by_category.html.twig' with {'depenses': depenses} %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Graphiques - Row 2 #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Évolution des Dépenses
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% include 'partials/_chart_depenses_evolution.html.twig' with {'depenses': depenses} %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Liste paginée des dernières dépenses #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Dernières Dépenses
+                    </h5>
+                    <a href="{{ path('depense_new') }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-plus"></i> Nouvelle Dépense
+                    </a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Titre</th>
+                                <th>Montant</th>
+                                <th>Catégorie</th>
+                                <th>Équipe</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for depense in pagination %}
+                            <tr>
+                                <td>
+                                    <strong>{{ depense.titre }}</strong>
+                                    {% if depense.description %}
+                                        <br>
+                                        <small class="text-muted">{{ depense.description|truncate(50) }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ depense.montant|number_format(2, ',', '.') }} €</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ depense.categorie ?? 'N/A' }}</span>
+                                </td>
+                                <td>{{ depense.team.name ?? '-' }}</td>
+                                <td>
+                                    {% if depense.statut == 'en_attente' %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-clock"></i> En attente
+                                        </span>
+                                    {% elseif depense.statut == 'approuvé' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Approuvé
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times"></i> Refusé
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ depense.date_creation|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <a href="{{ path('depense_show', {'id': depense.id}) }}" 
+                                       class="btn btn-sm btn-outline-primary" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('depense_edit', {'id': depense.id}) }}" 
+                                       class="btn btn-sm btn-outline-warning" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    Aucune dépense enregistrée
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Pagination Footer #}
+                <div class="card-footer bg-light">
+                    <nav aria-label="Pagination">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                <strong>{{ pagination.getTotalItemCount() }}</strong> dépenses au total
+                            </div>
+                            
+                            {{ knp_pagination_render(pagination) }}
+                            
+                            <div class="text-muted">
+                                Page <strong>{{ pagination.getCurrentPageNumber() }}</strong> 
+                                sur <strong>{{ pagination.getLastPageNumber() }}</strong>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: none;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .border-left-primary {
+        border-left: 4px solid #007bff !important;
+    }
+    
+    .border-left-danger {
+        border-left: 4px solid #dc3545 !important;
+    }
+    
+    .border-left-success {
+        border-left: 4px solid #28a745 !important;
+    }
+    
+    .border-left-info {
+        border-left: 4px solid #17a2b8 !important;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .chart-container {
+        min-height: 300px;
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+    }
+</style>
+
+{% endblock %}

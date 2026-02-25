@@ -11,6 +11,7 @@ use App\Repository\BudgetRepository;
 use App\Repository\DepenseRepository;
 use App\Service\AuthorizationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -166,12 +167,13 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, BudgetRepository $budgetRepository, AuthorizationService $authService): Response
+    public function index(Request $request, BudgetRepository $budgetRepository, AuthorizationService $authService, PaginatorInterface $paginator): Response
     {
         $search = $request->query->get('search', '');
         $sort = $request->query->get('sort', 'dateAllocation');
         $order = $request->query->get('order', 'DESC');
         $filter = $request->query->get('filter', 'all');
+        $page = $request->query->getInt('page', 1);
 
         if (!in_array($order, ['ASC', 'DESC'])) {
             $order = 'DESC';
@@ -209,6 +211,13 @@ class BudgetController extends AbstractController
             });
         }
 
+        // Pagination
+        $pagination = $paginator->paginate(
+            $budgets,
+            $page,
+            3  // 3 items per page
+        );
+
         $stats = [
             'total_alloue' => 0,
             'total_utilise' => 0,
@@ -225,7 +234,8 @@ class BudgetController extends AbstractController
         }
         
         return $this->render('budget/index.html.twig', [
-            'budgets' => $budgets,
+            'pagination' => $pagination,
+            'budgets' => $pagination->getItems(),
             'stats' => $stats,
             'search' => $search,
             'sort' => $sort,

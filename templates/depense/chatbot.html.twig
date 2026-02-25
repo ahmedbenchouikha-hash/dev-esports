@@ -1,0 +1,187 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AI Expense Chatbot - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12 d-flex justify-content-between align-items-center">
+        <h1 class="page-title mb-0">🤖 AI Expense Chatbot (Gemini)</h1>
+        <a href="{{ path('depense_index') }}" class="btn btn-outline-primary btn-sm">Back to Expenses</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Budget Total</h6>
+                <h4>{{ snapshot.global.budgetTotal|number_format(2, '.', ' ') }} TND</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Total Dépensé</h6>
+                <h4>{{ snapshot.global.spent|number_format(2, '.', ' ') }} TND</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Budget Restant</h6>
+                <h4>{{ snapshot.global.remaining|number_format(2, '.', ' ') }} TND</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <strong>Chat Assistant</strong>
+            </div>
+            <div class="card-body p-0">
+                <div id="chatBox" style="height: 430px; overflow-y: auto; padding: 1rem; background: rgba(10, 20, 40, 0.35);">
+                    <div class="mb-2">
+                        <div class="p-2 rounded" style="background: rgba(0, 242, 254, 0.12); border: 1px solid rgba(0, 242, 254, 0.25);">
+                            <div class="fw-bold">AI Assistant</div>
+                            <div>
+                                Bonjour 👋 Je peux t'aider à:
+                                <ul class="mb-0 mt-2">
+                                    <li>Calculer le budget restant</li>
+                                    <li>Suggérer une répartition automatique</li>
+                                    <li>Optimiser les dépenses</li>
+                                    <li>Faire un résumé budget/dépense</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form id="chatForm" class="p-3 border-top">
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="chatInput"
+                            class="form-control"
+                            placeholder="Ex: Donne-moi une répartition du budget restant"
+                            required
+                        >
+                        <button id="chatSendBtn" class="btn btn-primary" type="submit">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <strong>Quick Prompts</strong>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <button class="btn btn-outline-info quick-prompt" data-text="Calcule le budget restant global.">Budget restant</button>
+                <button class="btn btn-outline-info quick-prompt" data-text="Propose une répartition automatique du budget restant entre matériel, transport, logistique, nourriture.">Répartition auto</button>
+                <button class="btn btn-outline-info quick-prompt" data-text="Optimise les dépenses prévues pour améliorer l'équilibre.">Optimisation</button>
+                <button class="btn btn-outline-info quick-prompt" data-text="Fais un résumé complet: total budget, total dépense, reste et répartition suggérée.">Résumé auto</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const quickPrompts = document.querySelectorAll('.quick-prompt');
+
+    let sending = false;
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function nl2br(text) {
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    function appendMessage(sender, text, isUser) {
+        const row = document.createElement('div');
+        row.className = `mb-2 d-flex ${isUser ? 'justify-content-end' : 'justify-content-start'}`;
+
+        row.innerHTML = `
+            <div class="p-2 rounded" style="max-width: 85%; ${isUser
+                ? 'background: rgba(37, 211, 102, 0.2); border: 1px solid rgba(37, 211, 102, 0.3);'
+                : 'background: rgba(0, 242, 254, 0.12); border: 1px solid rgba(0, 242, 254, 0.25);'}">
+                <div class="fw-bold">${escapeHtml(sender)}</div>
+                <div>${nl2br(text)}</div>
+            </div>
+        `;
+
+        chatBox.appendChild(row);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage(message) {
+        if (sending) return;
+        if (!message.trim()) return;
+
+        sending = true;
+        chatSendBtn.disabled = true;
+
+        appendMessage('You', message, true);
+
+        try {
+            const body = new URLSearchParams();
+            body.set('message', message);
+
+            const res = await fetch('{{ path('depense_chatbot_ask') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: body.toString()
+            });
+
+            const data = await res.json();
+            if (res.ok && data.reply) {
+                appendMessage('AI Assistant', data.reply, false);
+            } else {
+                appendMessage('AI Assistant', data.error || 'Erreur lors de la réponse IA.', false);
+            }
+        } catch (error) {
+            appendMessage('AI Assistant', 'Erreur réseau. Veuillez réessayer.', false);
+        } finally {
+            sending = false;
+            chatSendBtn.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    chatForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+        chatInput.value = '';
+        sendMessage(message);
+    });
+
+    quickPrompts.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const text = btn.getAttribute('data-text') || '';
+            chatInput.value = text;
+            chatInput.focus();
+        });
+    });
+})();
+</script>
+{% endblock %}

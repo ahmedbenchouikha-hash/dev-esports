@@ -7,8 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
+#[Vich\Uploadable]
 class Team
 {
     #[ORM\Id]
@@ -41,6 +44,9 @@ class Team
         message: 'Invalid logo filename. Only jpg, jpeg, png, gif are allowed'
     )]
     private ?string $logo = null;
+
+    #[Vich\UploadableField(mapping: 'team_logo', fileNameProperty: 'logo')]
+    private ?File $logoFile = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     #[Assert\Choice(
@@ -171,6 +177,20 @@ class Team
     public function setLogo(?string $logo): static
     {
         $this->logo = $logo;
+        return $this;
+    }
+
+    public function getLogoFile(): ?File
+    {
+        return $this->logoFile;
+    }
+
+    public function setLogoFile(?File $logoFile = null): static
+    {
+        $this->logoFile = $logoFile;
+        if (null !== $logoFile) {
+            $this->updatedAt = new \DateTime();
+        }
         return $this;
     }
 

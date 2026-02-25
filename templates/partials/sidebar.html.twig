@@ -24,9 +24,7 @@
             <i class="fas fa-chart-line menu-icon"></i>
             <span class="menu-label">Dashboard</span>
         </a>
-        {% endif %}
 
-        {% if is_granted('ROLE_ADMIN') %}
         <!-- Matches -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#matchesMenu">
@@ -128,9 +126,6 @@
                 <a href="{{ path('admin_player_index') }}" class="menu-subitem {% if 'admin_player_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Players
                 </a>
-                <a href="{{ path('admin_player_create') }}" class="menu-subitem">
-                    <i class="fas fa-plus"></i> Create Player
-                </a>
             </div>
         </div>
 
@@ -178,9 +173,6 @@
             <div id="depenseMenu" class="collapse {% if 'depense' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('depense_index') }}" class="menu-subitem {% if 'depense_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Expenses
-                </a>
-                <a href="{{ path('depense_new') }}" class="menu-subitem">
-                    <i class="fas fa-plus"></i> Create Expense
                 </a>
                 <a href="{{ path('depense_historique') }}" class="menu-subitem">
                     <i class="fas fa-history"></i> History
@@ -271,6 +263,26 @@
 
         <!-- Divider -->
         <div class="menu-divider"></div>
+
+        <!-- Player Section Header -->
+        {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
+        <div class="menu-section-title">PLAYER</div>
+
+        <!-- Player Dashboard -->
+        <a href="{{ path('player_dashboard') }}" class="menu-item {% if 'player_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-user-circle menu-icon"></i>
+            <span class="menu-label">My Dashboard</span>
+        </a>
+
+        <!-- My Teams -->
+        <a href="{{ path('team_my_teams') }}" class="menu-item">
+            <i class="fas fa-users menu-icon"></i>
+            <span class="menu-label">My Teams</span>
+        </a>
+
+        <!-- Divider -->
+        <div class="menu-divider"></div>
+        {% endif %}
 
         <!-- Public Section Header -->
         <div class="menu-section-title">PUBLIC</div>

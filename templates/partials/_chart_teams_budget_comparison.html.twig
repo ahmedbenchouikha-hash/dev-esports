@@ -1,0 +1,67 @@
+{# Chart: Comparaison Budget Équipes #}
+<div class="chart-container" style="position: relative; height: 300px;">
+    <canvas id="teamsChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('teamsChart').getContext('2d');
+        
+        const labels = [];
+        const allocatedData = [];
+        const usedData = [];
+
+        {% for budget in budgets %}
+            labels.push('{{ budget.team.name }}');
+            allocatedData.push({{ budget.montantAlloue|json_encode }});
+            usedData.push({{ budget.montantUtilise|json_encode }});
+        {% endfor %}
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Budget Alloué',
+                        data: allocatedData,
+                        backgroundColor: '#36A2EB',
+                        borderColor: '#36A2EB',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Budget Utilisé',
+                        data: usedData,
+                        backgroundColor: '#FF6384',
+                        borderColor: '#FF6384',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Comparaison des Budgets par Équipe'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Montant (€)'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

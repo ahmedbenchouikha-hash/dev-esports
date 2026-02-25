@@ -6,8 +6,11 @@ use App\Repository\DepenseRepository;
 use Doctrine\ORM\Mapping as ORM;
 use DateTime;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity(repositoryClass: DepenseRepository::class)]
+#[Vich\Uploadable]
 class Depense
 {
     #[ORM\Id]
@@ -58,6 +61,12 @@ class Depense
     #[ORM\ManyToOne(targetEntity: Team::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?Team $team = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $facture = null;
+
+    #[Vich\UploadableField(mapping: 'depense_documents', fileNameProperty: 'facture')]
+    private ?File $factureFile = null;
 
     public function __construct()
     {
@@ -144,6 +153,31 @@ class Depense
     public function setTeam(?Team $team): self
     {
         $this->team = $team;
+        return $this;
+    }
+
+    public function getFacture(): ?string
+    {
+        return $this->facture;
+    }
+
+    public function setFacture(?string $facture): self
+    {
+        $this->facture = $facture;
+        return $this;
+    }
+
+    public function getFactureFile(): ?File
+    {
+        return $this->factureFile;
+    }
+
+    public function setFactureFile(?File $factureFile = null): self
+    {
+        $this->factureFile = $factureFile;
+        if (null !== $factureFile) {
+            $this->date_creation = new DateTime();
+        }
         return $this;
     }
 }

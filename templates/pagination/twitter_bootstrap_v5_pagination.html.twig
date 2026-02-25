@@ -1,0 +1,152 @@
+{# Pagination template for Bootstrap 5 - Modern Dark Design #}
+<nav aria-label="Page navigation" class="mt-5 mb-4 pagination-wrapper">
+    {% if pageCount > 1 %}
+    <ul class="pagination justify-content-center gap-2">
+        {% if current > 1 %}
+            <li class="page-item">
+                <a class="page-link btn-pagination-nav" href="{{ path(route, query|merge({(pageParameterName): 1})) }}" title="First page">
+                    <i class="fas fa-step-backward"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link btn-pagination-nav" href="{{ path(route, query|merge({(pageParameterName): current - 1})) }}" title="Previous page">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link btn-pagination-nav-disabled">
+                    <i class="fas fa-step-backward"></i>
+                </span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link btn-pagination-nav-disabled">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+            </li>
+        {% endif %}
+
+        {% for page in pagesInRange %}
+            {% if page == current %}
+                <li class="page-item active">
+                    <span class="page-link btn-pagination-active">
+                        {{ page }}
+                    </span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link btn-pagination" href="{{ path(route, query|merge({(pageParameterName): page})) }}">
+                        {{ page }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if current < pageCount %}
+            <li class="page-item">
+                <a class="page-link btn-pagination-nav" href="{{ path(route, query|merge({(pageParameterName): current + 1})) }}" title="Next page">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link btn-pagination-nav" href="{{ path(route, query|merge({(pageParameterName): pageCount})) }}" title="Last page">
+                    <i class="fas fa-step-forward"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link btn-pagination-nav-disabled">
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link btn-pagination-nav-disabled">
+                    <i class="fas fa-step-forward"></i>
+                </span>
+            </li>
+        {% endif %}
+    </ul>
+    {% else %}
+    <div class="text-center py-3">
+        <small class="text-muted"><i class="fas fa-info-circle"></i> All items fit on this page</small>
+    </div>
+    {% endif %}
+</nav>
+
+<style>
+    .pagination {
+        list-style: none;
+        padding: 0;
+    }
+
+    .page-item {
+        margin: 0 3px;
+    }
+
+    .btn-pagination,
+    .btn-pagination-nav,
+    .btn-pagination-active,
+    .btn-pagination-nav-disabled {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-pagination {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.1));
+        color: #00f2fe;
+        border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-pagination:hover {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(37, 211, 102, 0.2));
+        border-color: #00f2fe;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 242, 254, 0.2);
+    }
+
+    .btn-pagination-nav {
+        background: linear-gradient(135deg, #00f2fe, #25d366);
+        color: #fff;
+        border: none;
+    }
+
+    .btn-pagination-nav:hover {
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-pagination-active {
+        background: linear-gradient(135deg, #ff006e, #d946ef);
+        color: #fff;
+        border: none;
+        box-shadow: 0 5px 15px rgba(255, 0, 110, 0.3);
+    }
+
+    .btn-pagination-nav-disabled {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: not-allowed;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        opacity: 0.5;
+    }
+
+    .pagination-wrapper {
+        display: block;
+        padding: 20px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>

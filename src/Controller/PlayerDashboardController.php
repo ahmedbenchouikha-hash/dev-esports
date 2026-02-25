@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Team;
 use App\Entity\Player;
+use App\Entity\Budget;
+use App\Entity\Depense;
+use App\Service\PlayerScoreService;
 use App\Repository\TeamInvitationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +20,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PlayerDashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'player_dashboard', methods: ['GET'])]
-    public function dashboard(EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+    public function dashboard(
+        EntityManagerInterface $em, 
+        TeamInvitationRepository $invitationRepo,
+        PlayerScoreService $scoreService
+    ): Response
     {
         $user = $this->getUser();
         
@@ -41,12 +48,22 @@ class PlayerDashboardController extends AbstractController
         // Get pending invitations for this player
         $pendingInvitations = $invitationRepo->findPendingInvitationForPlayer($user);
 
+        // Get budgets and depenses data for charts
+        $budgets = $em->getRepository(Budget::class)->findAll();
+        $depenses = $em->getRepository(Depense::class)->findAll();
+
+        // Get player score and stats
+        $playerStats = $scoreService->getPlayerStats($user);
+
         return $this->render('player/dashboard.html.twig', [
             'player' => $user,
             'currentTeam' => $currentTeams->first() ?: null,  // For backward compatibility with template
             'currentTeams' => $currentTeams,
             'availableTeams' => $availableTeams,
             'pendingInvitations' => $pendingInvitations,
+            'budgets' => $budgets,
+            'depenses' => $depenses,
+            'playerStats' => $playerStats,
         ]);
     }
 

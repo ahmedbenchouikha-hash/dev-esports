@@ -6,8 +6,11 @@ use App\Repository\BudgetRepository;
 use Doctrine\ORM\Mapping as ORM;
 use DateTime;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity(repositoryClass: BudgetRepository::class)]
+#[Vich\Uploadable]
 class Budget
 {
     #[ORM\Id]
@@ -45,6 +48,12 @@ class Budget
 
     #[ORM\Column(length: 50)]
     private ?string $statut = 'actif';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $justificatif = null;
+
+    #[Vich\UploadableField(mapping: 'budget_justificatif', fileNameProperty: 'justificatif')]
+    private ?File $justificatifFile = null;
 
     public function __construct()
     {
@@ -150,6 +159,31 @@ class Budget
     public function setStatut(string $statut): self
     {
         $this->statut = $statut;
+        return $this;
+    }
+
+    public function getJustificatif(): ?string
+    {
+        return $this->justificatif;
+    }
+
+    public function setJustificatif(?string $justificatif): self
+    {
+        $this->justificatif = $justificatif;
+        return $this;
+    }
+
+    public function getJustificatifFile(): ?File
+    {
+        return $this->justificatifFile;
+    }
+
+    public function setJustificatifFile(?File $justificatifFile = null): self
+    {
+        $this->justificatifFile = $justificatifFile;
+        if (null !== $justificatifFile) {
+            $this->dateModification = new DateTime();
+        }
         return $this;
     }
 }

@@ -9,6 +9,7 @@ use App\Form\TeamType;
 use App\Repository\PlayerRepository;
 use App\Repository\TeamInvitationRepository;
 use App\Repository\TeamRepository;
+use App\Service\PlayerRecommendationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,13 +23,16 @@ class TeamController extends AbstractController
 {
     private PlayerRepository $playerRepository;
     private TeamInvitationRepository $invitationRepository;
+    private PlayerRecommendationService $playerRecommendationService;
 
     public function __construct(
         PlayerRepository $playerRepository,
-        TeamInvitationRepository $invitationRepository
+        TeamInvitationRepository $invitationRepository,
+        PlayerRecommendationService $playerRecommendationService
     ) {
         $this->playerRepository = $playerRepository;
         $this->invitationRepository = $invitationRepository;
+        $this->playerRecommendationService = $playerRecommendationService;
     }
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(TeamRepository $teamRepository, Request $request): Response
@@ -119,6 +123,32 @@ class TeamController extends AbstractController
             'availableLevels' => $availableLevels,
         ]);
     }
+
+    #[Route('/my-teams', name: 'my_teams', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function myTeams(TeamRepository $teamRepository): Response
+    {
+        $user = $this->getUser();
+        
+        // Ensure user is a Player
+        if (!$user instanceof Player) {
+            $this->addFlash('error', 'You must be a player to view this page.');
+            return $this->redirectToRoute('home');
+        }
+
+        // Get only teams that the current player belongs to
+        $teams = $user->getTeams()->toArray();
+
+        // Sort teams by name
+        usort($teams, function($a, $b) {
+            return strcmp($a->getName(), $b->getName());
+        });
+
+        return $this->render('team/my_teams.html.twig', [
+            'teams' => $teams,
+            'totalTeams' => count($teams),
+        ]);
+    }
     
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
@@ -147,24 +177,18 @@ class TeamController extends AbstractController
                         $team->addPlayer($creator);
                     }
 
-                    // Add selected players to team
-                    $selectedPlayerIds = $request->request->all()['team_players'] ?? [];
-                    if (!empty($selectedPlayerIds)) {
-                        foreach ($selectedPlayerIds as $playerId) {
-                            $player = $this->playerRepository->find((int)$playerId);
-                            if ($player) {
-                                $team->addPlayer($player);
-                            }
-                        }
-                    }
-
                     // Set team status and save
                     $team->setStatut('en attente');
                     $em->persist($team);
                     $em->flush();
 
                     $this->addFlash('success', '✅ Team created successfully! Your team is pending admin approval.');
-                    return $this->redirectToRoute('team_index');
+
+                    return $this->redirectToRoute('team_show', [
+                        'id' => $team->getId(),
+                        'reco_mode' => 'choose',
+                        'post_create' => 1,
+                    ]);
 
                 } catch (\Exception $e) {
                     $errorMsg = 'Error creating team: ' . $e->getMessage();
@@ -195,7 +219,7 @@ class TeamController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(int $id, TeamRepository $teamRepository): Response
+    public function show(Request $request, int $id, TeamRepository $teamRepository): Response
     {
         $team = $teamRepository->find($id);
 
@@ -221,6 +245,12 @@ class TeamController extends AbstractController
 
         $availablePlayers = [];
         $pendingInvitations = [];
+        $aiRecommendations = [];
+        $perfectTeamPlan = null;
+        $recoMode = (string) $request->query->get('reco_mode', 'choose');
+        if (!in_array($recoMode, ['choose', 'manual', 'auto'], true)) {
+            $recoMode = 'choose';
+        }
         
         // Get available players for invitation (only if team is approved and user is a team member who is a manager)
         if ($team->getStatut() === 'approuvé' && $this->isGranted('ROLE_MANAGER')) {
@@ -236,10 +266,23 @@ class TeamController extends AbstractController
             }
         }
 
+        $isManagerMember = $this->isGranted('ROLE_MANAGER') && $currentPlayer && $team->getPlayers()->contains($currentPlayer);
+
+        if ($isManagerMember) {
+            if ($recoMode === 'manual') {
+                $aiRecommendations = $this->playerRecommendationService->recommendForTeam($team, 5);
+            } elseif ($recoMode === 'auto') {
+                $perfectTeamPlan = $this->playerRecommendationService->recommendPerfectTeamPlan($team, 5);
+            }
+        }
+
         return $this->render('team/show.html.twig', [
             'team' => $team,
             'available_players' => $availablePlayers,
             'pending_invitations' => $pendingInvitations,
+            'ai_recommendations' => $aiRecommendations,
+            'perfect_team_plan' => $perfectTeamPlan,
+            'reco_mode' => $recoMode,
         ]);
     }
 
@@ -248,6 +291,10 @@ class TeamController extends AbstractController
     {
         $teamId = $request->request->get('team_id');
         $playerId = $request->request->get('player_id');
+        $recoMode = (string) $request->request->get('reco_mode', 'manual');
+        if (!in_array($recoMode, ['choose', 'manual', 'auto'], true)) {
+            $recoMode = 'manual';
+        }
 
         $team = $em->getRepository(Team::class)->find($teamId);
         $player = $em->getRepository(Player::class)->find($playerId);
@@ -287,7 +334,12 @@ class TeamController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', '✅ Invitation sent to ' . $player->getNickname() . '!');
-        return $this->redirectToRoute('team_show', ['id' => $teamId]);
+        return $this->redirectToRoute('team_show', [
+            'id' => $teamId,
+            'reco_mode' => $recoMode,
+            'invite_success' => 1,
+            'invitee' => $player->getNickname(),
+        ]);
     }
 
     #[Route('/invitation/{id}/accept', name: 'invitation_accept', methods: ['POST'])]

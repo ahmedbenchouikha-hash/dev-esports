@@ -1,0 +1,43 @@
+{# Chart: Budget vs Dépenses #}
+<div class="chart-container" style="position: relative; height: 300px;">
+    <canvas id="budgetChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        const budget = {{ budget.montantAlloue|json_encode }};
+        const utilisé = {{ budget.montantUtilise|json_encode }};
+        const restant = {{ budget.getMontantRestant()|json_encode }};
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Utilisé', 'Restant'],
+                datasets: [{
+                    data: [utilisé, restant],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB'
+                    ],
+                    borderColor: ['#fff', '#fff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Budget: {{ budget.team.name }} ({{ budget.getPourcentageUtilisation() }}%)'
+                    }
+                }
+            }
+        });
+    });
+</script>

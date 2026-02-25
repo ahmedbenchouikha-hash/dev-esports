@@ -1,0 +1,76 @@
+{# Chart: Évolution des Dépenses (Mensuelle) #}
+<div class="chart-container" style="position: relative; width: 100%; height: 350px;">
+    {% set monthlyData = {} %}
+    {% for depense in depenses %}
+        {% if depense.dateCreation %}
+            {% set monthKey = depense.dateCreation|date("m/Y") %}
+            {% if monthlyData[monthKey] is not defined %}
+                {% set monthlyData = monthlyData|merge({(monthKey): 0}) %}
+            {% endif %}
+            {% set monthlyData = monthlyData|merge({(monthKey): monthlyData[monthKey] + (depense.montant ?? 0)}) %}
+        {% endif %}
+    {% endfor %}
+
+    {% if monthlyData|length > 0 %}
+        {% set labels = [] %}
+        {% set data = [] %}
+        {% for month, amount in monthlyData %}
+            {% set labels = labels|merge([month]) %}
+            {% set data = data|merge([amount]) %}
+        {% endfor %}
+        <canvas id="depensesEvolutionChart" style="max-height: 350px;"></canvas>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const canvasElement = document.getElementById('depensesEvolutionChart');
+                if (!canvasElement) return;
+                
+                const ctx = canvasElement.getContext('2d');
+                const labels = {{ labels|json_encode|raw }};
+                const data = {{ data|json_encode|raw }};
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Dépenses (€)',
+                            data: data,
+                            borderColor: '#25d366',
+                            backgroundColor: 'rgba(37, 211, 102, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#25d366',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Montant (€)'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    {% else %}
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #999;">
+            <p>Aucune donnée disponible</p>
+        </div>
+    {% endif %}
+</div>

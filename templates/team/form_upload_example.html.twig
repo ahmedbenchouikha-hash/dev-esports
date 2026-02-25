@@ -1,0 +1,131 @@
+{# Exemple: Form pour Upload de Logo Équipe avec VichUploader #}
+{# À intégrer dans templates/team/form.html.twig ou similar #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% if edit %}Modifier Équipe{% else %}Créer Équipe{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{% if edit %}Modifier{% else %}Créer{% endif %} Équipe</h1>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    
+                    {{ form_row(form.name, {
+                        'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'équipe'}
+                    }) }}
+
+                    {{ form_row(form.country, {
+                        'attr': {'class': 'form-control'}
+                    }) }}
+
+                    {{ form_row(form.description, {
+                        'attr': {'class': 'form-control', 'rows': 3}
+                    }) }}
+
+                    {{ form_row(form.jeu, {
+                        'attr': {'class': 'form-select'}
+                    }) }}
+
+                    {{ form_row(form.niveau, {
+                        'attr': {'class': 'form-select'}
+                    }) }}
+
+                    {# 🎯 VICH UPLOADER - Upload Logo #}
+                    <div class="form-group mb-3">
+                        <label for="team_logoFile" class="form-label">
+                            <i class="fas fa-image"></i> Logo de l'équipe
+                        </label>
+                        
+                        {# Afficher le logo existant #}
+                        {% if team.logo %}
+                            <div class="mb-2">
+                                <img src="{{ asset('uploads/logos/teams/' ~ team.logo) }}" 
+                                     alt="Logo {{ team.name }}" 
+                                     class="img-thumbnail"
+                                     style="max-width: 150px;">
+                                <br>
+                                <small class="text-muted">Logo actuel</small>
+                            </div>
+                        {% endif %}
+                        
+                        {# Input d'upload Vich #}
+                        <input type="file" 
+                               id="team_logoFile" 
+                               class="form-control" 
+                               accept="image/png,image/jpeg,image/gif,image/webp"
+                               name="team[logoFile]">
+                        
+                        <small class="form-text text-muted">
+                            Formats acceptés: JPG, PNG, GIF, WebP (Max 5MB)
+                        </small>
+                    </div>
+
+                    {{ form_row(form.couleurEquipe, {
+                        'attr': {'class': 'form-control', 'type': 'color'}
+                    }) }}
+
+                    {{ form_row(form.statut, {
+                        'attr': {'class': 'form-select'}
+                    }) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Aperçu</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if team.logo %}
+                        <img src="{{ asset('uploads/logos/teams/' ~ team.logo) }}" 
+                             alt="Logo {{ team.name }}" 
+                             class="img-fluid mb-3"
+                             style="max-width: 100%; height: auto;">
+                    {% else %}
+                        <div class="bg-light p-4 rounded mb-3" style="min-height: 150px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                            <p class="text-muted mt-2">Aucun logo</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="badge" style="background-color: {{ team.couleurEquipe ?? '#999' }};">
+                        {{ team.couleurEquipe ?? '#999999' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Enregistrer
+            </button>
+            <a href="{{ path('team_list') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .img-thumbnail {
+        border: 1px solid #dee2e6;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}

@@ -9,22 +9,6 @@
     </div>
 </div>
 
-<!-- Flash Messages -->
-{% if app.session.flashbag.all %}
-    <div class="row mb-4">
-        <div class="col-md-12">
-            {% for type, messages in app.session.flashbag.all %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
-                        <strong>{{ type|upper }}:</strong> {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        </div>
-    </div>
-{% endif %}
-
 <!-- Form Errors -->
 {% if form.vars.errors|length > 0 %}
     <div class="row mb-4">
@@ -144,59 +128,6 @@
                         {% endif %}
                     {% endfor %}
 
-                    <!-- Players Selection Section -->
-                    {% if available_players is defined and available_players|length > 0 %}
-                        <hr>
-                        <h4>👥 Add Players to Team</h4>
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <p class="text-muted mb-3">Select players to add to your team (optional):</p>
-                                <div class="row">
-                                    {% for player in available_players %}
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card border p-3 player-card" style="cursor: pointer;">
-                                                <div class="d-flex align-items-center">
-                                                    <input type="checkbox" name="team_players[]" value="{{ player.id }}" class="me-3">
-                                                    <div>
-                                                        <strong>{{ player.nickname }}</strong>
-                                                        <br>
-                                                        <small class="text-muted">{{ player.firstName }} {{ player.lastName }}</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <style>
-                            .player-card {
-                                transition: all 0.3s ease;
-                            }
-                            .player-card:hover {
-                                background-color: rgba(13, 110, 253, 0.05);
-                                border-color: #0d6efd !important;
-                                transform: translateY(-2px);
-                                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-                            }
-                            .player-card.border-primary {
-                                border-color: #0d6efd !important;
-                                background-color: rgba(13, 110, 253, 0.1);
-                                font-weight: 500;
-                            }
-                            .player-card input[type="checkbox"] {
-                                cursor: pointer;
-                                width: 20px;
-                                height: 20px;
-                            }
-                        </style>
-                    {% else %}
-                        <div class="alert alert-info mt-3">
-                            <i class="fas fa-info-circle"></i> No players available to add.
-                        </div>
-                    {% endif %}
-
                     <!-- Submit Button Section -->
                     <hr>
                     <div class="alert alert-info">
@@ -217,7 +148,7 @@
 </div>
 
 <!-- Suggested Players Section (after team creation) -->
-{% if team_created and suggested_players|length > 0 %}
+{% if team_created|default(false) and suggested_players|default([])|length > 0 %}
 <div class="row mt-5">
     <div class="col-lg-10 mx-auto">
         <div class="card border-success shadow">
@@ -360,117 +291,12 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Form submitted!');
             console.log('Form method:', form.method);
             console.log('Form action:', form.action);
-            console.log('Selected players:', Array.from(form.querySelectorAll('input[name="team_players[]"]:checked')).map(el => el.value));
         });
     }
-    
-    // Make player cards clickable
-    const playerCards = document.querySelectorAll('.player-card');
-    playerCards.forEach(card => {
-        const checkbox = card.querySelector('input[type="checkbox"]');
-        if (checkbox) {
-            card.addEventListener('click', function(e) {
-                if (e.target !== checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                }
-            });
-            
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    card.classList.add('border-primary');
-                } else {
-                    card.classList.remove('border-primary');
-                }
-            });
-        }
-    });
 
     // Handle suggestion card invitations
-    const inviteButtons = document.querySelectorAll('.invite-player-btn');
-    inviteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const playerId = this.getAttribute('data-player-id');
-            const playerName = this.getAttribute('data-player-name');
-            const teamId = this.getAttribute('data-team-id');
-            const btn = this;
-
-            // Disable button during request
-            btn.disabled = true;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-            // Send invitation via AJAX
-            fetch(`{{ path('team_invite_from_suggestions', {'id': ''}) }}${teamId}/invite/${playerId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    '_token': '{{ csrf_token("invite_player") }}' // You may not need this for AJAX requests
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Success - update UI
-                    btn.classList.remove('btn-success');
-                    btn.classList.add('btn-success');
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Invitation Sent';
-                    
-                    // Show success message
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                    alertDiv.innerHTML = `
-                        <strong>✅ Success!</strong> ${data.message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    
-                    // Insert at top of suggestions section
-                    const suggestionsSection = document.querySelector('.card-header.bg-success');
-                    if (suggestionsSection) {
-                        suggestionsSection.parentElement.insertBefore(alertDiv, suggestionsSection.parentElement.firstChild);
-                    }
-                } else {
-                    // Error
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                    
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-warning alert-dismissible fade show';
-                    alertDiv.innerHTML = `
-                        <strong>⚠️ Info:</strong> ${data.error}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    
-                    const suggestionsSection = document.querySelector('.card-header.bg-success');
-                    if (suggestionsSection) {
-                        suggestionsSection.parentElement.insertBefore(alertDiv, suggestionsSection.parentElement.firstChild);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-                
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    <strong>❌ Error:</strong> An error occurred while sending the invitation.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                
-                const suggestionsSection = document.querySelector('.card-header.bg-success');
-                if (suggestionsSection) {
-                    suggestionsSection.parentElement.insertBefore(alertDiv, suggestionsSection.parentElement.firstChild);
-                }
-            });
-        });
-    });
+    // TODO: Implement route 'team_invite_from_suggestions' and create corresponding controller method
+    // Feature is currently disabled - awaiting backend implementation
 });
 </script>
 {% endblock %}
