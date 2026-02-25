@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Budget Tracking - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">📊 Budget Tracking</h1>
+            <a href="{{ path('budget_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Overall Statistics -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Allocated</h6>
+                <h3>{{ totalAlloue|number_format(2, ',', ' ') }}€</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Used</h6>
+                <h3>{{ totalUtilise|number_format(2, ',', ' ') }}€</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts Section -->
+{% if alertes %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">⚠️ Active Alerts ({{ alertes|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% for alerte in alertes %}
+                        <div class="alert {% if alerte.type == 'depassement' %}alert-danger{% else %}alert-warning{% endif %} mb-2">
+                            <strong>{{ alerte.team }}</strong>
+                            {% if alerte.type == 'depassement' %}
+                                - Budget exceeded by {{ alerte.montant_depasse|number_format(2, ',', ' ') }}€ ({{ alerte.pourcentage }}%)
+                            {% else %}
+                                - Usage at {{ alerte.pourcentage|round(1) }}%
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Budget Details Table -->
+<div class="row">
+    <div class="col-md-12">
+        {% if data is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No active budgets found.
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Team</th>
+                            <th>Allocated</th>
+                            <th>Used</th>
+                            <th>Remaining</th>
+                            <th>Usage Progress</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in data %}
+                            <tr {% if item.depassement %}class="table-danger"{% endif %}>
+                                <td>
+                                    <strong>
+                                        <a href="{{ path('budget_show', {id: item.budget.id}) }}">
+                                            {{ item.budget.team.name }}
+                                        </a>
+                                    </strong>
+                                </td>
+                                <td>{{ item.budget.montantAlloue|number_format(2, ',', ' ') }}€</td>
+                                <td>{{ item.budget.montantUtilise|number_format(2, ',', ' ') }}€</td>
+                                <td>
+                                    {% if item.restant >= 0 %}
+                                        <span class="text-success">{{ item.restant|number_format(2, ',', ' ') }}€</span>
+                                    {% else %}
+                                        <span class="text-danger">{{ item.restant|number_format(2, ',', ' ') }}€</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar {% if item.pourcentage > 100 %}bg-danger{% elseif item.pourcentage > 80 %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {% if item.pourcentage > 100 %}100{% else %}{{ item.pourcentage|round(1) }}{% endif %}%" aria-valuenow="{{ item.pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ item.pourcentage|round(1) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if item.depassement %}
+                                        <span class="badge bg-danger">Exceeded</span>
+                                    {% elseif item.pourcentage > 80 %}
+                                        <span class="badge bg-warning">High Usage</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Healthy</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

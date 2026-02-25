@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Join {{ tournament.name }} - Tournament Registration{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('tournament_index') }}">Tournaments</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('tournament_show', {'id': tournament.id}) }}">{{ tournament.name }}</a></li>
+                    <li class="breadcrumb-item active">Join Tournament</li>
+                </ol>
+            </nav>
+
+            <h1 class="mb-4">
+                <i class="fas fa-clipboard-list"></i> Join Tournament
+            </h1>
+
+            {# Display flash messages #}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Tournament Info Card -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">{{ tournament.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-map-marker-alt"></i> Location:</strong> {{ tournament.location }}
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="fas fa-calendar"></i> Duration:</strong> 
+                                {{ tournament.startDate|date('M d, Y') }} - {{ tournament.endDate|date('M d, Y') }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if tournament.prizePool %}
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-coins"></i> Prize Pool:</strong> 
+                                    <span class="badge bg-success">${{ tournament.prizePool|number_format(2) }}</span>
+                                </p>
+                            {% endif %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-info-circle"></i> Status:</strong> 
+                                <span class="badge bg-warning">{{ tournament.status }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if tournament.description %}
+                        <div class="mt-3">
+                            <p><strong>Description:</strong></p>
+                            <p>{{ tournament.description }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if tournament.rules %}
+                        <div class="mt-3">
+                            <p><strong><i class="fas fa-list-ul"></i> Rules:</strong></p>
+                            <ul class="small">
+                                {% for rule in tournament.rules %}
+                                    <li>{{ rule }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Team Info Card -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Your Team Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-users"></i> Team Name:</strong> {{ team.name }}
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="fas fa-flag"></i> Country:</strong> {{ team.country }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-star"></i> Level:</strong> 
+                                <span class="badge bg-secondary">{{ team.niveau }}</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong><i class="fas fa-gamepad"></i> Game:</strong> 
+                                <span class="badge bg-secondary">{{ team.jeu }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Form Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Registration Form</h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {
+                        'action': path('tournament_join_submit', {'id': tournament.id}),
+                        'method': 'POST',
+                        'attr': {'novalidate': 'novalidate'}
+                    }) }}
+
+                    <div class="mb-3">
+                        {{ form_label(form.teamName, 'Team Name', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.teamName, {'attr': {'class': 'form-control', 'placeholder': 'Enter your team name'}}) }}
+                        <div class="text-danger">
+                            {{ form_errors(form.teamName) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.contactEmail, 'Contact Email', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.contactEmail, {'attr': {'class': 'form-control', 'placeholder': 'Enter contact email'}}) }}
+                        <div class="text-danger">
+                            {{ form_errors(form.contactEmail) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.contactPhone, 'Contact Phone', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.contactPhone, {'attr': {'class': 'form-control', 'placeholder': 'Enter contact phone number (optional)'}}) }}
+                        <div class="text-danger">
+                            {{ form_errors(form.contactPhone) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.additionalInfo, 'Additional Information', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.additionalInfo, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Any additional information about your team...'}}) }}
+                        <div class="text-danger">
+                            {{ form_errors(form.additionalInfo) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form_widget(form.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(form.agreeTerms, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
+                        <div class="text-danger">
+                            {{ form_errors(form.agreeTerms) }}
+                        </div>
+                    </div>
+
+                    {{ form_rest(form) }}
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check-circle"></i> Submit Registration
+                        </button>
+                        <a href="{{ path('tournament_show', {'id': tournament.id}) }}" class="btn btn-secondary">
+                            <i class="fas fa-times-circle"></i> Cancel
+                        </a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle"></i>
+                <strong>What happens next?</strong>
+                After you submit the registration, the admin will review your application and approve or reject it.
+                You will receive a notification when the admin makes a decision.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

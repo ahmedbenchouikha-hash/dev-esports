@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Expense History - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">📋 Expense History</h1>
+            <a href="{{ path('depense_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Expenses
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- History List -->
+<div class="row">
+    <div class="col-md-12">
+        {% if depenses is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No expense history found.
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Title</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                            <th>Team</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for depense in depenses %}
+                            <tr>
+                                <td><strong>{{ depense.titre }}</strong></td>
+                                <td>{{ depense.montant|number_format(2, ',', ' ') }}€</td>
+                                <td>
+                                    {% if depense.categorie == 'materiel' %}
+                                        <span class="badge bg-info">Material</span>
+                                    {% elseif depense.categorie == 'transport' %}
+                                        <span class="badge bg-primary">Transport</span>
+                                    {% elseif depense.categorie == 'logistique' %}
+                                        <span class="badge bg-secondary">Logistics</span>
+                                    {% elseif depense.categorie == 'nourriture' %}
+                                        <span class="badge bg-success">Food</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Other</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if depense.team %}
+                                        <a href="{{ path('team_show', {id: depense.team.id}) }}">{{ depense.team.name }}</a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if depense.statut == 'validée' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elseif depense.statut == 'refusée' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ depense.dateCreation|date('d/m/Y H:i') }}</small></td>
+                                <td>
+                                    <a href="{{ path('depense_show', {id: depense.id}) }}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

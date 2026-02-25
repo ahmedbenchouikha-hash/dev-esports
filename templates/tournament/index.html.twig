@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournaments - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="page-title">Tournaments</h1>
+        <a href="{{ path('rawg_games') }}" class="btn btn-secondary mt-2">
+            <i class="fas fa-gamepad"></i> Search RAWG Games
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <input type="text" name="search" class="form-control" placeholder="Search by tournament name..." value="{{ search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="ongoing" {% if status == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                            <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="mb-3">Tournament Status Chart</h5>
+                <div style="max-width: 420px; height: 280px; margin: 0 auto;">
+                    <canvas id="tournamentStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tournaments List -->
+<div class="row">
+    {% if tournaments is empty %}
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                No tournaments found. <a href="{{ path('tournament_index') }}">Clear filters</a>
+            </div>
+        </div>
+    {% else %}
+        {% for tournament in tournaments %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title">{{ tournament.name }}</h5>
+                            <span class="badge {% if tournament.status == 'completed' %}badge-success{% elseif tournament.status == 'ongoing' %}badge-danger{% elseif tournament.status == 'pending' %}badge-warning{% else %}badge-secondary{% endif %}">
+                                {{ tournament.status|capitalize }}
+                            </span>
+                        </div>
+
+                        {% if tournament.description %}
+                            <p class="card-text" style="font-size: 0.9rem;">{{ tournament.description|slice(0, 100) }}{% if tournament.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                {{ tournament.startDate|date('d M Y') }} to {{ tournament.endDate|date('d M Y') }}<br>
+                                {{ tournament.location ?? 'TBD' }}<br>
+                                {% if tournament.prizePool %}${{ tournament.prizePool|number_format(0) }}{% else %}Prize TBD{% endif %}<br>
+                                {{ tournament.games|length }} Matches
+                            </small>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            {% if tournament.status == 'pending' and is_granted('ROLE_PLAYER') %}
+                                <a href="{{ path('tournament_join_form', { id: tournament.id }) }}" class="btn btn-success btn-sm flex-grow-1">
+                                    <strong>JOIN NOW</strong>
+                                </a>
+                                <a href="{{ path('tournament_show', { id: tournament.id }) }}" class="btn btn-outline-primary btn-sm flex-grow-1">View</a>
+                            {% else %}
+                                <a href="{{ path('tournament_show', { id: tournament.id }) }}" class="btn btn-primary btn-sm w-100">View Tournament</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+{% if tournaments is not empty %}
+    <div class="mt-2 mb-4 d-flex justify-content-center">
+        {{ knp_pagination_render(tournaments, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+    </div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const canvas = document.getElementById('tournamentStatusChart');
+    if (!canvas || typeof Chart === 'undefined') {
+        return;
+    }
+
+    const labels = {{ chart_labels|json_encode|raw }};
+    const data = {{ chart_data|json_encode|raw }};
+
+    new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Tournaments',
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 193, 7, 0.6)',
+                    'rgba(220, 53, 69, 0.6)',
+                    'rgba(25, 135, 84, 0.6)',
+                    'rgba(108, 117, 125, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(220, 53, 69, 1)',
+                    'rgba(25, 135, 84, 1)',
+                    'rgba(108, 117, 125, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

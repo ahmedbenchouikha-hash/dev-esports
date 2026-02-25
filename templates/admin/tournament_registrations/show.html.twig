@@ -1,0 +1,404 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Review Registration #{{ registration.id }} - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_tournament_registration_list') }}">Registrations</a></li>
+                    <li class="breadcrumb-item active">Registration #{{ registration.id }}</li>
+                </ol>
+            </nav>
+
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-clipboard-check"></i> Review Registration #{{ registration.id }}
+                </h1>
+                <span class="badge fs-6 p-2 
+                    {% if registration.status == 'pending' %}bg-warning
+                    {% elseif registration.status == 'approved' %}bg-success
+                    {% else %}bg-danger{% endif %}">
+                    {% if registration.status == 'pending' %}
+                        <i class="fas fa-clock"></i> Pending Review
+                    {% elseif registration.status == 'approved' %}
+                        <i class="fas fa-check"></i> Approved
+                    {% else %}
+                        <i class="fas fa-times"></i> Rejected
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-robot"></i> Gemini AI Recommendation
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="aiReviewBtn">
+                        Analyze With Gemini
+                    </button>
+                </div>
+                <div class="card-body" id="aiReviewResult">
+                    <p class="mb-0 text-muted">Click "Analyze With Gemini" to get recommendation for this registration.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Tournament Info -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-trophy"></i> Tournament Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 40%;">Tournament Name:</th>
+                                    <td>
+                                        <a href="{{ path('tournament_show', {'id': registration.tournament.id}) }}" target="_blank">
+                                            {{ registration.tournament.name }} <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Location:</th>
+                                    <td>{{ registration.tournament.location }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Duration:</th>
+                                    <td>
+                                        {{ registration.tournament.startDate|date('M d, Y H:i') }} - 
+                                        {{ registration.tournament.endDate|date('M d, Y H:i') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Prize Pool:</th>
+                                    <td>
+                                        {% if registration.tournament.prizePool %}
+                                            <span class="badge bg-success">${{ registration.tournament.prizePool|number_format(2) }}</span>
+                                        {% else %}
+                                            <em>None</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tournament Status:</th>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ registration.tournament.status }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Team Info -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-users"></i> Team Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 40%;">Team Name:</th>
+                                    <td>
+                                        <strong>{{ registration.team.name }}</strong>
+                                        <br><small class="text-muted">Registered as: {{ registration.teamName }}</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Country:</th>
+                                    <td>{{ registration.team.country }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Level:</th>
+                                    <td><span class="badge bg-secondary">{{ registration.team.niveau }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Game:</th>
+                                    <td><span class="badge bg-secondary">{{ registration.team.jeu }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Team Status:</th>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ registration.team.statut }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- Registration Details -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-file-alt"></i> Registration Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 40%;">Submitted By:</th>
+                                    <td>
+                                        <strong>{{ registration.player.nickname }}</strong><br>
+                                        <small class="text-muted">{{ registration.player.email }}</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Submitted On:</th>
+                                    <td>{{ registration.createdAt|date('M d, Y H:i') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Email:</th>
+                                    <td>
+                                        <a href="mailto:{{ registration.contactEmail }}">{{ registration.contactEmail }}</a>
+                                    </td>
+                                </tr>
+                                {% if registration.contactPhone %}
+                                    <tr>
+                                        <th>Contact Phone:</th>
+                                        <td>
+                                            <a href="tel:{{ registration.contactPhone }}">{{ registration.contactPhone }}</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+
+                            {% if registration.additionalInfo %}
+                                <div class="mt-3">
+                                    <p><strong>Additional Information:</strong></p>
+                                    <div class="alert alert-light p-3 border">
+                                        {{ registration.additionalInfo|nl2br }}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if registration.reviewedAt %}
+                                <hr>
+                                <p class="mb-1"><strong>Review Information:</strong></p>
+                                <p class="mb-0 text-muted small">
+                                    Reviewed on: {{ registration.reviewedAt|date('M d, Y H:i') }}<br>
+                                    Reviewed by: {{ registration.reviewedBy.nickname ?? registration.reviewedBy.email ?? 'Unknown' }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Admin Notes (if any) -->
+                    {% if registration.adminNotes %}
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-sticky-note"></i> Admin Notes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-light p-3 border">
+                                    {{ registration.adminNotes|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Admin Actions (only for pending) -->
+            {% if registration.status == 'pending' %}
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-check-circle"></i> Approve Registration
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ path('admin_tournament_registration_approve', {'id': registration.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ registration.id) }}">
+                                    
+                                    <div class="mb-3">
+                                        <label for="admin_notes" class="form-label fw-bold">Admin Notes (Optional)</label>
+                                        <textarea name="admin_notes" id="admin_notes" class="form-control" rows="3" 
+                                                  placeholder="Add notes about this approval..."></textarea>
+                                    </div>
+                                    
+                                    <button
+                                        type="submit"
+                                        class="btn btn-success w-100 js-confirm-submit"
+                                        data-confirm-title="Approve registration"
+                                        data-confirm-message="Are you sure you want to approve this registration?"
+                                    >
+                                        <i class="fas fa-check-circle"></i> Approve Registration
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-times-circle"></i> Reject Registration
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ path('admin_tournament_registration_reject', {'id': registration.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ registration.id) }}">
+                                    
+                                    <div class="mb-3">
+                                        <label for="rejection_reason" class="form-label fw-bold">Rejection Reason *</label>
+                                        <textarea name="rejection_reason" id="rejection_reason" class="form-control" rows="3" 
+                                                  placeholder="Explain why you're rejecting this registration..." required></textarea>
+                                        <div class="form-text text-danger">This reason will be shown to the team.</div>
+                                    </div>
+                                    
+                                    <button
+                                        type="submit"
+                                        class="btn btn-danger w-100 js-confirm-submit"
+                                        data-confirm-title="Reject registration"
+                                        data-confirm-message="Are you sure you want to reject this registration?"
+                                    >
+                                        <i class="fas fa-times-circle"></i> Reject Registration
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('admin_tournament_registration_list') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+
+            <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmActionTitle">Please Confirm</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="confirmActionMessage">
+                            Are you sure you want to continue?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="confirmActionSubmit">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const aiReviewBtn = document.getElementById('aiReviewBtn');
+    const aiReviewResult = document.getElementById('aiReviewResult');
+
+    if (aiReviewBtn && aiReviewResult) {
+        aiReviewBtn.addEventListener('click', async function () {
+            aiReviewBtn.disabled = true;
+            aiReviewBtn.textContent = 'Analyzing...';
+            aiReviewResult.innerHTML = '<p class="mb-0 text-muted">Processing AI recommendation...</p>';
+
+            try {
+                const response = await fetch('{{ path('admin_tournament_registration_ai_review', {'id': registration.id}) }}', {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const raw = await response.text();
+                let data = null;
+                try {
+                    data = JSON.parse(raw);
+                } catch (parseError) {
+                    throw new Error('Server returned non-JSON response. Check Gemini config and Symfony logs.');
+                }
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Unable to get AI recommendation.');
+                }
+
+                const decisionClass = data.decision === 'ACCEPTABLE'
+                    ? 'alert-success'
+                    : (data.decision === 'NOT_ACCEPTABLE' ? 'alert-danger' : 'alert-warning');
+
+                aiReviewResult.innerHTML = `
+                    <div class="alert ${decisionClass} mb-2">
+                        <strong>Decision:</strong> ${data.decision}<br>
+                        <strong>Score:</strong> ${data.score}/100<br>
+                        <strong>Source:</strong> ${data.source}
+                    </div>
+                    <div class="p-3 border rounded bg-light text-dark">
+                        <strong>Reason:</strong><br>${data.reason}
+                    </div>
+                `;
+            } catch (error) {
+                aiReviewResult.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+            } finally {
+                aiReviewBtn.disabled = false;
+                aiReviewBtn.textContent = 'Analyze With Gemini';
+            }
+        });
+    }
+
+    const modalElement = document.getElementById('confirmActionModal');
+    if (!modalElement || typeof bootstrap === 'undefined') {
+        return;
+    }
+
+    const modal = new bootstrap.Modal(modalElement);
+    const titleElement = document.getElementById('confirmActionTitle');
+    const messageElement = document.getElementById('confirmActionMessage');
+    const confirmButton = document.getElementById('confirmActionSubmit');
+    let pendingForm = null;
+
+    document.querySelectorAll('.js-confirm-submit').forEach((button) => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            pendingForm = button.closest('form');
+            if (!pendingForm) {
+                return;
+            }
+
+            titleElement.textContent = button.getAttribute('data-confirm-title') || 'Please Confirm';
+            messageElement.textContent = button.getAttribute('data-confirm-message') || 'Are you sure you want to continue?';
+            modal.show();
+        });
+    });
+
+    confirmButton.addEventListener('click', function () {
+        if (!pendingForm) {
+            return;
+        }
+
+        modal.hide();
+        pendingForm.submit();
+        pendingForm = null;
+    });
+});
+</script>
+{% endblock %}

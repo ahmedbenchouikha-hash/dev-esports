@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ recompense.recompense }} - Détails{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0">{{ recompense.recompense }}</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>ID</h5>
+                            <p>{{ recompense.id }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Type</h5>
+                            <p>{{ recompense.type }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Classement</h5>
+                            <p><span class="badge bg-info" style="font-size: 1.1rem;">{{ recompense.classement }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Nombre de demandes</h5>
+                            <p><span class="badge bg-secondary" style="font-size: 1.1rem;">{{ recompense.demandes|length }}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5>Description</h5>
+                        <p>{{ recompense.description ?? 'Aucune description' }}</p>
+                    </div>
+
+                    {% if recompense.demandes|length > 0 %}
+                        <div class="mb-3">
+                            <h5>Demandes associées</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Demandeur</th>
+                                            <th>Email</th>
+                                            <th>Date</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for demande in recompense.demandes %}
+                                            <tr>
+                                                <td>{{ demande.nomDemandeur }}</td>
+                                                <td>{{ demande.email }}</td>
+                                                <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
+                                                <td>
+                                                    <span class="badge bg-{% if demande.statut == 'acceptee' %}success{% elseif demande.statut == 'rejetee' %}danger{% else %}warning{% endif %}">
+                                                        {{ demande.statut }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('recompense_edit', {'id': recompense.id}) }}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a href="{{ path('demande_new', {'id': recompense.id}) }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Nouvelle demande
+                        </a>
+                        <a href="{{ path('recompense_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ tournament.name }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('tournament_index') }}">Tournaments</a></li>
+            <li class="breadcrumb-item active">{{ tournament.name }}</li>
+        </ol>
+    </nav>
+
+    {# Display flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ tournament.name }}</h1>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Tournament Details</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ tournament.description }}</p>
+
+                    <table class="table table-hover">
+                        <tr>
+                            <th style="width: 150px;">Game</th>
+                            <td>{{ tournament.game ?? 'Not specified' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Start Date</th>
+                            <td>{{ tournament.startDate|date('F j, Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <th>End Date</th>
+                            <td>{{ tournament.endDate|date('F j, Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ tournament.location }}</td>
+                        </tr>
+                        <tr>
+                            <th>Prize Pool</th>
+                            <td><span class="text-success fw-bold">${{ tournament.prizePool|number_format(0, '.', ',') }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                {% set status_color = {
+                                    'pending': 'warning',
+                                    'published': 'success',
+                                    'ongoing': 'primary',
+                                    'completed': 'secondary',
+                                    'cancelled': 'danger'
+                                } %}
+                                <span class="badge bg-{{ status_color[tournament.status] ?? 'secondary' }}">
+                                    {{ tournament.status|capitalize }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            {% if tournament.rules %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tournament Rules</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            {% for rule in tournament.rules %}
+                                <li class="mb-2">{{ rule }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card tournament-actions-sticky">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if tournament.status == 'pending' %}
+                        {% if is_granted('ROLE_USER') %}
+                            <a href="{{ path('tournament_join_form', {'id': tournament.id}) }}" class="btn btn-success btn-lg w-100 mb-2">
+                                <i class="fas fa-plus-circle"></i> Join Tournament
+                            </a>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg w-100 mb-2">
+                                <i class="fas fa-sign-in-alt"></i> Login to Join
+                            </a>
+                        {% endif %}
+                    {% endif %}
+
+                    <a href="{{ path('tournament_index') }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

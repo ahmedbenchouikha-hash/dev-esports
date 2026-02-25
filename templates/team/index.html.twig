@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Teams - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="page-title">🏆 Teams</h1>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" name="search" class="form-control" placeholder="Search by team name or country..." value="{{ search }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Teams List -->
+<div class="row">
+    {% if teams is empty %}
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                No teams found. <a href="{{ path('team_index') }}">Clear filters</a>
+            </div>
+        </div>
+    {% else %}
+        {% for team in teams %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ team.name }}</h5>
+                        
+                        {% if team.country %}
+                            <p class="text-muted"><small>📍 {{ team.country }}</small></p>
+                        {% endif %}
+                        
+                        {% if team.description %}
+                            <p class="card-text" style="font-size: 0.9rem;">{{ team.description|slice(0, 100) }}{% if team.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                👥 {{ team.players|length }} Players<br>
+                                🎮 {{ (team.gamesAsTeam1|length) + (team.gamesAsTeam2|length) }} Matches
+                            </small>
+                        </div>
+                        
+                        <a href="{{ path('team_show', { id: team.id }) }}" class="btn btn-primary w-100 btn-sm">View Team</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

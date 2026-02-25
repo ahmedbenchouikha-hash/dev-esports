@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Récompenses - Gestion des Récompenses{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1>Gestion des Récompenses</h1>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ path('recompense_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Ajouter une récompense
+            </a>
+            <a href="{{ path('recompense_export_pdf') }}" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Exporter en PDF
+            </a>
+        </div>
+    </div>
+
+    {% if app.flashes %}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Search and Sort -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Rechercher par nom, type ou description..."
+                           value="{{ search ?? '' }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="sort" class="form-select">
+                        <option value="">Trier par...</option>
+                        <option value="classement_asc" {% if sort == 'classement_asc' %}selected{% endif %}>
+                            Classement (croissant)
+                        </option>
+                        <option value="classement_desc" {% if sort == 'classement_desc' %}selected{% endif %}>
+                            Classement (décroissant)
+                        </option>
+                        <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>
+                            Nom (A-Z)
+                        </option>
+                        <option value="name_desc" {% if sort == 'name_desc' %}selected{% endif %}>
+                            Nom (Z-A)
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-search"></i> Chercher
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    {% if recompenses|length > 0 %}
+        <div class="alert alert-info">
+            <strong>Statistiques:</strong> {{ recompenses|length }} récompense(s) 
+            | Classement min: {{ minClassement }} | Classement max: {{ maxClassement }}
+        </div>
+    {% endif %}
+
+    <!-- Recompenses Table -->
+    {% if recompenses|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Classement</th>
+                        <th>Description</th>
+                        <th>Demandes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recompense in recompenses %}
+                        <tr>
+                            <td>{{ recompense.id }}</td>
+                            <td><strong>{{ recompense.recompense }}</strong></td>
+                            <td>{{ recompense.type }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ recompense.classement }}</span>
+                            </td>
+                            <td>{{ recompense.description ? (recompense.description|slice(0, 50) ~ (recompense.description|length > 50 ? '...' : '')) : '-' }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ recompense.demandes|length }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ path('recompense_show', {'id': recompense.id}) }}" 
+                                   class="btn btn-sm btn-info" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('recompense_edit', {'id': recompense.id}) }}" 
+                                   class="btn btn-sm btn-warning" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ path('demande_new', {'id': recompense.id}) }}" 
+                                   class="btn btn-sm btn-success" title="Demander">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                                <form method="post" action="{{ path('recompense_delete', {'id': recompense.id}) }}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('Êtes-vous sûr?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ recompense.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Aucune récompense trouvée.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

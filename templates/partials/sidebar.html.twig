@@ -1,0 +1,313 @@
+<!-- Sidebar Toggle Button -->
+<button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar-nav">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <a href="{{ path('home') }}" class="brand-link">
+            <span class="brand-icon"><i class="fas fa-gamepad"></i></span>
+            <span class="brand-text">Dev Esports</span>
+        </a>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-menu">
+        <!-- Admin Section Header -->
+        <div class="menu-section-title">ADMINISTRATION</div>
+
+        <!-- Dashboard -->
+        <a href="{{ path('admin_dashboard') }}" class="menu-item {% if 'admin_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-chart-line menu-icon"></i>
+            <span class="menu-label">Dashboard</span>
+        </a>
+
+        <!-- Matches -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#matchesMenu">
+                <i class="fas fa-trophy menu-icon"></i>
+                <span class="menu-label">Matches</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="matchesMenu" class="collapse {% if 'admin_match' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('admin_match_index') }}" class="menu-subitem {% if 'admin_match_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Matches
+                </a>
+                <a href="{{ path('admin_match_create') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Match
+                </a>
+            </div>
+        </div>
+
+        <!-- Tournaments -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#tournamentsMenu">
+                <i class="fas fa-crown menu-icon"></i>
+                <span class="menu-label">Tournaments</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="tournamentsMenu" class="collapse {% if 'admin_tournament' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('admin_tournament_index') }}" class="menu-subitem {% if 'admin_tournament_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Tournaments
+                </a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_tournament_registration_list') }}" class="menu-subitem {% if 'admin_tournament_registration' in app.request.attributes.get('_route') %}active{% endif %}">
+                        <i class="fas fa-clipboard-list"></i> Registrations
+                    </a>
+                {% endif %}
+                <a href="{{ path('admin_tournament_create') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Tournament
+                </a>
+            </div>
+        </div>
+
+        <!-- Teams -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#teamsMenu">
+                <i class="fas fa-users menu-icon"></i>
+                <span class="menu-label">Teams</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="teamsMenu" class="collapse {% if 'admin_team' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('admin_team_index') }}" class="menu-subitem {% if 'admin_team_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Teams
+                </a>
+                <a href="{{ path('admin_team_create') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Team
+                </a>
+            </div>
+        </div>
+
+        <!-- Players -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#playersMenu">
+                <i class="fas fa-star menu-icon"></i>
+                <span class="menu-label">Players</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="playersMenu" class="collapse {% if 'admin_player' in app.request.attributes.get('_route') %}show{% endif %}">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_players_list') }}" class="menu-subitem {% if 'admin_players_list' in app.request.attributes.get('_route') %}active{% endif %}">
+                        <i class="fas fa-user-check"></i> User Approvals
+                    </a>
+                {% endif %}
+                <a href="{{ path('admin_player_index') }}" class="menu-subitem {% if 'admin_player_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Players
+                </a>
+                <a href="{{ path('admin_player_create') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Player
+                </a>
+            </div>
+        </div>
+
+        <!-- Recompenses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#recompenseMenu">
+                <i class="fas fa-gift menu-icon"></i>
+                <span class="menu-label">Recompenses</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="recompenseMenu" class="collapse {% if 'recompense' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Recompenses
+                </a>
+                <a href="{{ path('recompense_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Recompense
+                </a>
+                <a href="{{ path('recompense_export_pdf') }}" class="menu-subitem">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
+            </div>
+        </div>
+
+        <!-- Depenses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#depenseMenu">
+                <i class="fas fa-receipt menu-icon"></i>
+                <span class="menu-label">Expenses</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="depenseMenu" class="collapse {% if 'depense' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('depense_index') }}" class="menu-subitem {% if 'depense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Expenses
+                </a>
+                <a href="{{ path('depense_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Expense
+                </a>
+                <a href="{{ path('depense_historique') }}" class="menu-subitem">
+                    <i class="fas fa-history"></i> History
+                </a>
+                <a href="{{ path('depense_pending') }}" class="menu-subitem">
+                    <i class="fas fa-hourglass-half"></i> Pending
+                </a>
+            </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#budgetMenu">
+                <i class="fas fa-wallet menu-icon"></i>
+                <span class="menu-label">Budget</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="budgetMenu" class="collapse {% if 'budget' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('budget_index') }}" class="menu-subitem {% if 'budget_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Budgets
+                </a>
+                <a href="{{ path('budget_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Budget
+                </a>
+                <a href="{{ path('budget_tracking') }}" class="menu-subitem">
+                    <i class="fas fa-chart-pie"></i> Tracking
+                </a>
+                <a href="{{ path('budget_alerte') }}" class="menu-subitem">
+                    <i class="fas fa-bell"></i> Alerts
+                </a>
+                <a href="{{ path('budget_historique') }}" class="menu-subitem">
+                    <i class="fas fa-history"></i> History
+                </a>
+            </div>
+        </div>
+
+        <!-- Reclamations -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#reclamationMenu">
+                <i class="fas fa-exclamation-circle menu-icon"></i>
+                <span class="menu-label">Complaints</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="reclamationMenu" class="collapse {% if 'reclamation' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('app_reclamation_index') }}" class="menu-subitem {% if 'app_reclamation_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Complaints
+                </a>
+                <a href="{{ path('app_reclamation_new_player') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> New Complaint
+                </a>
+            </div>
+        </div>
+
+        <!-- Punitions -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#punitionMenu">
+                <i class="fas fa-ban menu-icon"></i>
+                <span class="menu-label">Sanctions</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="punitionMenu" class="collapse {% if 'punition' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('app_punition_index') }}" class="menu-subitem {% if 'app_punition_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Sanctions
+                </a>
+                <a href="{{ path('app_punition_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Sanction
+                </a>
+            </div>
+        </div>
+
+        <!-- Admin Responses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#adminResponseMenu">
+                <i class="fas fa-reply menu-icon"></i>
+                <span class="menu-label">Responses</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="adminResponseMenu" class="collapse {% if 'admin_response' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('app_admin_response_index') }}" class="menu-subitem {% if 'app_admin_response_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Responses
+                </a>
+                <a href="{{ path('app_admin_response_new') }}" class="menu-subitem">
+                    <i class="fas fa-plus"></i> Create Response
+                </a>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="menu-divider"></div>
+
+        <!-- Player Section -->
+        {% if is_granted('ROLE_USER') and app.user is not null %}
+            <div class="menu-section-title">PLAYER</div>
+
+            <!-- Player Dashboard -->
+            <a href="{{ path('player_dashboard') }}" class="menu-item {% if 'player_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+                <i class="fas fa-user-circle menu-icon"></i>
+                <span class="menu-label">My Dashboard</span>
+            </a>
+
+            <!-- Divider -->
+            <div class="menu-divider"></div>
+        {% endif %}
+
+        <!-- Public Section Header -->
+        <div class="menu-section-title">PUBLIC</div>
+
+        <!-- View Matches -->
+        <a href="{{ path('match_index') }}" class="menu-item">
+            <i class="fas fa-eye menu-icon"></i>
+            <span class="menu-label">View Matches</span>
+        </a>
+
+        <!-- View Tournaments -->
+        <a href="{{ path('tournament_index') }}" class="menu-item">
+            <i class="fas fa-eye menu-icon"></i>
+            <span class="menu-label">View Tournaments</span>
+        </a>
+
+        <!-- View Teams -->
+        <a href="{{ path('team_index') }}" class="menu-item">
+            <i class="fas fa-eye menu-icon"></i>
+            <span class="menu-label">View Teams</span>
+        </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="footer-item">
+            <p class="version-text"><i class="fas fa-code"></i> v1.0</p>
+            <p class="copyright-text">© 2026 Dev Esports</p>
+        </div>
+    </div>
+</aside>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.sidebar-nav');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const isMobile = window.innerWidth <= 768;
+
+    // Toggle sidebar
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('show');
+        });
+    }
+
+    // Close sidebar on menu item click (mobile)
+    const menuItems = document.querySelectorAll('.menu-item, .menu-subitem');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (isMobile && !item.classList.contains('menu-toggle')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    });
+
+    // Close sidebar on outside click (mobile)
+    document.addEventListener('click', function(e) {
+        if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle')) {
+            sidebar.classList.remove('show');
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        const newIsMobile = window.innerWidth <= 768;
+        if (newIsMobile !== isMobile) {
+            location.reload();
+        }
+    });
+});
+</script>

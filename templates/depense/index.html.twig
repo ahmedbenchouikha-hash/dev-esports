@@ -1,0 +1,205 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Expenses - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">💰 Expenses Management</h1>
+            <a href="{{ path('depense_new') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Create New Expense
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% if app.flashes %}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Expenses</h6>
+                <h4>{{ stats.nombre_depenses }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Amount</h6>
+                <h4>{{ stats.total_montant|number_format(2, ',', ' ') }}€</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Pending</h6>
+                <h4><span class="badge bg-warning">{{ stats.en_attente }}</span></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Approved</h6>
+                <h4><span class="badge bg-success">{{ stats.validees }}</span></h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filters -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search by title or team..." value="{{ search }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="statut" class="form-control">
+                            <option value="all">All Status</option>
+                            <option value="en_attente" {% if statut == 'en_attente' %}selected{% endif %}>Pending</option>
+                            <option value="validée" {% if statut == 'validée' %}selected{% endif %}>Approved</option>
+                            <option value="refusée" {% if statut == 'refusée' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="categorie" class="form-control">
+                            <option value="all">All Categories</option>
+                            <option value="materiel" {% if categorie == 'materiel' %}selected{% endif %}>Material</option>
+                            <option value="transport" {% if categorie == 'transport' %}selected{% endif %}>Transport</option>
+                            <option value="logistique" {% if categorie == 'logistique' %}selected{% endif %}>Logistics</option>
+                            <option value="nourriture" {% if categorie == 'nourriture' %}selected{% endif %}>Food</option>
+                            <option value="autre" {% if categorie == 'autre' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{{ path('depense_index') }}" class="btn btn-secondary w-100">
+                            <i class="fas fa-redo"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Expenses Table -->
+<div class="row">
+    <div class="col-md-12">
+        {% if depenses is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No expenses found. <a href="{{ path('depense_index') }}">Clear filters</a>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Title</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                            <th>Team</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for depense in depenses %}
+                            <tr>
+                                <td><strong>{{ depense.titre }}</strong></td>
+                                <td>{{ depense.montant|number_format(2, ',', ' ') }}€</td>
+                                <td>
+                                    {% if depense.categorie == 'materiel' %}
+                                        <span class="badge bg-info">Material</span>
+                                    {% elseif depense.categorie == 'transport' %}
+                                        <span class="badge bg-primary">Transport</span>
+                                    {% elseif depense.categorie == 'logistique' %}
+                                        <span class="badge bg-secondary">Logistics</span>
+                                    {% elseif depense.categorie == 'nourriture' %}
+                                        <span class="badge bg-success">Food</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Other</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if depense.team %}
+                                        <a href="{{ path('team_show', {id: depense.team.id}) }}">{{ depense.team.name }}</a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if depense.statut == 'validée' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elseif depense.statut == 'refusée' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ depense.dateCreation|date('d/m/Y H:i') }}</small></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ path('depense_show', {id: depense.id}) }}" class="btn btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('depense_edit', {id: depense.id}) }}" class="btn btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        {% if depense.statut == 'en_attente' %}
+                                            <form method="POST" action="{{ path('depense_valider', {id: depense.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ depense.id) }}">
+                                                <button type="submit" class="btn btn-success btn-sm" title="Approve" onclick="return confirm('Approve this expense?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+
+                                            <form method="POST" action="{{ path('depense_refuser', {id: depense.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ depense.id) }}">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Reject" onclick="return confirm('Reject this expense?')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                        <form method="POST" action="{{ path('depense_delete', {id: depense.id}) }}" style="display:inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ depense.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete" onclick="return confirm('Delete this expense?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

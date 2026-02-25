@@ -1,0 +1,253 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Welcome to Dev Esports - Tournaments & Matches{% endblock %}
+
+{% block body %}
+
+<!-- Hero Section -->
+<div class="row mb-5" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 255, 136, 0.1) 100%); padding: 3rem 0; border-radius: 10px; margin-bottom: 3rem !important;">
+    <div class="col-md-12 text-center">
+        <h1 style="font-size: 3.5rem; color: var(--highlight-color); margin-bottom: 1rem; font-weight: bold;">🎮 Welcome to Dev Esports</h1>
+        <p class="text-muted" style="font-size: 1.3rem; margin-bottom: 2rem;">Watch the best esports tournaments and matches live</p>
+        <div>
+            <a href="{{ path('match_index') }}" class="btn btn-primary btn-lg" style="margin-right: 10px;">View All Matches</a>
+            <a href="{{ path('tournament_index') }}" class="btn btn-outline-primary btn-lg">Browse Tournaments</a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-5">
+    <div class="col-md-4 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #00d4ff;">
+            <div class="card-body">
+                <h2 style="color: #00d4ff; font-size: 2.5rem;">{{ total_matches }}</h2>
+                <p class="text-muted" style="font-size: 1.1rem;">🎮 Total Matches</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #00ff88;">
+            <div class="card-body">
+                <h2 style="color: #00ff88; font-size: 2.5rem;">{{ total_tournaments }}</h2>
+                <p class="text-muted" style="font-size: 1.1rem;">🏆 Tournaments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card text-center" style="border-left: 4px solid #ffaa00;">
+            <div class="card-body">
+                <h2 style="color: #ffaa00; font-size: 2.5rem;">{{ total_teams }}</h2>
+                <p class="text-muted" style="font-size: 1.1rem;">👥 Professional Teams</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ongoing Matches Section -->
+{% if ongoing_matches %}
+<div class="row mb-5">
+    <div class="col-md-12 mb-4">
+        <h2 class="page-title" style="color: #00d4ff;">🔴 LIVE NOW - Ongoing Matches</h2>
+    </div>
+    {% for match in ongoing_matches %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" style="border: 2px solid #00d4ff; position: relative;">
+                <div style="position: absolute; top: 10px; right: 10px; background: #ff6b6b; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                    🔴 LIVE
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if match.team1 and match.team2 %}
+                            <h5 class="mb-3">
+                                <span style="color: var(--highlight-color);">{{ match.team1.name }}</span>
+                                <span style="color: #999; margin: 0 10px;">vs</span>
+                                <span style="color: var(--highlight-color);">{{ match.team2.name }}</span>
+                            </h5>
+                            <h3 style="color: #00d4ff; font-weight: bold;">{{ match.score1 }} - {{ match.score2 }}</h3>
+                        {% endif %}
+                    </div>
+                    {% if match.tournament %}
+                        <p class="text-center text-muted mb-3">
+                            <span class="badge bg-info">{{ match.tournament.name }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent border-top text-center">
+                    <a href="{{ path('match_show', {id: match.id}) }}" class="btn btn-outline-info btn-sm">Watch Details</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Upcoming Matches Section -->
+{% if upcoming_matches %}
+<div class="row mb-5">
+    <div class="col-md-12 mb-4">
+        <h2 class="page-title" style="color: #ffaa00;">📅 Upcoming Matches</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Match</th>
+                            <th>Tournament</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in upcoming_matches %}
+                            <tr>
+                                <td>
+                                    {% if match.team1 and match.team2 %}
+                                        <strong style="color: var(--highlight-color);">{{ match.team1.name }}</strong>
+                                        <span class="text-muted">vs</span>
+                                        <strong style="color: var(--highlight-color);">{{ match.team2.name }}</strong>
+                                    {% else %}
+                                        Match #{{ match.id }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if match.tournament %}
+                                        <span class="badge bg-info">{{ match.tournament.name }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning" style="background-color: #ffaa00 !important; color: #000;">Pending</span>
+                                </td>
+                                <td>
+                                    <a href="{{ path('match_show', {id: match.id}) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ path('match_index') }}" class="btn btn-primary btn-sm">View All Upcoming Matches →</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Finished Matches Section -->
+{% if recent_finished_matches %}
+<div class="row mb-5">
+    <div class="col-md-12 mb-4">
+        <h2 class="page-title" style="color: #00ff88;">✓ Recent Results</h2>
+    </div>
+    {% for match in recent_finished_matches %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" style="border-left: 4px solid #00ff88;">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if match.team1 and match.team2 %}
+                            <h6 class="text-muted mb-2">Final Result</h6>
+                            <h5 class="mb-3">
+                                <span style="color: var(--highlight-color);">{{ match.team1.name }}</span>
+                                <span style="color: #999; margin: 0 10px;">vs</span>
+                                <span style="color: var(--highlight-color);">{{ match.team2.name }}</span>
+                            </h5>
+                            <h3 style="color: #00ff88; font-weight: bold;">{{ match.score1 }} - {{ match.score2 }}</h3>
+                            {% if match.score1 > match.score2 %}
+                                <p class="text-muted" style="margin-top: 10px;">
+                                    <span style="color: #00ff88; font-weight: bold;">{{ match.team1.name }} WINS</span>
+                                </p>
+                            {% elseif match.score2 > match.score1 %}
+                                <p class="text-muted" style="margin-top: 10px;">
+                                    <span style="color: #00ff88; font-weight: bold;">{{ match.team2.name }} WINS</span>
+                                </p>
+                            {% else %}
+                                <p class="text-muted" style="margin-top: 10px;">
+                                    <span style="color: #ffaa00; font-weight: bold;">DRAW</span>
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    {% if match.tournament %}
+                        <p class="text-center text-muted mb-3">
+                            <span class="badge bg-secondary">{{ match.tournament.name }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent border-top text-center">
+                    <a href="{{ path('match_show', {id: match.id}) }}" class="btn btn-outline-success btn-sm">View Match</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="col-md-12">
+        <div class="text-center">
+            <a href="{{ path('match_index') }}" class="btn btn-primary">View All Results →</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Tournaments Section -->
+{% if featured_tournaments %}
+<div class="row mb-5">
+    <div class="col-md-12 mb-4">
+        <h2 class="page-title" style="color: #00ff88;">🏆 Featured Tournaments</h2>
+    </div>
+    {% for tournament in featured_tournaments %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" style="border-top: 3px solid var(--highlight-color);">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--highlight-color); font-size: 1.3rem;">{{ tournament.name }}</h5>
+                    <p class="card-text text-muted">{{ tournament.description|slice(0, 80) }}{% if tournament.description|length > 80 %}...{% endif %}</p>
+                    
+                    <div class="tournament-info mb-3">
+                        {% if tournament.startDate %}
+                            <p class="mb-2">
+                                <strong style="color: #00d4ff;">📅 Starts:</strong><br>
+                                <span class="text-muted">{{ tournament.startDate|date('d M Y') }}</span>
+                            </p>
+                        {% endif %}
+                        {% if tournament.endDate %}
+                            <p class="mb-0">
+                                <strong style="color: #00ff88;">🏁 Ends:</strong><br>
+                                <span class="text-muted">{{ tournament.endDate|date('d M Y') }}</span>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top">
+                    <a href="{{ path('tournament_show', {id: tournament.id}) }}" class="btn btn-primary btn-sm w-100">View Tournament</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="col-md-12">
+        <div class="text-center">
+            <a href="{{ path('tournament_index') }}" class="btn btn-primary btn-lg">Explore All Tournaments →</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Call to Action Section -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 255, 136, 0.2) 100%); border: 2px solid var(--highlight-color);">
+            <div class="card-body text-center py-5">
+                <h2 style="color: var(--highlight-color); margin-bottom: 1rem;">Don't Miss Any Matches!</h2>
+                <p class="text-muted" style="font-size: 1.1rem; margin-bottom: 2rem;">Follow tournaments and teams to stay updated on all the latest esports action.</p>
+                <div>
+                    <a href="{{ path('match_index') }}" class="btn btn-primary btn-lg" style="margin-right: 10px;">Browse Matches</a>
+                    <a href="{{ path('team_index') }}" class="btn btn-outline-primary btn-lg">View Teams</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

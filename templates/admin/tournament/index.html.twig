@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Manage Tournaments - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="page-title">Manage Tournaments</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{{ path('admin_tournament_create') }}" class="btn btn-primary">+ Create Tournament</a>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <input type="text" name="search" class="form-control" placeholder="Search by tournament name..." value="{{ search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="ongoing" {% if status == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                            <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tournaments Table -->
+<div class="row">
+    <div class="col-md-12">
+        {% if tournaments is empty %}
+            <div class="alert alert-info">
+                No tournaments found.
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Location</th>
+                                <th>Prize Pool</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tournament in tournaments %}
+                                <tr>
+                                    <td><strong>{{ tournament.name }}</strong></td>
+                                    <td>{{ tournament.startDate|date('d M Y') }}</td>
+                                    <td>{{ tournament.endDate|date('d M Y') }}</td>
+                                    <td>{{ tournament.location ?? '-' }}</td>
+                                    <td>{% if tournament.prizePool %}${{ tournament.prizePool|number_format(0) }}{% else %}-{% endif %}</td>
+                                    <td>
+                                        <span class="badge {% if tournament.status == 'completed' %}badge-success{% elseif tournament.status == 'ongoing' %}badge-danger{% elseif tournament.status == 'pending' %}badge-warning{% else %}badge-secondary{% endif %}">
+                                            {{ tournament.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('admin_tournament_show', { id: tournament.id }) }}" class="btn btn-sm btn-info">View</a>
+                                        <a href="{{ path('admin_tournament_edit', { id: tournament.id }) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ tournament.id }}">Delete</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex justify-content-center">
+                {{ knp_pagination_render(tournaments, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Modals -->
+{% for tournament in tournaments %}
+<div class="modal fade" id="deleteModal{{ tournament.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ tournament.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: var(--secondary-color);">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ tournament.id }}">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong>{{ tournament.name }}</strong>? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ path('admin_tournament_delete', { id: tournament.id }) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tournament.id) }}">
+                    <button type="submit" class="btn btn-danger">Delete Tournament</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

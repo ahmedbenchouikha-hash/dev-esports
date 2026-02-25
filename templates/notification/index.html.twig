@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Notifications{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('player_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Notifications</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-bell"></i> My Notifications
+                    {% if unreadCount > 0 %}
+                        <span class="badge bg-danger">{{ unreadCount }} unread</span>
+                    {% endif %}
+                </h1>
+                {% if notifications|length > 0 %}
+                    <button class="btn btn-outline-primary" id="markAllRead">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                {% endif %}
+            </div>
+
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% if notifications is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    You have no notifications. Check back later for updates!
+                </div>
+            {% else %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <ul class="nav nav-pills" id="notificationTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="pill" href="#all">All</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="pill" href="#unread">Unread</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="all">
+                                <div class="list-group list-group-flush" id="notificationList">
+                                    {% for notification in notifications %}
+                                        <div class="list-group-item list-group-item-action {% if not notification.isRead %}list-group-item-primary{% endif %}" 
+                                             data-notification-id="{{ notification.id }}">
+                                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex">
+                                                        <i class="{{ notification.iconClass }} me-3 fa-2x"></i>
+                                                        <div>
+                                                            <p class="mb-1">{{ notification.message }}</p>
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-clock"></i> {{ notification.createdAt|date('F j, Y H:i') }}
+                                                            </small>
+                                                            {% if not notification.isRead %}
+                                                                <span class="badge bg-danger ms-2">New</span>
+                                                            {% endif %}
+                                                            {% if notification.link %}
+                                                                <a href="{{ notification.link }}" class="btn btn-sm btn-link ps-0">View Details</a>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    {% if not notification.isRead %}
+                                                        <button class="btn btn-sm btn-outline-success mark-read" 
+                                                                data-id="{{ notification.id }}">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="unread">
+                                <div class="list-group list-group-flush" id="unreadNotificationList">
+                                    {% for notification in notifications %}
+                                        {% if not notification.isRead %}
+                                            <div class="list-group-item list-group-item-primary" 
+                                                 data-notification-id="{{ notification.id }}">
+                                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex">
+                                                            <i class="{{ notification.iconClass }} me-3 fa-2x"></i>
+                                                            <div>
+                                                                <p class="mb-1">{{ notification.message }}</p>
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-clock"></i> {{ notification.createdAt|date('F j, Y H:i') }}
+                                                                </small>
+                                                                {% if notification.link %}
+                                                                    <a href="{{ notification.link }}" class="btn btn-sm btn-link ps-0">View Details</a>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <button class="btn btn-sm btn-outline-success mark-read" 
+                                                                data-id="{{ notification.id }}">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="list-group-item text-center text-muted py-4">
+                                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                                            <p>No unread notifications!</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark individual notification as read
+    document.querySelectorAll('.mark-read').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationId = this.dataset.id;
+            const notificationItem = this.closest('.list-group-item');
+            
+            fetch(`/notifications/mark-read/${notificationId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    notificationItem.classList.remove('list-group-item-primary');
+                    this.remove();
+                    
+                    // Update unread count in navbar
+                    updateUnreadCount();
+                }
+            });
+        });
+    });
+    
+    // Mark all as read
+    const markAllBtn = document.getElementById('markAllRead');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function() {
+            fetch('/notifications/mark-all-read', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelectorAll('.list-group-item-primary').forEach(item => {
+                        item.classList.remove('list-group-item-primary');
+                    });
+                    document.querySelectorAll('.mark-read').forEach(btn => {
+                        btn.remove();
+                    });
+                    
+                    // Update unread count
+                    updateUnreadCount();
+                    
+                    // Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                    alert.style.zIndex = '9999';
+                    alert.innerHTML = `
+                        All notifications marked as read!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alert);
+                    
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 3000);
+                }
+            });
+        });
+    }
+    
+    function updateUnreadCount() {
+        fetch('/notifications/unread-count')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
+    }
+});
+</script>
+{% endblock %}
