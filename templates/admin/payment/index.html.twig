@@ -1,0 +1,456 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Payments - Admin{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-credit-card"></i> Payment Management
+            </h1>
+            <p class="text-muted mt-2 mb-0">Track all ticket purchases and payment transactions</p>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators (Chiffre d'Affaires) -->
+    <div class="row mb-5">
+        <!-- Total Revenue (Chiffre d'Affaires) -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, var(--primary) 0%, #00a8d8 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-2 text-uppercase">Revenue<br/><small>(Chiffre d'Affaires)</small></h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">
+                                €{{ (stats.totalRevenue ?? 0)|number_format(2) }}
+                            </h2>
+                            <small class="text-white-50">Total gross revenue</small>
+                        </div>
+                        <i class="fas fa-sack-dollar" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Revenue (After Refunds) -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white mb-2 text-uppercase">Net Revenue</h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">
+                                €{{ (stats.netRevenue ?? 0)|number_format(2) }}
+                            </h2>
+                            <small class="text-white-50">
+                                After €{{ (stats.totalRefunded ?? 0)|number_format(2) }} refunds
+                            </small>
+                        </div>
+                        <i class="fas fa-wallet" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Transaction -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white mb-2 text-uppercase">Avg Transaction</h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">
+                                €{{ (stats.avgTransaction ?? 0)|number_format(2) }}
+                            </h2>
+                            <small class="text-white-50">Average ticket value</small>
+                        </div>
+                        <i class="fas fa-coins" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Rate -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #0dcaf0 0%, #0099ff 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white mb-2 text-uppercase">Success Rate</h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">
+                                {% set total_count = (stats.countSucceeded ?? 0) + (stats.countPending ?? 0) + (stats.countFailed ?? 0) + (stats.countRefunded ?? 0) %}
+                                {% if total_count > 0 %}
+                                    {{ ((stats.countSucceeded ?? 0) / total_count * 100)|number_format(1) }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </h2>
+                            <small class="text-white-50">{{ stats.countSucceeded ?? 0 }} successful transactions</small>
+                        </div>
+                        <i class="fas fa-chart-pie" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Breakdown Section -->
+    <div class="row mb-5">
+        <!-- Revenue by Ticket Type -->
+        <div class="col-lg-6 mb-4">
+            <div class="card bg-dark border-primary shadow-lg">
+                <div class="card-header bg-dark border-primary">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-chart-bar"></i> Revenue by Ticket Type
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {% set revenueByType = stats.revenueByType ?? {} %}
+                    {% if revenueByType is not empty %}
+                        {% set totalTypeRevenue = 0 %}
+                        {% for type, revenue in revenueByType %}
+                            {% set totalTypeRevenue = totalTypeRevenue + revenue %}
+                        {% endfor %}
+                        {% for type, revenue in revenueByType %}
+                            {% set percentage = (revenue / totalTypeRevenue * 100)|round(1) %}
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="text-capitalize" style="color: var(--primary);">
+                                        {% if type == 'regular' %}
+                                            <i class="fas fa-ticket-alt"></i> Regular
+                                        {% elseif type == 'vip' %}
+                                            <i class="fas fa-crown"></i> VIP
+                                        {% elseif type == 'student' %}
+                                            <i class="fas fa-graduation-cap"></i> Student
+                                        {% else %}
+                                            {{ type|upper }}
+                                        {% endif %}
+                                    </strong>
+                                    <span class="text-success" style="font-weight: bold;">€{{ revenue|number_format(2) }} ({{ percentage }}%)</span>
+                                </div>
+                                <div class="progress" style="height: 8px; background-color: rgba(0, 242, 254, 0.1);">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {{ percentage }}%; background: linear-gradient(90deg, var(--primary), #00a8d8);"
+                                         aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">No revenue data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue by Payment Status -->
+        <div class="col-lg-6 mb-4">
+            <div class="card bg-dark border-primary shadow-lg">
+                <div class="card-header bg-dark border-primary">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-filter"></i> Revenue by Payment Status
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {% set revenueByStatus = stats.revenueByStatus ?? {} %}
+                    {% if revenueByStatus is not empty %}
+                        {% set statusColors = {
+                            'succeeded': '#28a745',
+                            'pending': '#ffc107',
+                            'failed': '#dc3545',
+                            'refunded': '#0dcaf0'
+                        } %}
+                        {% for status, revenue in revenueByStatus %}
+                            <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded" style="background-color: rgba(0, 242, 254, 0.05);">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if status == 'succeeded' %}
+                                        <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                        <strong class="text-success">Succeeded</strong>
+                                    {% elseif status == 'pending' %}
+                                        <span class="badge bg-warning"><i class="fas fa-hourglass-half"></i></span>
+                                        <strong class="text-warning">Pending</strong>
+                                    {% elseif status == 'failed' %}
+                                        <span class="badge bg-danger"><i class="fas fa-times"></i></span>
+                                        <strong class="text-danger">Failed</strong>
+                                    {% elseif status == 'refunded' %}
+                                        <span class="badge bg-info"><i class="fas fa-undo"></i></span>
+                                        <strong class="text-info">Refunded</strong>
+                                    {% endif %}
+                                </div>
+                                <span style="color: var(--secondary); font-weight: bold; font-size: 1.1rem;">
+                                    €{{ revenue|number_format(2) }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">No status data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Counts Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-dark border-primary shadow-lg">
+                <div class="card-header bg-dark border-primary">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-list"></i> Transaction Summary
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="text-center p-3 rounded" style="background-color: rgba(40, 167, 69, 0.1);">
+                                <h3 class="text-success mb-0" style="font-weight: 900;">{{ stats.countSucceeded ?? 0 }}</h3>
+                                <small class="text-muted">Successful</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="text-center p-3 rounded" style="background-color: rgba(255, 193, 7, 0.1);">
+                                <h3 class="text-warning mb-0" style="font-weight: 900;">{{ stats.countPending ?? 0 }}</h3>
+                                <small class="text-muted">Pending</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="text-center p-3 rounded" style="background-color: rgba(220, 53, 69, 0.1);">
+                                <h3 class="text-danger mb-0" style="font-weight: 900;">{{ stats.countFailed ?? 0 }}</h3>
+                                <small class="text-muted">Failed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="text-center p-3 rounded" style="background-color: rgba(13, 202, 240, 0.1);">
+                                <h3 class="text-info mb-0" style="font-weight: 900;">{{ stats.countRefunded ?? 0 }}</h3>
+                                <small class="text-muted">Refunded</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-dark border-primary shadow-lg">
+                <div class="card-header bg-dark border-primary">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-crown"></i> Top Customers (By Spending)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% set topCustomers = stats.topCustomers ?? [] %}
+                    {% if topCustomers is not empty %}
+                        <div class="table-responsive">
+                            <table class="table table-dark mb-0">
+                                <thead style="background-color: rgba(0, 242, 254, 0.1);">
+                                    <tr>
+                                        <th class="text-primary">Rank</th>
+                                        <th class="text-primary">Customer</th>
+                                        <th class="text-primary">Email</th>
+                                        <th class="text-primary">Total Spent</th>
+                                        <th class="text-primary">Purchases</th>
+                                        <th class="text-primary">Avg/Purchase</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rank, customer in topCustomers %}
+                                        <tr style="border-color: rgba(0, 242, 254, 0.2);">
+                                            <td>
+                                                <strong style="color: var(--secondary); font-size: 1.2rem;">
+                                                    {% if loop.index0 == 0 %}
+                                                        <i class="fas fa-medal" style="color: #ffd700;"></i>
+                                                    {% elseif loop.index0 == 1 %}
+                                                        <i class="fas fa-medal" style="color: #c0c0c0;"></i>
+                                                    {% elseif loop.index0 == 2 %}
+                                                        <i class="fas fa-medal" style="color: #cd7f32;"></i>
+                                                    {% else %}
+                                                        #{{ loop.index }}
+                                                    {% endif %}
+                                                </strong>
+                                            </td>
+                                            <td>
+                                                <strong style="color: #25d366;">{{ customer.name }}</strong>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">{{ customer.email }}</small>
+                                            </td>
+                                            <td>
+                                                <strong style="color: var(--secondary);">€{{ customer.spent|number_format(2) }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ customer.purchases }}</span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">€{{ (customer.spent / customer.purchases)|number_format(2) }}</small>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="fas fa-inbox" style="font-size: 2rem; color: rgba(0, 242, 254, 0.3);"></i>
+                            <p class="mt-2">No customer data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card bg-dark border-primary shadow-lg mb-4">
+        <div class="card-header bg-dark border-primary">
+            <h5 class="mb-0" style="color: var(--primary);">
+                <i class="fas fa-filter"></i> Search & Filter Payments
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="search" class="form-control form-control-dark" 
+                           placeholder="Search by email, name, intent ID, or ticket number..." value="{{ search }}">
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="{{ path('admin_payment_index') }}" class="btn btn-secondary w-50">
+                            <i class="fas fa-redo"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payments Table View -->
+    {% if payments %}
+    <div class="table-responsive">
+        <table class="table table-dark table-hover border-primary" style="border: 1px solid rgba(0, 242, 254, 0.3);">
+            <thead style="background-color: rgba(0, 242, 254, 0.1); border-bottom: 2px solid var(--primary);">
+                <tr>
+                    <th style="color: var(--primary);">Payment ID</th>
+                    <th style="color: var(--primary);">Customer</th>
+                    <th style="color: var(--primary);">Ticket</th>
+                    <th style="color: var(--primary);">Amount</th>
+                    <th style="color: var(--primary);">Status</th>
+                    <th style="color: var(--primary); text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr style="border-color: rgba(0, 242, 254, 0.2); vertical-align: middle;">
+                    <td>
+                        <strong style="color: var(--primary);">{{ payment.id }}</strong>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ payment.customerName ?: payment.customerEmail }}</strong><br>
+                            <small class="text-muted">{{ payment.customerEmail }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <strong style="color: #25d366;">{{ payment.ticket.ticketNumber }}</strong><br>
+                        <small class="text-muted">{{ payment.ticket.type|upper }}</small>
+                    </td>
+                    <td>
+                        <strong style="color: var(--secondary); font-size: 1.2rem;">
+                            €{{ payment.amount|number_format(2) }} x {{ payment.quantityPurchased }}
+                        </strong><br>
+                        <small class="text-muted">Total: €{{ (payment.amount * payment.quantityPurchased)|number_format(2) }}</small>
+                    </td>
+                    <td>
+                        {% if payment.status == 'succeeded' %}
+                            <span class="badge bg-success" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-check"></i> Succeeded
+                            </span>
+                        {% elseif payment.status == 'pending' %}
+                            <span class="badge bg-warning" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-hourglass-half"></i> Pending
+                            </span>
+                        {% elseif payment.status == 'failed' %}
+                            <span class="badge bg-danger" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-times"></i> Failed
+                            </span>
+                        {% elseif payment.status == 'refunded' %}
+                            <span class="badge bg-info" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-undo"></i> Refunded
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                {{ payment.status|upper }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="{{ path('admin_payment_show', {'id': payment.id}) }}" 
+                           class="btn btn-sm btn-info" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4 d-flex justify-content-center">
+        <ul class="pagination">
+            {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_payment_index', {'page': 1, 'search': search}) }}">
+                        <i class="fas fa-step-backward"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_payment_index', {'page': page - 1, 'search': search}) }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for p in 1..pages %}
+                {% if p == page %}
+                    <li class="page-item active">
+                        <span class="page-link" style="background-color: var(--primary); border-color: var(--primary);">{{ p }}</span>
+                    </li>
+                {% elseif p >= page - 2 and p <= page + 2 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_payment_index', {'page': p, 'search': search}) }}">{{ p }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page < pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_payment_index', {'page': page + 1, 'search': search}) }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{{ path('admin_payment_index', {'page': pages, 'search': search}) }}">
+                        <i class="fas fa-step-forward"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info border-info" role="alert">
+        <i class="fas fa-info-circle"></i>
+        <strong>No payments found</strong> - Try adjusting your search criteria
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
