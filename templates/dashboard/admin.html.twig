@@ -1,0 +1,16 @@
+{% extends 'dashboard/base_dashboard.html.twig' %}
+
+{% block dashboard_content %}
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, <strong>{{ app.user.username }}</strong>.</p>
+
+    <div class="dashboard-section">
+        <h3 style="margin-bottom:10px">Statistics</h3>
+        <div class="stat">Total users: <span style="margin-left:8px">{{ userCount }}</span></div>
+    </div>
+
+    <div class="dashboard-section">
+        <h3 style="margin-bottom:10px">User Management</h3>
+        <p><a href="{{ path('user_index') }}">Users</a></p>
+    </div>
+{% endblock %}

@@ -4,11 +4,22 @@ namespace App\Repository;
 
 use App\Entity\Team;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+<<<<<<< HEAD
 use Doctrine\ORM\Query;
+=======
+>>>>>>> module-user
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Team>
+<<<<<<< HEAD
+=======
+ *
+ * @method Team|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Team|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Team[]    findAll()
+ * @method Team[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+>>>>>>> module-user
  */
 class TeamRepository extends ServiceEntityRepository
 {
@@ -17,6 +28,7 @@ class TeamRepository extends ServiceEntityRepository
         parent::__construct($registry, Team::class);
     }
 
+<<<<<<< HEAD
     /**
      * Search teams by multiple criteria
      */
@@ -173,6 +185,15 @@ class TeamRepository extends ServiceEntityRepository
             ->orderBy('t.' . $orderBy, $direction)
             ->setFirstResult($offset)
             ->setMaxResults($limit)
+=======
+    public function findTeamsWithAvailableSlots()
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.members', 'm')
+            ->groupBy('t.id')
+            ->having('COUNT(m) < 5')
+            ->orderBy('t.createdAt', 'DESC')
+>>>>>>> module-user
             ->getQuery()
             ->getResult();
     }

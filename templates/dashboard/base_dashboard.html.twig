@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <style>
+        .dashboard-grid { display:flex; max-width:1200px; margin:28px auto; gap:24px; padding:0 16px; align-items:flex-start }
+        .dashboard-sidebar { width:260px; background:linear-gradient(180deg,#ffffff,#fbfbff); border-radius:12px; padding:18px; box-shadow:0 8px 24px rgba(15,23,42,0.06); border:1px solid rgba(15,23,42,0.04) }
+        .dashboard-sidebar h3 { margin-top:0; font-size:18px; color:#0f172a }
+        .dashboard-menu { list-style:none; padding-left:0; margin:12px 0 0 0 }
+        .dashboard-menu li { margin-bottom:8px }
+        .dashboard-menu a { display:block; padding:8px 10px; color:#4f46e5; text-decoration:none; border-radius:8px; font-weight:600 }
+        .dashboard-menu a:hover { background: rgba(79,70,229,0.06); }
+
+        .dashboard-main { flex:1 }
+        .dashboard-panel { background:#fff; border-radius:12px; padding:22px; box-shadow:0 8px 24px rgba(15,23,42,0.05); border:1px solid rgba(15,23,42,0.03) }
+
+        .dashboard-panel h2 { margin-top:0; font-size:26px; color:#0f172a }
+        .dashboard-section { margin-top:18px }
+        .stat { display:inline-block; padding:12px 16px; background:linear-gradient(90deg,#eef2ff,#f8fafc); border-radius:10px; font-weight:700; color:#111827; margin-right:12px }
+
+        @media (max-width: 880px) {
+            .dashboard-grid { flex-direction:column; }
+            .dashboard-sidebar { width:100%; }
+            .dashboard-panel { width:100% }
+        }
+    </style>
+
+    <div class="dashboard-grid">
+        <aside class="dashboard-sidebar">
+            <h3>Menu</h3>
+            <ul class="dashboard-menu">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ path('user_index') }}">Manage Users</a></li>
+                {% endif %}
+
+                {% if is_granted('ROLE_USER') %}
+                    <li><a href="{{ path('user_dashboard') }}">My Dashboard</a></li>
+                    <li><a href="{{ path('user_show', {'id': app.user.id}) }}">My Profile</a></li>
+                {% endif %}
+
+                <li><a href="{{ path('app_home') }}">Home</a></li>
+            </ul>
+        </aside>
+
+        <main class="dashboard-main">
+            <div class="dashboard-panel">
+                {% block dashboard_content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+{% endblock %}

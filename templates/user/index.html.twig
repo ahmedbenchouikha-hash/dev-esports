@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Users{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h1 style="margin:0">Users</h1>
+                <a class="btn secondary" href="{{ path('user_new') }}">Create new user</a>
+            </div>
+
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #f5f5f5; border-radius: 4px;">
+                <h3 style="margin-top: 0; margin-bottom: 15px;">Recherche et Tri</h3>
+                <form method="GET" action="{{ path('user_index') }}" style="margin-bottom: 0;">
+                    <div style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+                        <div>
+                            <label for="search" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by username or email:</label>
+                            <input type="text" id="search" name="search" placeholder="Enter username or email" value="{{ app.request.query.get('search', '') }}" style="padding: 8px; width: 250px;">
+                        </div>
+                        <div>
+                            <label for="sort" style="display: block; margin-bottom: 5px; font-weight: bold;">Sort by:</label>
+                            <select id="sort" name="sort" style="padding: 8px;">
+                                <option value="username" {% if app.request.query.get('sort', 'username') == 'username' %}selected{% endif %}>Username</option>
+                                <option value="email" {% if app.request.query.get('sort', 'email') == 'email' %}selected{% endif %}>Email</option>
+                                <option value="id" {% if app.request.query.get('sort', 'id') == 'id' %}selected{% endif %}>ID</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn primary" style="padding: 8px 16px;">Search & Sort</button>
+                        <a href="{{ path('user_index') }}" class="btn secondary" style="padding: 8px 16px;">Reset</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr><th>ID</th><th>Username</th><th>Email</th><th>Type</th><th>Confirmation</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td><span class="chip">{{ user.typeuser }}</span></td>
+                            <td>
+                                {% if user.confirmationFile %}
+                                    <a href="/uploads/profiles/{{ user.confirmationFile }}" target="_blank" class="small-btn" style="background-color: #10b981; color: white;">📄 View</a>
+                                {% else %}
+                                    <span style="color: #999;">No file</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <a class="small-btn" href="{{ path('user_show', {id: user.id}) }}">View</a>
+                                    <a class="small-btn" href="{{ path('user_edit', {id: user.id}) }}">Edit</a>
+                                    <form action="{{ path('user_delete', {id: user.id}) }}" method="post" style="display:inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
+                                        <button class="small-btn danger" type="submit" onclick="return confirm('Delete this user?');">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="6">No users found.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

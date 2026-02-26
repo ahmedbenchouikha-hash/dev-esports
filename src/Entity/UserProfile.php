@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
+<<<<<<< HEAD
 use App\Repository\UserProfileRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserProfileRepository::class)]
+=======
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[ORM\Entity]
+>>>>>>> module-user
 #[ORM\Table(name: 'user_profile')]
 #[ORM\HasLifecycleCallbacks]
 class UserProfile
@@ -62,9 +69,17 @@ class UserProfile
     public function setUser(User $user): static
     {
         $this->user = $user;
+<<<<<<< HEAD
         if ($user->getProfile() !== $this) {
             $user->setProfile($this);
         }
+=======
+
+        if ($user->getProfile() !== $this) {
+            $user->setProfile($this);
+        }
+
+>>>>>>> module-user
         return $this;
     }
 
@@ -76,6 +91,10 @@ class UserProfile
     public function setFirstName(?string $firstName): static
     {
         $this->firstName = $firstName;
+<<<<<<< HEAD
+=======
+
+>>>>>>> module-user
         return $this;
     }
 
@@ -87,6 +106,10 @@ class UserProfile
     public function setLastName(?string $lastName): static
     {
         $this->lastName = $lastName;
+<<<<<<< HEAD
+=======
+
+>>>>>>> module-user
         return $this;
     }
 
@@ -98,6 +121,10 @@ class UserProfile
     public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
+<<<<<<< HEAD
+=======
+
+>>>>>>> module-user
         return $this;
     }
 
@@ -109,6 +136,10 @@ class UserProfile
     public function setAddress(?string $address): static
     {
         $this->address = $address;
+<<<<<<< HEAD
+=======
+
+>>>>>>> module-user
         return $this;
     }
 
@@ -120,6 +151,10 @@ class UserProfile
     public function setBirthDate(?\DateTimeInterface $birthDate): static
     {
         $this->birthDate = $birthDate;
+<<<<<<< HEAD
+=======
+
+>>>>>>> module-user
         return $this;
     }
 
@@ -131,6 +166,10 @@ class UserProfile
     public function setProfilePicture(?string $profilePicture): static
     {
         $this->profilePicture = $profilePicture;
+<<<<<<< HEAD
+=======
+
+>>>>>>> module-user
         return $this;
     }
 

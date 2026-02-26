@@ -8,8 +8,12 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
+<<<<<<< HEAD
                 property: email # This is what users type to log in
     
+=======
+                property: email
+>>>>>>> module-user
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -17,6 +21,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+<<<<<<< HEAD
             
             # Use custom authenticator for role-based redirects
             custom_authenticators:
@@ -25,11 +30,26 @@ security:
             logout:
                 path: app_logout
                 target: app_login
+=======
+            custom_authenticators:
+                - App\Security\LoginFormAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                target: app_home
+>>>>>>> module-user
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+<<<<<<< HEAD
         - { path: ^/users, roles: ROLE_USER }
+=======
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/users, roles: ROLE_ADMIN }
+        - { path: ^/user/dashboard, roles: ROLE_USER }
+        - { path: ^/users/\d+/edit, roles: ROLE_USER }
+>>>>>>> module-user
 
 when@test:
   security:

@@ -1,0 +1,277 @@
+<!-- Sidebar Toggle Overlay -->
+<button class="sidebar-toggle-overlay" id="sidebarToggleOverlay" title="Open Sidebar">
+    <span class="toggle-icon">☰</span>
+</button>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar-nav">
+    <!-- Brand + internal toggle (close) -->
+    <div class="sidebar-brand" role="banner">
+        <a href="#" class="brand-link">
+            <span class="brand-icon">🎮</span>
+            <span class="brand-text">Dev Esports</span>
+        </a>
+        <button class="sidebar-toggle" id="sidebarToggle" title="Close Sidebar" aria-label="Close sidebar">
+            <span class="toggle-icon">✕</span>
+        </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-menu">
+        <!-- Admin Section Header -->
+        <div class="menu-section-title">ADMINISTRATION</div>
+
+        <!-- Dashboard -->
+        <a href="#" class="menu-item {% if 'admin_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+            <span class="menu-icon">📊</span>
+            <span class="menu-label">Dashboard</span>
+        </a>
+
+        <!-- Matches -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#matchesMenu">
+                <span class="menu-icon">🎮</span>
+                <span class="menu-label">Matches</span>
+                <span class="menu-arrow">▼</span>
+            </a>
+            <div id="matchesMenu" class="collapse {% if 'admin_match' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="#" class="menu-subitem {% if 'admin_match_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    All Matches
+                </a>
+                <a href="#" class="menu-subitem">
+                    Create Match
+                </a>
+            </div>
+        </div>
+
+        <!-- Tournaments -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#tournamentsMenu">
+                <span class="menu-icon">🏆</span>
+                <span class="menu-label">Tournaments</span>
+                <span class="menu-arrow">▼</span>
+            </a>
+            <div id="tournamentsMenu" class="collapse {% if 'admin_tournament' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="#" class="menu-subitem {% if 'admin_tournament_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    All Tournaments
+                </a>
+                <a href="#" class="menu-subitem">
+                    Create Tournament
+                </a>
+            </div>
+        </div>
+
+        <!-- Teams -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#teamsMenu">
+                <span class="menu-icon">👥</span>
+                <span class="menu-label">Teams</span>
+                <span class="menu-arrow">▼</span>
+            </a>
+            <div id="teamsMenu" class="collapse {% if 'admin_team' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="#" class="menu-subitem {% if 'admin_team_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    All Teams
+                </a>
+                <a href="#" class="menu-subitem">
+                    Create Team
+                </a>
+            </div>
+        </div>
+
+        <!-- Players -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#playersMenu">
+                <span class="menu-icon">⭐</span>
+                <span class="menu-label">Players</span>
+                <span class="menu-arrow">▼</span>
+            </a>
+            <div id="playersMenu" class="collapse {% if 'admin_player' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="#" class="menu-subitem {% if 'admin_player_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    All Players
+                </a>
+                <a href="#" class="menu-subitem">
+                    Create Player
+                </a>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="menu-divider"></div>
+
+        <!-- Public Section Header -->
+        <div class="menu-section-title">PUBLIC</div>
+
+        <!-- View Matches -->
+        <a href="#" class="menu-item">
+            <span class="menu-icon">👁️</span>
+            <span class="menu-label">View Matches</span>
+        </a>
+
+        <!-- View Tournaments -->
+        <a href="#" class="menu-item">
+            <span class="menu-icon">👁️</span>
+            <span class="menu-label">View Tournaments</span>
+        </a>
+
+        <!-- View Teams -->
+        <a href="#" class="menu-item">
+            <span class="menu-icon">👁️</span>
+            <span class="menu-label">View Teams</span>
+        </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="footer-item">
+            <p class="version-text">v1.0</p>
+            <p class="copyright-text">© 2026 Dev Esports</p>
+        </div>
+    </div>
+</aside>
+
+<style>
+    /* Color variables */
+    :root {
+        --primary: #4f46e5;
+        --accent: #06b6d4;
+        --gradient-primary: linear-gradient(135deg,#4f46e5 0%,#06b6d4 100%);
+        --gradient-surface: linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+        --border-color: #e6eef6;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --radius-md: 10px;
+        --shadow-glow: 0 8px 30px rgba(79,70,229,0.09);
+        --transition: 200ms ease;
+    }
+
+    /* Sidebar Navigation Styles */
+    .sidebar-nav { position: fixed; left: 0; top: 0; width: 280px; height: 100vh; background: var(--gradient-surface); border-right: 1px solid var(--border-color); z-index: 1030; display: flex; flex-direction: column; overflow-y: auto; padding-top: 0; transition: width 0.3s var(--transition), transform 0.3s var(--transition); }
+    .sidebar-nav.collapsed { width: 80px; }
+    .sidebar-nav.hidden { width: 0; opacity: 0; visibility: hidden; transform: translateX(-280px); border-right: none; }
+
+    /* Overlay button (mobile) */
+    .sidebar-toggle-overlay { position: fixed; left: 1rem; top: 1rem; width: 2.5rem; height: 2.5rem; background: var(--gradient-primary); border: none; border-radius: var(--radius-md); color: #fff; cursor: pointer; display: none; align-items: center; justify-content: center; transition: var(--transition); font-size: 1.25rem; font-weight: 700; z-index: 1040; box-shadow: var(--shadow-glow); }
+    .sidebar-toggle-overlay.show { display: flex; }
+
+    /* Toggle now lives inside .sidebar-brand (not fixed) */
+    .sidebar-brand { padding: 1.25rem 1rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; transition: padding 0.3s var(--transition); display:flex; align-items:center; gap:0.75rem; position:relative; }
+    .sidebar-brand .brand-link { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 800; font-size: 1.05rem; color: var(--text-primary); }
+    .brand-icon { font-size: 1.6rem; }
+    .brand-text { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; align-items: center; justify-content: center; transition: var(--transition); font-size: 1rem; display: flex; border-radius:8px }
+    .sidebar-toggle:hover { background: rgba(79,70,229,0.06); color: var(--primary); }
+
+    .sidebar-menu { flex: 1; padding: 1rem 0; overflow-y: auto; transition: all 0.3s var(--transition); }
+    .menu-section-title { padding: 1rem 1.5rem 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; }
+
+    .menu-item { display: flex; align-items: center; gap: 1rem; padding: 0.875rem 1.5rem; color: var(--text-secondary); text-decoration: none; transition: var(--transition); font-weight: 500; cursor: pointer; border-left: 3px solid transparent; position: relative; border-radius: 6px; margin: 0.25rem 0.75rem; }
+    .menu-item:hover { background: linear-gradient(90deg, rgba(79,70,229,0.04), rgba(6,182,212,0.02)); color: var(--text-primary); box-shadow: none; transform: translateY(-1px); }
+    .menu-item.active { background: linear-gradient(90deg, rgba(79,70,229,0.08), rgba(6,182,212,0.04)); color: var(--primary); font-weight:700; border-left-color: var(--primary); }
+
+    .menu-label { flex: 1; font-size: 0.95rem; }
+    .menu-icon { font-size: 1.25rem; flex-shrink: 0; filter: drop-shadow(0 1px 0 rgba(0,0,0,0.02)); }
+    .menu-subitem { display: flex; align-items: center; padding: 0.6rem 1.5rem 0.6rem 3.5rem; color: var(--text-muted); text-decoration: none; transition: var(--transition); font-size: 0.92rem; font-weight: 500; border-left: 3px solid transparent; border-radius:6px; margin: 0.125rem 0.5rem; }
+    .menu-subitem:hover { color: var(--text-primary); background: rgba(15,23,42,0.02); }
+
+    .menu-divider { height: 1px; background: var(--border-color); margin: 1rem 0; transition: margin 0.3s var(--transition); }
+    .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); flex-shrink: 0; transition: padding 0.3s var(--transition); }
+    .version-text { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+    .copyright-text { font-size: 0.7rem; color: var(--text-muted); margin: 0.25rem 0 0; }
+
+    /* Scrollbar styling */
+    .sidebar-nav::-webkit-scrollbar { width: 8px; }
+    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(79,70,229,0.12); border-radius: 6px; }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .sidebar-toggle { position: absolute; top: 10px; right: 10px; }
+        .sidebar-toggle-overlay { display:flex }
+        .sidebar-nav { transform: translateX(-100%); transition: transform 0.3s var(--transition); box-shadow: 0 8px 30px rgba(2,6,23,0.08); }
+        .sidebar-nav.show { transform: translateX(0); }
+        body.sidebar-open { overflow: hidden; }
+        .content-with-sidebar { margin-left: 0; padding: 0 16px; }
+    }
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.sidebar-nav');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const overlayBtn = document.getElementById('sidebarToggleOverlay');
+    const body = document.body;
+    const isMobile = window.innerWidth <= 768;
+
+    const isHidden = localStorage.getItem('sidebarHidden') === 'true';
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    
+    if (isHidden && !isMobile) {
+        sidebar.classList.add('hidden');
+        body.classList.add('sidebar-hidden');
+        overlayBtn.classList.add('show');
+    } else if (isCollapsed && !isMobile) {
+        sidebar.classList.add('collapsed');
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (isMobile) {
+                sidebar.classList.remove('show');
+                overlayBtn.classList.add('show');
+                localStorage.setItem('sidebarHidden', 'true');
+            } else {
+                if (sidebar.classList.contains('hidden')) {
+                    sidebar.classList.remove('hidden');
+                    body.classList.remove('sidebar-hidden');
+                    overlayBtn.classList.remove('show');
+                    localStorage.setItem('sidebarHidden', 'false');
+                } else {
+                    sidebar.classList.add('hidden');
+                    body.classList.add('sidebar-hidden');
+                    overlayBtn.classList.add('show');
+                    localStorage.setItem('sidebarHidden', 'true');
+                }
+            }
+        });
+    }
+
+    if (overlayBtn) {
+        overlayBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.remove('hidden', 'show');
+            body.classList.remove('sidebar-hidden');
+            overlayBtn.classList.remove('show');
+            localStorage.setItem('sidebarHidden', 'false');
+        });
+    }
+
+    const menuItems = document.querySelectorAll('.menu-item, .menu-subitem');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (isMobile && !item.classList.contains('menu-toggle')) {
+                sidebar.classList.remove('show');
+                overlayBtn.classList.add('show');
+            }
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle-overlay')) {
+            sidebar.classList.remove('show');
+            overlayBtn.classList.add('show');
+        }
+    });
+
+    window.addEventListener('resize', function() {
+        const newIsMobile = window.innerWidth <= 768;
+        if (newIsMobile !== isMobile) {
+            location.reload();
+        }
+    });
+});
+</script>

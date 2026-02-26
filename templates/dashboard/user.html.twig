@@ -1,0 +1,47 @@
+{% extends 'dashboard/base_dashboard.html.twig' %}
+
+{% block dashboard_content %}
+    <div style="max-width: 800px;">
+        <h2 style="margin-bottom: 30px;">My Profile</h2>
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 10px; color: white; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 30px;">
+                <div style="width: 120px; height: 120px; background-color: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; flex-shrink: 0;">
+                    👤
+                </div>
+                <div>
+                    <h3 style="margin: 0 0 10px 0; font-size: 28px;">{{ user.username }}</h3>
+                    <p style="margin: 5px 0; opacity: 0.95;">{{ user.email }}</p>
+                    <p style="margin: 5px 0; opacity: 0.9; font-size: 14px;">Member since {{ user.id | date('F Y') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background-color: #f8f9fa; border-radius: 10px; padding: 30px; margin-bottom: 30px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Account Information</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #667eea;">Username</label>
+                    <p style="margin: 0; font-size: 16px; color: #333;">{{ user.username }}</p>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #667eea;">Email Address</label>
+                    <p style="margin: 0; font-size: 16px; color: #333;">{{ user.email }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background-color: #e7f3ff; border-left: 4px solid #667eea; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+            <p style="margin: 0; color: #334155;"><strong>Account Status:</strong> Active</p>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <a href="{{ path('user_edit', {'id': app.user.id}) }}" class="btn primary" style="padding: 12px 30px; font-size: 16px; border-radius: 6px; text-decoration: none; display: inline-block; background-color: #667eea; color: white; border: none; cursor: pointer;">
+                ✎ Edit Profile
+            </a>
+            <a href="{{ path('user_dashboard') }}" class="btn secondary" style="padding: 12px 30px; font-size: 16px; border-radius: 6px; text-decoration: none; display: inline-block; background-color: #e2e8f0; color: #333; border: none; cursor: pointer;">
+                ← Back
+            </a>
+        </div>
+    </div>
+{% endblock %}

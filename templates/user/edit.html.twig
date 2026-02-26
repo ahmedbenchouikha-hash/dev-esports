@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <h1>Edit Profile</h1>
+            
+            <div style="background-color: #e7f3ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <p style="margin: 0; color: #334155;"><strong>Note:</strong> Update your profile information or change your password below. Please provide any player confirmation documents that are required.</p>
+            </div>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                {{ form_widget(form) }}
+                <div class="text-center" style="margin-top:12px">
+                    <button class="btn" type="submit">Save Changes</button>
+                </div>
+            {{ form_end(form) }}
+
+            <div style="margin-top:12px">
+                <a class="btn secondary" href="{{ path('user_dashboard') }}">Back to profile</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Join a Team{% endblock %}
+
+{% block body %}
+    {% include '_sidebar.html.twig' %}
+
+    <div class="content-with-sidebar">
+        <div class="container" style="max-width: 900px;">
+            <h1 style="color: #667eea; margin-bottom: 30px;">Available Teams</h1>
+
+            {% if availableTeams|length > 0 %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    {% for team in availableTeams %}
+                        <div class="card" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
+                            <!-- Card Header -->
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px;">
+                                <h3 style="margin: 0; font-size: 18px;">{{ team.name }}</h3>
+                                <p style="margin: 8px 0 0 0; opacity: 0.9;">Led by <strong>{{ team.creator.username }}</strong></p>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div style="padding: 20px; flex-grow: 1;">
+                                <!-- Member Count -->
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span style="font-weight: 600; color: #333;">Members</span>
+                                        <span style="color: #667eea; font-weight: 600;">{{ team.memberCount }} <span style="color: #999;">/ 5</span></span>
+                                    </div>
+                                    <div style="height: 8px; background-color: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: {{ (team.memberCount / 5 * 100) }}%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Available Slots -->
+                                <div style="background-color: #f0f4ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                                    <p style="margin: 0; color: #667eea; font-weight: 600;">
+                                        🎮 {{ team.availableSlots }} {{ team.availableSlots == 1 ? 'spot' : 'spots' }} available
+                                    </p>
+                                </div>
+
+                                <!-- Member List Preview -->
+                                <div style="margin-bottom: 20px;">
+                                    <p style="font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 10px;">Members</p>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        {% for member in team.members %}
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                                    {{ member.user.username[0]|upper }}
+                                                </div>
+                                                <span style="font-size: 13px; color: #333;">{{ member.user.username }}</span>
+                                                {% if member.user == team.creator %}
+                                                    <span style="background-color: #667eea; color: white; padding: 2px 6px; border-radius: 2px; font-size: 10px; font-weight: 600;">Captain</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Footer (Action Button) -->
+                            <div style="padding: 15px 20px; background-color: #f8f9fa; border-top: 1px solid #e5e7eb;">
+                                <form action="{{ path('team_join', {id: team.id}) }}" method="post">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('join-team-' ~ team.id) }}">
+                                    <button type="submit" class="btn primary" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                                        Join Team
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 8px; text-align: center;">
+                    <p style="margin: 0; color: #92400e; font-size: 16px;">
+                        🎮 No teams available to join right now.
+                    </p>
+                    <p style="margin: 10px 0 0 0; color: #b45309; font-size: 14px;">
+                        All existing teams are full, or you're already a member. <a href="{{ path('team_create') }}" style="color: #92400e; font-weight: 600; text-decoration: none;">Create your own team!</a>
+                    </p>
+                </div>
+            {% endif %}
+
+            <!-- Back Button -->
+            <div style="margin-top: 30px;">
+                <a href="{{ path('team_index') }}" style="display: inline-block; padding: 12px 30px; background-color: #e2e8f0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background-color 0.2s;">
+                    ← Back to Teams
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

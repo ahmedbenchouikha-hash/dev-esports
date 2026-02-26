@@ -1,0 +1,56 @@
+<nav class="site-nav">
+    <div class="nav-inner">
+        <div class="brand">
+            <a href="{{ path('app_home') }}">Esport<span class="accent">Dev</span></a>
+        </div>
+
+        <input id="nav-toggle" class="nav-toggle" type="checkbox" />
+        <label for="nav-toggle" class="nav-toggle-label">☰</label>
+
+        <ul class="nav-links">
+            <li><a href="{{ path('app_home') }}">Home</a></li>
+            <li><a href="{{ path('api_docs') }}">API Docs</a></li>
+            {% if app.user is not defined or app.user is null %}
+                <li><a href="{{ path('app_register') }}">Register</a></li>
+                <li><a href="{{ path('app_login') }}">Login</a></li>
+            {% else %}
+                <li class="nav-user">Hello, <strong>{{ app.user.username|e }}</strong></li>
+                <li><a href="{{ path(app.user.typeuser == 'ADMIN' ? 'admin_dashboard' : 'user_dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ path('team_index') }}">Teams</a></li>
+                <li>
+                    <form action="{{ path('app_logout') }}" method="post" style="display:inline">
+                        <button type="submit" style="background:transparent;border:0;color:rgba(255,255,255,0.95);font-weight:600;cursor:pointer;padding:8px 12px">Logout</button>
+                    </form>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<style>
+    .site-nav { background: linear-gradient(90deg,#0ea5e9 0%,#6366f1 100%); color: #fff; box-shadow: 0 4px 18px rgba(15,23,42,0.08); }
+    .site-nav .nav-inner { max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:16px; padding:10px 16px; position:relative }
+    .site-nav .brand a { color:#fff; font-weight:700; text-decoration:none; font-size:18px }
+    .site-nav .brand .accent { color: rgba(255,255,255,0.9); font-weight:800 }
+
+    /* Desktop links */
+    .nav-links { list-style:none; margin:0; padding:0; display:flex; gap:12px; margin-left:auto }
+    .nav-links li a { color: rgba(255,255,255,0.95); text-decoration:none; padding:8px 12px; border-radius:8px; font-weight:600 }
+    .nav-links li a:hover, .nav-links li a:focus { background: rgba(255,255,255,0.08); }
+
+    /* Mobile toggle using checkbox hack */
+    .nav-toggle { display:none }
+    .nav-toggle-label { display:none }
+
+    @media (max-width: 720px) {
+        .nav-links { position:absolute; right:16px; top:58px; flex-direction:column; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)); padding:8px; border-radius:10px; display:none }
+        .nav-toggle { display:block; position:absolute; right:8px; top:12px; opacity:0; width:36px; height:36px; }
+        .nav-toggle-label { display:block; margin-left:auto; cursor:pointer; color:#fff; font-size:26px; padding:4px 8px }
+        .nav-toggle:checked ~ .nav-toggle-label { color:#fff }
+        .nav-toggle:checked ~ .nav-links, .nav-toggle:checked + .nav-toggle-label + .nav-links { display:flex }
+        .content-with-sidebar { margin-left:0; padding-top:72px }
+    }
+
+    /* small visual reset for links inside nav when used alongside flashes */
+    .flash { max-width:1100px; margin:12px auto; padding:8px 12px; border-radius:8px }
+</style>
