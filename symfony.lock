@@ -22,7 +22,6 @@
             "./src/Repository/.gitignore"
         ]
     },
-<<<<<<< HEAD
     "doctrine/doctrine-fixtures-bundle": {
         "version": "4.3",
         "recipe": {
@@ -35,8 +34,6 @@
             "./src/DataFixtures/AppFixtures.php"
         ]
     },
-=======
->>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     "doctrine/doctrine-migrations-bundle": {
         "version": "3.7",
         "recipe": {
@@ -50,12 +47,9 @@
             "./migrations/.gitignore"
         ]
     },
-<<<<<<< HEAD
     "knplabs/knp-paginator-bundle": {
         "version": "v6.10.0"
     },
-=======
->>>>>>> 1c04895fd40ddf3e3d0493c052d9fac6b47ed96e
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
