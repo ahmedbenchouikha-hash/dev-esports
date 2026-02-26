@@ -60,7 +60,7 @@ class BudgetAlertService
         
         @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] Found budget for team {$team->getName()}\n", FILE_APPEND);
 
-        // Calculate used amount
+        // Calculate used amount from ALL validated expenses
         $depenses = $this->depenseRepository->findBy([
             'team' => $team,
             'statut' => 'validée'
@@ -71,7 +71,13 @@ class BudgetAlertService
             $montantUtilise += $depense->getMontant();
         }
 
+        // Update budget with current usage
         $budget->setMontantUtilise($montantUtilise);
+        $this->entityManager->persist($budget);
+        $this->entityManager->flush();
+        
+        @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] BudgetAlertService: Saved montantUtilise = {$montantUtilise}\n", FILE_APPEND);
+        
         $remainingAmount = $budget->getMontantRestant();
         $percentageUsed = $budget->getPourcentageUtilisation();
 

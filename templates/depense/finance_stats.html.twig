@@ -1,0 +1,283 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finance Budget - RankUp{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>💰 Finance Budget Statistics</h1>
+            <p class="text-muted">Complete financial overview of all teams and expenses</p>
+            <hr>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Total Budget</h6>
+                    <h2 class="text-primary">{{ totalStats.total_budget|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Total Expenses</h6>
+                    <h2 class="text-danger">{{ totalStats.total_expenses|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Approved</h6>
+                    <h2 class="text-success">{{ totalStats.total_approved|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Pending</h6>
+                    <h2 class="text-warning">{{ totalStats.total_pending|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1: Budget Comparison & Expenses by Team -->
+    <div class="row mb-5">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📊 Budget by Team (Allocated vs Used)</h5>
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📈 Expenses by Team</h5>
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="expenseTeamChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2: Expenses by Category & Status -->
+    <div class="row mb-5">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">🏷️ Expenses by Category</h5>
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">✅ Expenses by Status</h5>
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Utilization Table -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">📋 Team Budget Utilization Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Budget Allocated</th>
+                                    <th>Amount Used</th>
+                                    <th>Remaining</th>
+                                    <th>Utilization %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for budget in budgets %}
+                                    {% set teamName = budget.team ? budget.team.name : 'Unknown' %}
+                                    {% set alloue = budget.montantAlloue %}
+                                    {% set utilise = budget.montantUtilise %}
+                                    {% set remaining = alloue - utilise %}
+                                    {% set percent = alloue > 0 ? (utilise / alloue * 100) : 0 %}
+                                    <tr>
+                                        <td><strong>{{ teamName }}</strong></td>
+                                        <td>{{ alloue|number_format(2, ',', ' ') }} TND</td>
+                                        <td>{{ utilise|number_format(2, ',', ' ') }} TND</td>
+                                        <td style="color: {% if remaining < 0 %}red{% else %}green{% endif %};">
+                                            {{ remaining|number_format(2, ',', ' ') }} TND
+                                        </td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar {% if percent >= 100 %}bg-danger{% elseif percent >= 80 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ percent > 100 ? 100 : percent|round(1) }}%"
+                                                     aria-valuenow="{{ percent }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    {{ percent|round(1) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    setTimeout(function() {
+        // Chart 1: Budget by Team
+        const budgetData = {{ budgetsByTeam|json_encode|raw }};
+        new Chart(document.getElementById('budgetChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(budgetData),
+                datasets: [
+                    {
+                        label: 'Allocated (TND)',
+                        data: Object.values(budgetData).map(b => b.alloue),
+                        backgroundColor: '#45B7D1'
+                    },
+                    {
+                        label: 'Used (TND)',
+                        data: Object.values(budgetData).map(b => b.utilise),
+                        backgroundColor: '#FF6B6B'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Chart 2: Expenses by Team
+        const expenseTeamData = {{ expensesByTeam|json_encode|raw }};
+        new Chart(document.getElementById('expenseTeamChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(expenseTeamData),
+                datasets: [{
+                    data: Object.values(expenseTeamData),
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#95E1D3', '#FFD700', '#FF69B4']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Chart 3: Expenses by Category
+        const categoryData = {{ expensesByCategory|json_encode|raw }};
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(categoryData),
+                datasets: [{
+                    label: 'Amount (TND)',
+                    data: Object.values(categoryData),
+                    backgroundColor: ['#45B7D1', '#FF6B6B', '#FFA07A', '#4ECDC4', '#95E1D3'].slice(0, Object.keys(categoryData).length)
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Chart 4: Expenses by Status
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [
+                        {{ totalStats.total_approved }},
+                        {{ totalStats.total_pending }},
+                        {{ totalStats.total_rejected }}
+                    ],
+                    backgroundColor: ['#51CF66', '#FFD700', '#FF6B6B']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        console.log('✅ All finance charts loaded successfully');
+    }, 200);
+</script>
+
+<style>
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: 0.3s ease;
+    }
+    
+    h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress {
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

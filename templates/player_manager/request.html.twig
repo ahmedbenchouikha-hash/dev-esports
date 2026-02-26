@@ -46,7 +46,15 @@
                             </div>
                         {% endif %}
                         <small class="text-muted d-block mt-1">
-                            Optional. You can also manage an existing team if invited.
+                            {% if prefillSource == 'previous_request' %}
+                                <i class="fas fa-check-circle text-success"></i>
+                                <strong>Auto-filled from previous request:</strong> "{{ previousTeamName }}". You can change it before submitting.
+                            {% elseif prefillSource == 'player_team' %}
+                                <i class="fas fa-check-circle text-success"></i>
+                                <strong>Auto-filled:</strong> Your team name "{{ playerTeam.name }}" has been automatically filled in since you're already a member of this team. You can modify it if needed to create a new team.
+                            {% else %}
+                                Optional. You can also manage an existing team if invited.
+                            {% endif %}
                         </small>
                     </div>
 

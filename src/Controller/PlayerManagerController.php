@@ -48,6 +48,26 @@ class PlayerManagerController extends AbstractController
         $managerRequest = new ManagerRequest();
         $managerRequest->setPlayer($user);
 
+        // Prefer previous manager request team name when available, otherwise fall back to player's current team
+        $previousRequests = $repository->findByPlayer($user);
+        $previousTeamName = null;
+        $prefillSource = null;
+
+        if (!empty($previousRequests)) {
+            $previous = $previousRequests[0];
+            if ($previous->getTeamName()) {
+                $managerRequest->setTeamName($previous->getTeamName());
+                $previousTeamName = $previous->getTeamName();
+                $prefillSource = 'previous_request';
+            }
+        }
+
+        $playerTeam = $user->getTeam();
+        if (!$prefillSource && $playerTeam) {
+            $managerRequest->setTeamName($playerTeam->getName());
+            $prefillSource = 'player_team';
+        }
+
         $form = $this->createForm(ManagerRequestType::class, $managerRequest);
         $form->handleRequest($request);
 
@@ -61,6 +81,9 @@ class PlayerManagerController extends AbstractController
 
         return $this->render('player_manager/request.html.twig', [
             'form' => $form->createView(),
+            'playerTeam' => $playerTeam,
+            'previousTeamName' => $previousTeamName,
+            'prefillSource' => $prefillSource,
         ]);
     }
 

@@ -1,70 +1,488 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Team Chat - Dev Esports{% endblock %}
+{% block title %}Team Chat - Rankup{% endblock %}
 
 {% block body %}
-<div class="row mb-3">
-    <div class="col-md-12 d-flex justify-content-between align-items-center">
-        <h1 class="page-title mb-0">💬 Team Chat</h1>
-        <a href="{{ path('team_show', {id: current_team.id}) }}" class="btn btn-outline-primary btn-sm">Back to Team</a>
-    </div>
-</div>
+<style>
+.rankup-chat-container {
+    display: flex;
+    height: calc(100vh - 200px);
+    gap: 1rem;
+    margin: 1rem 0;
+}
 
-<div class="row g-3">
-    <div class="col-lg-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="mb-3">My Teams</h5>
-                <div class="list-group">
+.rankup-chat-sidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rankup-chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rankup-card {
+    background: rgba(26, 40, 71, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 242, 254, 0.15);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.rankup-card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(0, 242, 254, 0.15);
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.05));
+}
+
+.rankup-card-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.team-item {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 242, 254, 0);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.team-item:hover {
+    background: rgba(0, 242, 254, 0.1);
+    border-color: rgba(0, 242, 254, 0.2);
+}
+
+.team-item.active {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(37, 211, 102, 0.2));
+    border-color: rgba(0, 242, 254, 0.3);
+    font-weight: 600;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #25d366;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message-group {
+    display: flex;
+    gap: 0.75rem;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-group.own {
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00f2fe, #25d366);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #1a2847;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.message-header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.message-sender {
+    font-weight: 600;
+    color: #00f2fe;
+}
+
+.message-time {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+}
+
+.message-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    word-wrap: break-word;
+    max-width: 500px;
+    position: relative;
+}
+
+.message-group.other .message-bubble {
+    background: rgba(0, 242, 254, 0.15);
+    border: 1px solid rgba(0, 242, 254, 0.25);
+    color: var(--text-primary);
+}
+
+.message-group.own .message-bubble {
+    background: linear-gradient(135deg, rgba(37, 211, 102, 0.3), rgba(0, 242, 254, 0.15));
+    border: 1px solid rgba(37, 211, 102, 0.4);
+    color: #25d366;
+}
+
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 0.75rem 1rem;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0, 242, 254, 0.6);
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-8px);
+    }
+}
+
+.chat-input-container {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(0, 242, 254, 0.15);
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.05), rgba(37, 211, 102, 0.02));
+}
+
+.chat-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+#chatInput {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    resize: none;
+    max-height: 100px;
+    transition: all 0.3s ease;
+}
+
+#chatInput:focus {
+    border-color: rgba(0, 242, 254, 0.5);
+    background: rgba(0, 242, 254, 0.1);
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+#chatInput::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.chat-send-btn {
+    background: linear-gradient(135deg, #00f2fe, #25d366);
+    border: none;
+    color: #1a2847;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 80px;
+}
+
+.chat-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.user-item {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid rgba(0, 242, 254, 0.1);
+    transition: all 0.3s ease;
+}
+
+.user-item:hover {
+    border-color: rgba(0, 242, 254, 0.3);
+    background: rgba(0, 242, 254, 0.05);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00f2fe, #25d366);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #1a2847;
+    font-size: 0.75rem;
+}
+
+.user-status {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.user-online {
+    font-size: 0.75rem;
+    color: #25d366;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.online-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #25d366;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.team-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.member-count {
+    background: rgba(0, 242, 254, 0.15);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #00f2fe;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 242, 254, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 254, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 254, 0.5);
+}
+</style>
+
+<div class="rankup-chat-container">
+    <!-- Sidebar -->
+    <div class="rankup-chat-sidebar">
+        <!-- Teams List -->
+        <div class="rankup-card">
+            <div class="rankup-card-header">
+                <h5 class="mb-0">📌 Teams</h5>
+            </div>
+            <div class="rankup-card-body" style="padding: 0.75rem;">
+                <div class="team-list">
                     {% for team in teams %}
-                        <a
-                            href="{{ path('team_chat_room', {id: team.id}) }}"
-                            class="list-group-item list-group-item-action {% if team.id == current_team.id %}active{% endif %}"
-                        >
+                        <a href="{{ path('team_chat_room', {id: team.id}) }}" class="team-item {% if team.id == current_team.id %}active{% endif %}">
+                            <span class="status-indicator"></span>
                             {{ team.name }}
                         </a>
                     {% endfor %}
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-9">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Chat: {{ current_team.name }}</strong>
-                <small class="text-muted">Real-time team chat</small>
+        <!-- Members List -->
+        <div class="rankup-card">
+            <div class="rankup-card-header">
+                <h5 class="mb-0">👥 Members</h5>
             </div>
-            <div class="card-body p-0">
-                <div id="chatMessages" style="height: 420px; overflow-y: auto; padding: 1rem; background: rgba(10, 20, 40, 0.35);">
-                    {% for message in messages %}
-                        {% set isMine = message.sender and app.user and message.sender.id == app.user.id %}
-                        <div class="d-flex mb-2 {% if isMine %}justify-content-end{% else %}justify-content-start{% endif %}" data-message-id="{{ message.id }}">
-                            <div class="p-2 rounded" style="max-width: 75%; {% if isMine %}background: rgba(37, 211, 102, 0.2); border: 1px solid rgba(37, 211, 102, 0.3);{% else %}background: rgba(0, 242, 254, 0.12); border: 1px solid rgba(0, 242, 254, 0.25);{% endif %}">
-                                <div class="small fw-bold">{{ message.sender.nickname ?? 'Player' }}</div>
-                                <div>{{ message.content }}</div>
-                                <div class="text-muted small mt-1">{{ message.createdAt ? message.createdAt|date('H:i') : '' }}</div>
+            <div class="rankup-card-body" style="padding: 0.75rem;">
+                <div class="user-list">
+                    {% for player in current_team.players %}
+                        <div class="user-item">
+                            <div class="user-avatar">{{ player.nickname|slice(0, 1)|upper }}</div>
+                            <div class="user-status">
+                                <div class="user-name">{{ player.nickname }}</div>
+                                <div class="user-online"><span class="online-dot"></span> Online</div>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-
-                <form id="chatForm" class="p-3 border-top" autocomplete="off">
-                    <div class="input-group">
-                        <input
-                            type="text"
-                            id="chatInput"
-                            class="form-control"
-                            maxlength="1000"
-                            placeholder="Type a message..."
-                            required
-                        >
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-paper-plane"></i> Send
-                        </button>
-                    </div>
-                </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Main Chat -->
+    <div class="rankup-chat-main">
+        <!-- Chat Header -->
+        <div class="rankup-card">
+            <div class="rankup-card-header">
+                <div class="header-info">
+                    <div>
+                        <div class="team-name">💬 {{ current_team.name }}</div>
+                        <small class="text-muted" style="font-size: 0.85rem;">Team conversation</small>
+                    </div>
+                    <div class="member-count">
+                        <i class="fas fa-users"></i> {{ current_team.players|length }} Members
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="rankup-card" style="flex: 1;">
+            <div class="rankup-card-body">
+                <div class="chat-messages" id="chatMessages">
+                    {% for message in messages %}
+                        {% set isMine = message.sender and app.user and message.sender.id == app.user.id %}
+                        <div class="message-group {% if isMine %}own{% else %}other{% endif %}" data-message-id="{{ message.id }}">
+                            <div class="message-avatar">{{ message.sender.nickname|slice(0, 1)|upper }}</div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-sender">{{ message.sender.nickname ?? 'Player' }}</span>
+                                    <span class="message-time">{{ message.createdAt ? message.createdAt|date('H:i') : '' }}</span>
+                                </div>
+                                <div class="message-bubble">{{ message.content }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div id="typingIndicator" style="display: none;">
+                        <div class="message-group other">
+                            <div class="message-avatar">📝</div>
+                            <div class="typing-indicator">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-container">
+            <form id="chatForm" autocomplete="off">
+                <div class="chat-input-group">
+                    <textarea
+                        id="chatInput"
+                        class="form-control"
+                        rows="1"
+                        maxlength="1000"
+                        placeholder="✨ Type your message here..."
+                        required
+                    ></textarea>
+                    <button id="chatSendBtn" class="chat-send-btn" type="submit">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -74,13 +492,17 @@
     const messagesEl = document.getElementById('chatMessages');
     const formEl = document.getElementById('chatForm');
     const inputEl = document.getElementById('chatInput');
-    const submitBtn = formEl ? formEl.querySelector('button[type="submit"]') : null;
+    const submitBtn = document.getElementById('chatSendBtn');
+    const typingIndicator = document.getElementById('typingIndicator');
     const teamId = {{ current_team.id }};
 
     let lastMessageId = 0;
     let isSending = false;
+    let typingTimeout = null;
     const knownMessageIds = new Set();
+    const otherUsersTyping = new Set();
 
+    // Initialize
     const existing = messagesEl.querySelectorAll('[data-message-id]');
     if (existing.length > 0) {
         const ids = Array.from(existing).map(el => Number(el.getAttribute('data-message-id')) || 0);
@@ -89,10 +511,21 @@
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
+    // Auto-grow textarea
+    inputEl.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        notifyTyping();
+    });
+
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function getInitials(sender) {
+        return (sender || 'Player').slice(0, 1).toUpperCase();
     }
 
     function appendMessage(message) {
@@ -101,19 +534,27 @@
             return;
         }
 
+        // Remove existing typing indicator before adding new message
+        const typingEl = messagesEl.querySelector('#typingIndicator');
+        if (typingEl && typingEl.style.display !== 'none') {
+            typingEl.style.display = 'none';
+        }
+
         const wrapper = document.createElement('div');
-        wrapper.className = `d-flex mb-2 ${message.isMine ? 'justify-content-end' : 'justify-content-start'}`;
+        wrapper.className = `message-group ${message.isMine ? 'own' : 'other'}`;
         wrapper.setAttribute('data-message-id', String(msgId));
 
-        const bubbleStyle = message.isMine
-            ? 'max-width: 75%; background: rgba(37, 211, 102, 0.2); border: 1px solid rgba(37, 211, 102, 0.3);'
-            : 'max-width: 75%; background: rgba(0, 242, 254, 0.12); border: 1px solid rgba(0, 242, 254, 0.25);';
+        const initials = getInitials(message.sender || 'Player');
+        const timeStr = message.createdAt || new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
         wrapper.innerHTML = `
-            <div class="p-2 rounded" style="${bubbleStyle}">
-                <div class="small fw-bold">${escapeHtml(message.sender || 'Player')}</div>
-                <div>${escapeHtml(message.content || '')}</div>
-                <div class="text-muted small mt-1">${escapeHtml(message.createdAt || '')}</div>
+            <div class="message-avatar">${escapeHtml(initials)}</div>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-sender">${escapeHtml(message.sender || 'Player')}</span>
+                    <span class="message-time">${escapeHtml(timeStr)}</span>
+                </div>
+                <div class="message-bubble">${escapeHtml(message.content || '')}</div>
             </div>
         `;
 
@@ -144,6 +585,14 @@
         }
     }
 
+    function notifyTyping() {
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            // Typing notification logic can be added here for future enhancement
+            // sendTypingStatus(true);
+        }, 1000);
+    }
+
     formEl.addEventListener('submit', async function (event) {
         event.preventDefault();
 
@@ -157,9 +606,7 @@
         }
 
         isSending = true;
-        if (submitBtn) {
-            submitBtn.disabled = true;
-        }
+        submitBtn.disabled = true;
 
         try {
             const body = new URLSearchParams();
@@ -178,19 +625,22 @@
             if (res.ok && data.message) {
                 appendMessage(data.message);
                 inputEl.value = '';
+                inputEl.style.height = 'auto';
                 inputEl.focus();
             }
         } catch (error) {
             console.error('Chat send error:', error);
         } finally {
             isSending = false;
-            if (submitBtn) {
-                submitBtn.disabled = false;
-            }
+            submitBtn.disabled = false;
         }
     });
 
+    // Poll for new messages every 2.5 seconds
     setInterval(fetchNewMessages, 2500);
+
+    // Initial fetch
+    fetchNewMessages();
 })();
 </script>
 {% endblock %}

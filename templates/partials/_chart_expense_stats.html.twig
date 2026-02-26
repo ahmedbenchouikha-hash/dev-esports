@@ -1,0 +1,128 @@
+{# Chart: Statistiques Dépenses détaillées #}
+<div id="chartExpenseStats" style="height: 350px;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const depensesRaw = {%- filter json_encode -%}{{ depenses }}{%- endfilter -%};
+        const depenses = typeof depensesRaw === 'string' ? JSON.parse(depensesRaw) : depensesRaw;
+        
+        if (!Array.isArray(depenses) || depenses.length === 0) {
+            document.getElementById('chartExpenseStats').innerHTML = 
+                '<div class="alert alert-info text-center pt-5"><i class="fas fa-database"></i> Aucune dépense</div>';
+            return;
+        }
+        
+        // Analyser par catégorie
+        const categoryStats = {};
+        
+        depenses.forEach(d => {
+            if (d) {
+                const cat = d.categorie || 'Non catégorisée';
+                if (!categoryStats[cat]) {
+                    categoryStats[cat] = { count: 0, totalAmount: 0, validated: 0, pending: 0 };
+                }
+                categoryStats[cat].count++;
+                categoryStats[cat].totalAmount += parseFloat(d.montant || 0);
+                
+                if (d.statut === 'validée') {
+                    categoryStats[cat].validated++;
+                } else if (d.statut === 'brouillon' || d.statut === 'en_attente') {
+                    categoryStats[cat].pending++;
+                }
+            }
+        });
+        
+        const categories = Object.keys(categoryStats);
+        if (categories.length === 0) {
+            document.getElementById('chartExpenseStats').innerHTML = 
+                '<div class="alert alert-info text-center pt-5"><i class="fas fa-database"></i> Aucune catégorie</div>';
+            return;
+        }
+        
+        const countData = categories.map(cat => categoryStats[cat].count);
+        const validatedData = categories.map(cat => categoryStats[cat].validated);
+        
+        const options = {
+            series: [
+                {
+                    name: 'Total Dépenses',
+                    data: countData
+                },
+                {
+                    name: 'Validées',
+                    data: validatedData
+                }
+            ],
+            chart: {
+                type: 'bar',
+                height: 350,
+                sparkline: { enabled: false }
+            },
+            colors: ['#45B7D1', '#51CF66'],
+            plotOptions: {
+                bar: {
+                    columnWidth: '70%',
+                    borderRadius: 4,
+                    dataLabels: {
+                        position: 'top'
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetY: -20,
+                style: {
+                    fontSize: '12px',
+                    colors: ['#333']
+                },
+                formatter: function(val) {
+                    return val || '0';
+                }
+            },
+            stroke: {
+                show: true,
+                width: 1,
+                colors: ['#f3f3f3']
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                y: {
+                    formatter: function(val) {
+                        return val + ' dépense(s)';
+                    }
+                }
+            },
+            xaxis: {
+                categories: categories,
+                title: {
+                    text: 'Catégorie'
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Nombre de Dépenses'
+                },
+                labels: {
+                    formatter: function(val) {
+                        return Math.round(val);
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom',
+                horizontalAlign: 'center',
+                offsetY: 10
+            }
+        };
+        
+        new ApexCharts(document.getElementById('chartExpenseStats'), options).render();
+    } catch(e) {
+        console.error('Chart error:', e);
+        document.getElementById('chartExpenseStats').innerHTML = 
+            '<div class="alert alert-danger"><strong>Erreur graphique:</strong> ' + e.message + '</div>';
+    }
+});
+</script>

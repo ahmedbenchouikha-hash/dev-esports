@@ -8,6 +8,7 @@ use App\Entity\TeamInvitation;
 use App\Form\TeamType;
 use App\Repository\PlayerRepository;
 use App\Repository\TeamInvitationRepository;
+use App\Repository\ManagerRequestRepository;
 use App\Repository\TeamRepository;
 use App\Service\PlayerRecommendationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -151,9 +152,24 @@ class TeamController extends AbstractController
     }
     
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
+    public function new(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, ManagerRequestRepository $managerRequestRepo): Response
     {
         $team = new Team();
+
+        // If the current player previously submitted a manager request with a team name,
+        // pre-fill the Team name in the creation form to save them time.
+        $creator = $this->getUser();
+        if ($creator instanceof Player) {
+            $requests = $managerRequestRepo->findByPlayer($creator);
+            if (count($requests) > 0) {
+                $latest = $requests[0];
+                $name = $latest->getTeamName();
+                if (!empty($name)) {
+                    $team->setName($name);
+                }
+            }
+        }
+
         $form = $this->createForm(TeamType::class, $team);
         $form->handleRequest($request);
 

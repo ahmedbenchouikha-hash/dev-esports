@@ -9,7 +9,7 @@
     <div class="sidebar-brand">
         <a href="{{ path('player_dashboard') }}" class="brand-link">
             <span class="brand-icon"><i class="fas fa-gamepad"></i></span>
-            <span class="brand-text">Dev Esports</span>
+            <span class="brand-text">Rankup</span>
         </a>
     </div>
 
@@ -61,6 +61,14 @@
 
         <!-- Teams Section -->
         <div class="menu-section-title">TEAMS</div>
+
+        <!-- Team Chat -->
+        {% if app.user and is_granted('ROLE_USER') and app.user.teams is defined and app.user.teams|length > 0 %}
+        <a href="{{ path('team_chat_index') }}" class="menu-item {% if 'team_chat' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-comments menu-icon"></i>
+            <span class="menu-label">Team Chat</span>
+        </a>
+        {% endif %}
 
         <!-- My Teams (Manager Only) -->
         {% if is_granted('ROLE_MANAGER') %}
@@ -138,7 +146,7 @@
     <div class="sidebar-footer">
         <div class="footer-item">
             <p class="version-text"><i class="fas fa-code"></i> v1.0</p>
-            <p class="copyright-text">© 2026 Dev Esports</p>
+            <p class="copyright-text">© 2026 Rankup</p>
         </div>
     </div>
 </aside>

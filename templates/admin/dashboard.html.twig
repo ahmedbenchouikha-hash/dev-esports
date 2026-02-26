@@ -249,6 +249,30 @@
             color: var(--primary);
         }
 
+        .btn-approve {
+            background: var(--success);
+            color: white;
+            border: none;
+        }
+
+        .btn-approve:hover {
+            background: #0d9970;
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-refuse {
+            background: var(--danger);
+            color: white;
+            border: none;
+        }
+
+        .btn-refuse:hover {
+            background: #ff2848;
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 1200px) {
             .charts-grid {
                 grid-template-columns: 1fr;
@@ -449,7 +473,84 @@
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Pending Expenses Section -->
+    <div class="dashboard-card" style="margin-top: 2rem;">
+        <div class="dashboard-card-header">
+            <h3>💰 Dépenses en Attente ({{ totalPendingExpenses|default(0) }})</h3>
+            <span style="color: var(--warning); font-weight: bold;">{{ totalPendingExpenses|default(0) }} à approuver</span>
+        </div>
+        <div class="dashboard-card-body">
+            {% if pendingExpenses %}
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Montant</th>
+                            <th>Catégorie</th>
+                            <th>Équipe</th>
+                            <th>Manager</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in pendingExpenses %}
+                            <tr>
+                                <td><strong>{{ expense.titre }}</strong></td>
+                                <td style="color: var(--danger); font-weight: 600;">{{ expense.montant|number_format(2, ',', ' ') }} TND</td>
+                                <td>
+                                    {% if expense.categorie == 'materiel' %}
+                                        <span style="color: #45B7D1;">🔧 Matériel</span>
+                                    {% elseif expense.categorie == 'transport' %}
+                                        <span style="color: #FF6B6B;">🚗 Transport</span>
+                                    {% elseif expense.categorie == 'logistique' %}
+                                        <span style="color: #FFA07A;">📦 Logistique</span>
+                                    {% elseif expense.categorie == 'nourriture' %}
+                                        <span style="color: #4ECDC4;">🍕 Nourriture</span>
+                                    {% else %}
+                                        <span style="color: #95E1D3;">📌 Autre</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ expense.team.name|default('N/A') }}</strong></td>
+                                <td>
+                                    {% if expense.team and expense.team.players|length > 0 %}
+                                        {% set manager = expense.team.players.first %}
+                                        {{ manager.username|default('N/A') }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>{{ expense.dateCreation|date('d-m-Y')|default('N/A') }}</td>
+                                <td style="white-space: nowrap;">
+                                    <form method="POST" action="{{ path('admin_depense_approve', {id: expense.id}) }}" style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('depense') }}">
+                                        <button type="submit" class="btn-dashboard btn-approve" 
+                                                style="padding: 0.5rem 1rem; font-size: 0.75rem; display: inline-block; border: none; cursor: pointer; border-radius: 4px;">
+                                            ✓ Approuver
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ path('admin_depense_refuse', {id: expense.id}) }}" style="display: inline; margin-left: 0.5rem;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('depense') }}">
+                                        <button type="submit" class="btn-dashboard btn-refuse" 
+                                                style="padding: 0.5rem 1rem; font-size: 0.75rem; display: inline-block; border: none; cursor: pointer; border-radius: 4px;">
+                                            ✕ Refuser
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <p style="font-size: 1.2rem; margin: 0;">✨ Aucune dépense en attente</p>
+                    <p style="margin: 0.5rem 0 0 0;">Toutes les dépenses ont été traitées!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
 
 <!-- ApexCharts Initialization -->
 <script>

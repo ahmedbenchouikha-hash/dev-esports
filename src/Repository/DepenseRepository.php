@@ -125,4 +125,35 @@ class DepenseRepository extends ServiceEntityRepository
             ->getSingleScalarResult()
         ;
     }
+
+    /**
+     * Get total depense amount grouped by team for given team ids and statut
+     *
+     * @param int[] $teamIds
+     * @return array<int, array{teamId:int,teamName:string,total:float}>
+     */
+    public function getTotalsByTeamIds(array $teamIds, string $statut = 'validée'): array
+    {
+        if (empty($teamIds)) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('d')
+            ->select('t.id AS teamId, t.name AS teamName, SUM(d.montant) AS total')
+            ->join('d.team', 't')
+            ->andWhere('d.statut = :statut')
+            ->andWhere('t.id IN (:teamIds)')
+            ->setParameter('statut', $statut)
+            ->setParameter('teamIds', $teamIds)
+            ->groupBy('t.id')
+            ->orderBy('total', 'DESC');
+
+        $rows = $qb->getQuery()->getArrayResult();
+
+        return array_map(fn($r) => [
+            'teamId' => (int) $r['teamId'],
+            'teamName' => (string) $r['teamName'],
+            'total' => (float) $r['total'],
+        ], $rows);
+    }
 }

@@ -7,6 +7,7 @@ use App\Entity\Player;
 use App\Entity\Budget;
 use App\Entity\Depense;
 use App\Service\PlayerScoreService;
+use App\Service\BudgetAlertService;
 use App\Repository\TeamInvitationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +24,8 @@ class PlayerDashboardController extends AbstractController
     public function dashboard(
         EntityManagerInterface $em, 
         TeamInvitationRepository $invitationRepo,
-        PlayerScoreService $scoreService
+        PlayerScoreService $scoreService,
+        BudgetAlertService $budgetAlertService
     ): Response
     {
         $user = $this->getUser();
@@ -36,6 +38,13 @@ class PlayerDashboardController extends AbstractController
 
         $currentTeams = $user->getTeams();
         $availableTeams = $em->getRepository(Team::class)->findAll();
+        
+        // Recalculate budget usage for all teams the user manages
+        if (in_array('ROLE_MANAGER', $user->getRoles())) {
+            foreach ($currentTeams as $team) {
+                $budgetAlertService->checkBudgetAndAlert($team);
+            }
+        }
         
         // Remove teams the player is already in from available teams
         $availableTeams = array_filter($availableTeams, function($team) use ($currentTeams) {
@@ -54,6 +63,17 @@ class PlayerDashboardController extends AbstractController
 
         // Get player score and stats
         $playerStats = $scoreService->getPlayerStats($user);
+        
+        // Manager financial data (initialize as null if not a manager)
+        $managerFinancialSummary = null;
+        $managerDepenseLineLabels = [];
+        $managerDepenseLineDepenses = [];
+        $managerDepenseLineBudgets = [];
+        $managerDepensePieLabels = [];
+        $managerDepensePieValues = [];
+        $managerDepenseBudgetLineLabels = [];
+        $managerDepenseBudgetLineDepenses = [];
+        $managerDepenseBudgetLineBudgets = [];
 
         return $this->render('player/dashboard.html.twig', [
             'player' => $user,
@@ -64,6 +84,15 @@ class PlayerDashboardController extends AbstractController
             'budgets' => $budgets,
             'depenses' => $depenses,
             'playerStats' => $playerStats,
+            'managerFinancialSummary' => $managerFinancialSummary,
+            'managerDepenseLineLabels' => $managerDepenseLineLabels,
+            'managerDepenseLineDepenses' => $managerDepenseLineDepenses,
+            'managerDepenseLineBudgets' => $managerDepenseLineBudgets,
+            'managerDepensePieLabels' => $managerDepensePieLabels,
+            'managerDepensePieValues' => $managerDepensePieValues,
+            'managerDepenseBudgetLineLabels' => $managerDepenseBudgetLineLabels,
+            'managerDepenseBudgetLineDepenses' => $managerDepenseBudgetLineDepenses,
+            'managerDepenseBudgetLineBudgets' => $managerDepenseBudgetLineBudgets,
         ]);
     }
 

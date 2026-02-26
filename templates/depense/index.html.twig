@@ -8,13 +8,23 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="page-title">💰 Expenses Management</h1>
             <div class="d-flex gap-2">
-                {% if is_granted('ROLE_MANAGER') or is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('depense_chatbot_index') }}" class="btn btn-info">
-                        <i class="fas fa-robot"></i> AI Chatbot
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('depense_finance_stats') }}" class="btn btn-secondary">
+                        <i class="fas fa-chart-pie"></i> Finance Budget
                     </a>
                 {% endif %}
-                <a href="{{ path('depense_new') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Create New Expense
+                {% if not is_granted('ROLE_ADMIN') %}
+                    {% if is_granted('ROLE_MANAGER') %}
+                        <a href="{{ path('depense_chatbot_index') }}" class="btn btn-info">
+                            <i class="fas fa-robot"></i> AI Chatbot
+                        </a>
+                    {% endif %}
+                    <a href="{{ path('depense_new') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Create New Expense
+                    </a>
+                {% endif %}
+                <a href="{{ path('depense_export_pdf') ~ '?' ~ app.request.queryString }}" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Export PDF
                 </a>
             </div>
         </div>
@@ -164,21 +174,22 @@
                                         <a href="{{ path('depense_edit', {id: depense.id}) }}" class="btn btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        
-                                        {% if depense.statut == 'en_attente' %}
-                                            <form method="POST" action="{{ path('depense_valider', {id: depense.id}) }}" style="display:inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ depense.id) }}">
-                                                <button type="submit" class="btn btn-success btn-sm" title="Approve" onclick="return confirm('Approve this expense?')">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
 
-                                            <form method="POST" action="{{ path('depense_refuser', {id: depense.id}) }}" style="display:inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ depense.id) }}">
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Reject" onclick="return confirm('Reject this expense?')">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            {% if depense.statut == 'en_attente' or depense.statut == 'en attente' %}
+                                                <form method="POST" action="{{ path('admin_depense_approve', {id: depense.id}) }}" style="display:inline;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('depense') }}">
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Approve" onclick="return confirm('Approve this expense?')">
+                                                        <i class="fas fa-check"></i> Approve
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ path('admin_depense_refuse', {id: depense.id}) }}" style="display:inline;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('depense') }}">
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Refuse" onclick="return confirm('Refuse this expense?')">
+                                                        <i class="fas fa-times"></i> Refuse
+                                                    </button>
+                                                </form>
+                                            {% endif %}
                                         {% endif %}
 
                                         <form method="POST" action="{{ path('depense_delete', {id: depense.id}) }}" style="display:inline;">

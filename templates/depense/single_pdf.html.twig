@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Expense #{{ depense.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 20px;
+        }
+        .header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #007bff;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .field {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        .label {
+            font-weight: bold;
+            width: 150px;
+            color: #007bff;
+        }
+        .value {
+            flex: 1;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: white;
+        }
+        .status.validée {
+            background-color: #28a745;
+        }
+        .status.refusée {
+            background-color: #dc3545;
+        }
+        .status.en_attente {
+            background-color: #ffc107;
+            color: black;
+        }
+        .category {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            background-color: #e9ecef;
+            font-size: 12px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💰 Expense Details</h1>
+        <p>Generated on {{ "now"|date('Y-m-d H:i') }}</p>
+    </div>
+
+    <div class="content">
+        <div class="field">
+            <div class="label">Expense ID:</div>
+            <div class="value">#{{ depense.id }}</div>
+        </div>
+
+        <div class="field">
+            <div class="label">Title:</div>
+            <div class="value"><strong>{{ depense.titre }}</strong></div>
+        </div>
+
+        <div class="field">
+            <div class="label">Amount:</div>
+            <div class="value"><strong>{{ depense.montant|number_format(2, ',', ' ') }}€</strong></div>
+        </div>
+
+        <div class="field">
+            <div class="label">Status:</div>
+            <div class="value">
+                <span class="status {% if depense.statut == 'validée' %}validée{% elseif depense.statut == 'refusée' %}refusée{% else %}en_attente{% endif %}">
+                    {% if depense.statut == 'validée' %}
+                        Approved
+                    {% elseif depense.statut == 'refusée' %}
+                        Rejected
+                    {% else %}
+                        Pending
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="label">Category:</div>
+            <div class="value">
+                <span class="category">
+                    {% if depense.categorie == 'materiel' %}
+                        📦 Material
+                    {% elseif depense.categorie == 'transport' %}
+                        🚗 Transport
+                    {% elseif depense.categorie == 'logistique' %}
+                        📦 Logistics
+                    {% elseif depense.categorie == 'nourriture' %}
+                        🍽️ Food
+                    {% else %}
+                        ❓ Other
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="label">Team:</div>
+            <div class="value">
+                {% if depense.team %}
+                    {{ depense.team.name }}
+                {% else %}
+                    <em>N/A</em>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="label">Created Date:</div>
+            <div class="value">{{ depense.dateCreation|date('d/m/Y H:i') }}</div>
+        </div>
+
+        {% if depense.description %}
+        <div class="field">
+            <div class="label">Description:</div>
+            <div class="value">{{ depense.description }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>This document was automatically generated. For official use only.</p>
+    </div>
+</body>
+</html>

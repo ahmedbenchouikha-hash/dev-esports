@@ -90,34 +90,16 @@
             <!-- Action Buttons -->
             <div class="card">
                 <div class="card-body">
-                    {% if depense.statut == 'en_attente' %}
-                        <p class="mb-2"><strong>Approve or Reject this expense:</strong></p>
-                        <div class="d-flex gap-2">
-                            <form method="POST" action="{{ path('depense_valider', {id: depense.id}) }}" style="display:inline;">
-                                <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ depense.id) }}">
-                                <button type="submit" class="btn btn-success" onclick="return confirm('Approve this expense?')">
-                                    <i class="fas fa-check"></i> Approve
-                                </button>
-                            </form>
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('depense_edit', {id: depense.id}) }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
 
-                            <form method="POST" action="{{ path('depense_refuser', {id: depense.id}) }}" style="display:inline;">
-                                <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ depense.id) }}">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this expense?')">
-                                    <i class="fas fa-times"></i> Reject
-                                </button>
-                            </form>
-                        </div>
-                    {% else %}
-                        <p class="text-muted"><strong>Status:</strong> This expense has already been {{ depense.statut == 'validée' ? 'approved' : 'rejected' }}.</p>
-                    {% endif %}
-
-                    <hr>
-
-                    <form method="POST" action="{{ path('depense_delete', {id: depense.id}) }}" style="display:inline;">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ depense.id) }}">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this expense? This action cannot be undone.')">
-                            <i class="fas fa-trash"></i> Delete Expense
-                        </button>
+                        <form method="POST" action="{{ path('depense_delete', {id: depense.id}) }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ depense.id) }}">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this expense? This action cannot be undone.')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                     </form>
                 </div>
             </div>

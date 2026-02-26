@@ -1,0 +1,249 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1>📊 Dashboard Financier</h1>
+            <hr>
+        </div>
+    </div>
+
+    <!-- KPI Section -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Budget Total</h6>
+                    <h2 class="text-primary">{{ budgets_total|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Dépenses</h6>
+                    <h2 class="text-danger">{{ depenses_total|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Restant</h6>
+                    <h2 class="text-success">{{ (budgets_total - depenses_total)|number_format(0) }} TND</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6>Utilisation</h6>
+                    <h2 class="text-info">{{ budgets_total > 0 ? ((depenses_total / budgets_total) * 100)|round(1) : 0 }}%</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    📊 Dépenses par Catégorie
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    📈 Budget par Équipe
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    📉 Évolution du Budget
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="chart3"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    📊 Statistiques
+                </div>
+                <div class="card-body">
+                    <div style="width:100%; height:300px;">
+                        <canvas id="chart4"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Preprocess data from Twig
+    const budgets = {{ budgets|json_encode|raw }};
+    const depenses = {{ depenses|json_encode|raw }};
+
+    // Chart 1: Group depenses by category
+    const categoryCounts = {};
+    depenses.forEach(d => {
+        if (!categoryCounts[d.categorie]) categoryCounts[d.categorie] = 0;
+        categoryCounts[d.categorie]++;
+    });
+
+    // Chart 2: Budget per team
+    const teamData = {};
+    budgets.forEach(b => {
+        if (!teamData[b.team_name]) {
+            teamData[b.team_name] = { alloue: 0, utilise: 0 };
+        }
+        teamData[b.team_name].alloue += b.montant_alloue;
+        teamData[b.team_name].utilise += b.montant_utilise;
+    });
+
+    // Chart 4: Depense stats by category
+    const categoryStats = {};
+    depenses.forEach(d => {
+        if (!categoryStats[d.categorie]) {
+            categoryStats[d.categorie] = { total: 0, validee: 0 };
+        }
+        categoryStats[d.categorie].total++;
+        if (d.statut === 'validée') categoryStats[d.categorie].validee++;
+    });
+
+    setTimeout(function() {
+        // Chart 1: Dépenses par Catégorie (Count)
+        new Chart(document.getElementById('chart1'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(categoryCounts),
+                datasets: [{
+                    data: Object.values(categoryCounts),
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#95E1D3']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Chart 2: Budget par Équipe
+        new Chart(document.getElementById('chart2'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(teamData),
+                datasets: [
+                    {
+                        label: 'Alloué (TND)',
+                        data: Object.values(teamData).map(t => t.alloue),
+                        backgroundColor: '#45B7D1'
+                    },
+                    {
+                        label: 'Utilisé (TND)',
+                        data: Object.values(teamData).map(t => t.utilise),
+                        backgroundColor: '#FF6B6B'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Chart 3: Évolution (Cumulative by date)
+        const dateMap = {};
+        depenses.forEach(d => {
+            const date = d.date_creation || 'Unknown';
+            if (!dateMap[date]) dateMap[date] = 0;
+            dateMap[date]++;
+        });
+        const sortedDates = Object.keys(dateMap).sort();
+        let cumulative = 0;
+        const cumulativeData = sortedDates.map(date => {
+            cumulative += dateMap[date];
+            return cumulative;
+        });
+
+        new Chart(document.getElementById('chart3'), {
+            type: 'line',
+            data: {
+                labels: sortedDates.length > 0 ? sortedDates : ['Pas de données'],
+                datasets: [{
+                    label: 'Dépenses Cumulées',
+                    data: cumulativeData.length > 0 ? cumulativeData : [0],
+                    borderColor: '#FF6B6B',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Chart 4: Statistiques par Catégorie
+        new Chart(document.getElementById('chart4'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(categoryStats),
+                datasets: [
+                    {
+                        label: 'Total',
+                        data: Object.values(categoryStats).map(s => s.total),
+                        backgroundColor: '#45B7D1'
+                    },
+                    {
+                        label: 'Validée',
+                        data: Object.values(categoryStats).map(s => s.validee),
+                        backgroundColor: '#51CF66'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        console.log('✅ Tous les graphiques sont affichés avec données réelles');
+    }, 200);
+</script>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Depense;
 use App\Entity\Game;
 use App\Entity\Player;
 use App\Entity\Team;
@@ -187,9 +188,56 @@ class AppFixtures extends Fixture
             $matchCount++;
         }
 
+        // Create Expenses
+        $expenseCount = 0;
+
+        $depense1 = new Depense();
+        $depense1->setTeam($teams[0]); // Phoenix Legends
+        $depense1->setTitre('Equipment Purchase');
+        $depense1->setMontant(5000.00);
+        $depense1->setDescription('Gaming peripherals and tournament equipment');
+        $depense1->setDateCreation(new \DateTime());
+        $depense1->setStatut('en_attente');
+        $depense1->setCategorie('equipment');
+        $manager->persist($depense1);
+        $expenseCount++;
+
+        $depense2 = new Depense();
+        $depense2->setTeam($teams[0]); // Phoenix Legends
+        $depense2->setTitre('Team Travel Expenses');
+        $depense2->setMontant(15000.00);
+        $depense2->setDescription('Flights and accommodation for world championship');
+        $depense2->setDateCreation(new \DateTime('-20 days'));
+        $depense2->setStatut('en_attente');
+        $depense2->setCategorie('travel');
+        $manager->persist($depense2);
+        $expenseCount++;
+
+        $depense3 = new Depense();
+        $depense3->setTeam($teams[1]); // Dragon Warriors
+        $depense3->setTitre('Coaching Fees');
+        $depense3->setMontant(8000.00);
+        $depense3->setDescription('Monthly coaching and strategy sessions');
+        $depense3->setDateCreation(new \DateTime('-5 days'));
+        $depense3->setStatut('en_attente');
+        $depense3->setCategorie('personnel');
+        $manager->persist($depense3);
+        $expenseCount++;
+
+        $depense4 = new Depense();
+        $depense4->setTeam($teams[2]); // Shadow Assassins
+        $depense4->setTitre('Streaming Setup');
+        $depense4->setMontant(3500.00);
+        $depense4->setDescription('Professional streaming equipment and software licenses');
+        $depense4->setDateCreation(new \DateTime());
+        $depense4->setStatut('en_attente');
+        $depense4->setCategorie('equipment');
+        $manager->persist($depense4);
+        $expenseCount++;
+
         $manager->flush();
 
         echo "\n✅ Database populated successfully!\n";
-        echo "   📊 Created: 3 Tournaments, 6 Teams, 30 Players, $matchCount Matches\n\n";
+        echo "   📊 Created: 3 Tournaments, 6 Teams, 30 Players, $matchCount Matches, $expenseCount Expenses\n\n";
     }
 }

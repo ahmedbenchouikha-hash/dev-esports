@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Dev Esports{% endblock %}</title>
+        <title>{% block title %}Rankup{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         
         <!-- Bootstrap CSS -->
@@ -750,7 +750,7 @@
                 <div style="display: flex; align-items: center; gap: 2rem;">
                     <a class="navbar-brand-custom" href="/">
                         <i class="fas fa-gamepad"></i>
-                        <span>Dev Esports</span>
+                        <span>Rankup</span>
                     </a>
                 </div>
                 
@@ -771,13 +771,6 @@
                                 <i class="fas fa-users"></i> Teams
                             </a>
                         </li>
-                        {% if app.user and is_granted('ROLE_USER') and app.user.teams is defined and app.user.teams|length > 0 %}
-                            <li class="nav-item-custom">
-                                <a href="{{ path('team_chat_index') }}">
-                                    <i class="fas fa-comments"></i> Team Chat
-                                </a>
-                            </li>
-                        {% endif %}
                         {% if app.user %}
                             {% if is_granted('ROLE_ADMIN') %}
                                 <li class="nav-item-custom">
@@ -861,7 +854,7 @@
         <!-- Footer -->
         <footer class="footer mt-5">
             <div class="container">
-                <p>&copy; 2026 Dev Esports. All rights reserved.</p>
+                <p>&copy; 2026 Rankup. All rights reserved.</p>
                 <p class="text-muted">PIDEV Project - Esports Management System</p>
             </div>
         </footer>

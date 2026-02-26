@@ -1,67 +1,113 @@
-{# Chart: Comparaison Budget Équipes #}
-<div class="chart-container" style="position: relative; height: 300px;">
-    <canvas id="teamsChart"></canvas>
-</div>
+{# Chart: Comparaison Budget Équipes - ApexCharts #}
+<div id="chartTeamsBudget" style="height: 350px;"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('teamsChart').getContext('2d');
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const rawData = {%- filter json_encode -%}{{ budgets }}{%- endfilter -%};
+        const budgets = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
         
-        const labels = [];
-        const allocatedData = [];
-        const usedData = [];
-
-        {% for budget in budgets %}
-            labels.push('{{ budget.team.name }}');
-            allocatedData.push({{ budget.montantAlloue|json_encode }});
-            usedData.push({{ budget.montantUtilise|json_encode }});
-        {% endfor %}
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Budget Alloué',
-                        data: allocatedData,
-                        backgroundColor: '#36A2EB',
-                        borderColor: '#36A2EB',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Budget Utilisé',
-                        data: usedData,
-                        backgroundColor: '#FF6384',
-                        borderColor: '#FF6384',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    title: {
-                        display: true,
-                        text: 'Comparaison des Budgets par Équipe'
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Montant (€)'
-                        }
-                    }
-                }
+        if (!Array.isArray(budgets) || budgets.length === 0) {
+            document.getElementById('chartTeamsBudget').innerHTML = 
+                '<div class="alert alert-info text-center pt-5"><i class="fas fa-database"></i> Pas de budgets disponibles</div>';
+            return;
+        }
+        
+        const teamNames = [];
+        const allocatedSeries = [];
+        const usedSeries = [];
+        
+        budgets.forEach(b => {
+            if (b) {
+                const teamName = b.team_name || ('Équipe ' + (b.id || b.team_id || 'Unknown'));
+                teamNames.push(teamName);
+                allocatedSeries.push(parseFloat(b.montant_alloue || 0));
+                usedSeries.push(parseFloat(b.montant_utilise || 0));
             }
         });
-    });
+        
+        if (teamNames.length === 0) {
+            document.getElementById('chartTeamsBudget').innerHTML = 
+                '<div class="alert alert-info text-center pt-5"><i class="fas fa-database"></i> Aucune équipe avec budget</div>';
+            return;
+        }
+        
+        const options = {
+            series: [
+                {
+                    name: 'Budget Alloué',
+                    data: allocatedSeries
+                },
+                {
+                    name: 'Budget Utilisé',
+                    data: usedSeries
+                }
+            ],
+            chart: {
+                type: 'bar',
+                height: 350,
+                sparkline: { enabled: false }
+            },
+            colors: ['#45B7D1', '#FF6B6B'],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    columnWidth: '55%',
+                    borderRadius: 4,
+                    dataLabels: {
+                        position: 'top'
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetX: -6,
+                style: {
+                    fontSize: '11px',
+                    colors: ['#333']
+                },
+                formatter: function(val) {
+                    return (val || 0).toFixed(2) + ' TND';
+                }
+            },
+            stroke: {
+                show: true,
+                width: 1,
+                colors: ['#f3f3f3']
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                y: {
+                    formatter: function(val) {
+                        return (val || 0).toFixed(2) + ' TND';
+                    }
+                }
+            },
+            xaxis: {
+                categories: teamNames,
+                title: {
+                    text: 'Budget (TND)'
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Équipes'
+                }
+            },
+            legend: {
+                position: 'bottom',
+                horizontalAlign: 'center',
+                offsetY: 10
+            }
+        };
+        
+        new ApexCharts(document.getElementById('chartTeamsBudget'), options).render();
+    } catch(e) {
+        console.error('Chart error:', e);
+        document.getElementById('chartTeamsBudget').innerHTML = 
+            '<div class="alert alert-danger"><strong>Erreur graphique:</strong> ' + e.message + '</div>';
+    }
+});
 </script>

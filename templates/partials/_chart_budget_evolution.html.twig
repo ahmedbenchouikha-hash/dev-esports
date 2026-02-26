@@ -1,0 +1,175 @@
+{# Chart: Évolution du Budget dans le Temps #}
+<div id="chartBudgetEvolution" style="height: 350px;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const depensesRaw = {%- filter json_encode -%}{{ depenses }}{%- endfilter -%};
+        const depenses = typeof depensesRaw === 'string' ? JSON.parse(depensesRaw) : depensesRaw;
+        
+        if (!Array.isArray(depenses) || depenses.length === 0) {
+            document.getElementById('chartBudgetEvolution').innerHTML = 
+                '<div class="alert alert-info text-center pt-5"><i class="fas fa-database"></i> Pas de données</div>';
+            return;
+        }
+        
+        // Trier les dépenses par date
+        const sortedDepenses = depenses
+            .filter(d => d && (d.statut === 'validée' || d.statut === 'brouillon'))
+            .sort((a, b) => new Date(a.date_creation || 0) - new Date(b.date_creation || 0));
+        
+        // Grouper par date et calculer cumul
+        const dateMap = {};
+        const budgetAlloc = {{ budgets_total|default(0) }};
+        
+        sortedDepenses.forEach(d => {
+            if (d && d.date_creation) {
+                const date = new Date(d.date_creation).toLocaleDateString('fr-FR');
+                if (!dateMap[date]) {
+                    dateMap[date] = { count: 0, amount: 0 };
+                }
+                dateMap[date].count++;
+                if (d.statut === 'validée') {
+                    dateMap[date].amount += parseFloat(d.montant || 0);
+                }
+            }
+        });
+        
+        // Construire les séries avec points
+        let runningTotal = 0;
+        const dates = [];
+        const cumulativeSeries = [];
+        const remaining = [];
+        
+        Object.entries(dateMap).forEach(([date, data]) => {
+            runningTotal += data.amount;
+            dates.push(date);
+            cumulativeSeries.push(parseFloat(runningTotal.toFixed(2)));
+            remaining.push(parseFloat((budgetAlloc - runningTotal).toFixed(2)));
+        });
+        
+        if (dates.length === 0) {
+            document.getElementById('chartBudgetEvolution').innerHTML = 
+                '<div class="alert alert-info text-center pt-5"><i class="fas fa-database"></i> Aucune dépense datée</div>';
+            return;
+        }
+        
+        const options = {
+            series: [
+                {
+                    name: 'Budget Dépensé (Cumulatif)',
+                    data: cumulativeSeries,
+                    type: 'area'
+                },
+                {
+                    name: 'Budget Restant',
+                    data: remaining,
+                    type: 'line'
+                }
+            ],
+            chart: {
+                type: 'line',
+                height: 350,
+                sparkline: { enabled: false },
+                toolbar: {
+                    show: true
+                },
+                zoom: {
+                    enabled: true
+                }
+            },
+            colors: ['#FF6B6B', '#4ECDC4'],
+            stroke: {
+                curve: 'smooth',
+                width: [3, 2]
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    type: 'vertical',
+                    opacityFrom: 0.3,
+                    opacityTo: 0
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            markers: {
+                size: 4,
+                hover: {
+                    size: 6
+                }
+            },
+            xaxis: {
+                categories: dates,
+                title: {
+                    text: 'Date'
+                }
+            },
+            yaxis: [
+                {
+                    title: {
+                        text: 'Montant (TND)',
+                        style: {
+                            color: '#FF6B6B'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            color: '#FF6B6B'
+                        },
+                        formatter: function(val) {
+                            return (val || 0).toFixed(2) + ' TND';
+                        }
+                    }
+                },
+                {
+                    opposite: true,
+                    title: {
+                        text: 'Restant (TND)',
+                        style: {
+                            color: '#4ECDC4'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            color: '#4ECDC4'
+                        },
+                        formatter: function(val) {
+                            return (val || 0).toFixed(2) + ' TND';
+                        }
+                    }
+                }
+            ],
+            tooltip: {
+                shared: true,
+                intersect: false,
+                y: [
+                    {
+                        formatter: function(val) {
+                            return (val || 0).toFixed(2) + ' TND Dépensé';
+                        }
+                    },
+                    {
+                        formatter: function(val) {
+                            return (val || 0).toFixed(2) + ' TND Restant';
+                        }
+                    }
+                ]
+            },
+            legend: {
+                position: 'bottom',
+                horizontalAlign: 'center',
+                offsetY: 10
+            }
+        };
+        
+        new ApexCharts(document.getElementById('chartBudgetEvolution'), options).render();
+    } catch(e) {
+        console.error('Chart error:', e);
+        document.getElementById('chartBudgetEvolution').innerHTML = 
+            '<div class="alert alert-danger"><strong>Erreur graphique:</strong> ' + e.message + '</div>';
+    }
+});
+</script>

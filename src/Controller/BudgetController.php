@@ -10,6 +10,7 @@ use App\Form\BudgetType;
 use App\Repository\BudgetRepository;
 use App\Repository\DepenseRepository;
 use App\Service\AuthorizationService;
+use App\Service\BudgetAlertService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -143,6 +144,90 @@ class BudgetController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard', name: 'dashboard', methods: ['GET'])]
+    public function dashboard(Request $request, BudgetRepository $budgetRepository, DepenseRepository $depenseRepository, PaginatorInterface $paginator): Response
+    {
+        $user = $this->getUser();
+        
+        // Check if user is a manager
+        if (!in_array('ROLE_MANAGER', $user->getRoles())) {
+            $this->addFlash('warning', 'Only managers can access the budget dashboard');
+            return $this->redirectToRoute('player_dashboard');
+        }
+        
+        // Get manager's teams
+        $managerTeams = $user->getTeams();
+        
+        if ($managerTeams->isEmpty()) {
+            $this->addFlash('warning', 'You must manage a team to access the budget dashboard');
+            return $this->redirectToRoute('player_dashboard');
+        }
+        
+        // Get budgets for manager's teams only
+        $budgets = [];
+        foreach ($managerTeams as $team) {
+            $budget = $budgetRepository->findOneBy(['team' => $team]);
+            if ($budget) {
+                $budgets[] = $budget;
+            }
+        }
+        
+        // Get depenses for manager's teams only
+        $allDepenses = $depenseRepository->findBy(
+            ['team' => $managerTeams->toArray()],
+            ['date_creation' => 'DESC']
+        );
+        
+        // Calculate totals for manager's teams only
+        $budgets_total = 0;
+        $depenses_total = 0;
+        
+        foreach ($budgets as $budget) {
+            $budgets_total += $budget->getMontantAlloue();
+        }
+        
+        foreach ($allDepenses as $depense) {
+            if ($depense->getStatut() === 'validée') {
+                $depenses_total += $depense->getMontant();
+            }
+        }
+        
+        // Convert depenses to array for JSON encoding
+        $depensesArray = [];
+        foreach ($allDepenses as $depense) {
+            $depensesArray[] = [
+                'id' => $depense->getId(),
+                'titre' => $depense->getTitre(),
+                'description' => $depense->getDescription(),
+                'montant' => floatval($depense->getMontant()),
+                'categorie' => $depense->getCategorie(),
+                'statut' => $depense->getStatut(),
+                'date_creation' => $depense->getDateCreation() ? $depense->getDateCreation()->format('Y-m-d') : null,
+                'team_id' => $depense->getTeam() ? $depense->getTeam()->getId() : null,
+            ];
+        }
+        
+        // Convert budgets to array
+        $budgetsArray = [];
+        foreach ($budgets as $budget) {
+            $budgetsArray[] = [
+                'id' => $budget->getId(),
+                'montant_alloue' => floatval($budget->getMontantAlloue()),
+                'montant_utilise' => floatval($budget->getMontantUtilise()),
+                'team_name' => $budget->getTeam() ? $budget->getTeam()->getName() : 'Unknown',
+                'team_id' => $budget->getTeam() ? $budget->getTeam()->getId() : null,
+            ];
+        }
+        
+        return $this->render('budget/dashboard_simple.html.twig', [
+            'budgets' => $budgetsArray,
+            'depenses' => $depensesArray,
+            'budgets_total' => $budgets_total,
+            'depenses_total' => $depenses_total,
+            'managerTeams' => $managerTeams,
+        ]);
+    }
+
     #[Route('/team/{teamId}', name: 'by_team', methods: ['GET'])]
     public function byTeam(int $teamId, BudgetRepository $budgetRepository, DepenseRepository $depenseRepository): Response
     {
@@ -167,7 +252,7 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, BudgetRepository $budgetRepository, AuthorizationService $authService, PaginatorInterface $paginator): Response
+    public function index(Request $request, BudgetRepository $budgetRepository, DepenseRepository $depenseRepository, AuthorizationService $authService, PaginatorInterface $paginator, BudgetAlertService $budgetAlertService, EntityManagerInterface $entityManager): Response
     {
         $search = $request->query->get('search', '');
         $sort = $request->query->get('sort', 'dateAllocation');
@@ -184,6 +269,22 @@ class BudgetController extends AbstractController
             $sort = 'dateAllocation';
         }
 
+        $allBudgets = $budgetRepository->findBy([], [$sort => $order]);
+        
+        // First pass: recalculate all budgets
+        foreach ($allBudgets as $budget) {
+            // Managers can only see budgets for teams they manage
+            if (!$this->isGranted('ROLE_ADMIN') && $this->isGranted('ROLE_MANAGER')) {
+                if (!$authService->canManageTeam($budget->getTeam())) {
+                    continue;
+                }
+            }
+            
+            // Recalculate budget usage
+            $budgetAlertService->checkBudgetAndAlert($budget->getTeam());
+        }
+        
+        // Reload budgets from database to get updated values
         $allBudgets = $budgetRepository->findBy([], [$sort => $order]);
         
         $budgets = [];
@@ -218,6 +319,19 @@ class BudgetController extends AbstractController
             3  // 3 items per page
         );
 
+        // Get expenses data for charts
+        $allExpenses = $depenseRepository->findBy([], ['date_creation' => 'DESC']);
+        $expenses = [];
+        foreach ($allExpenses as $exp) {
+            // Managers can only see expenses for teams they manage
+            if (!$this->isGranted('ROLE_ADMIN') && $this->isGranted('ROLE_MANAGER')) {
+                if (!$authService->canManageTeam($exp->getTeam())) {
+                    continue;
+                }
+            }
+            $expenses[] = $exp;
+        }
+
         $stats = [
             'total_alloue' => 0,
             'total_utilise' => 0,
@@ -241,6 +355,8 @@ class BudgetController extends AbstractController
             'sort' => $sort,
             'order' => $order,
             'filter' => $filter,
+            'expenses' => $expenses,
+            'all_budgets' => $budgets,
         ]);
     }
 

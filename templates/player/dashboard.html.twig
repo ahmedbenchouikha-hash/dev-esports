@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Player Dashboard - Dev Esports{% endblock %}
+{% block title %}Player Dashboard - Rankup{% endblock %}
 
 {% block body %}
 <div class="player-dashboard">
@@ -29,7 +29,7 @@
                 <h3>Financial Dashboard</h3>
                 <p>View team budgets, expenses, and financial charts</p>
             </div>
-            <a href="{{ path('budget_index') }}" class="action-btn">
+            <a href="{{ path('budget_dashboard') }}" class="action-btn">
                 <i class="fas fa-arrow-right"></i> View Full Dashboard
             </a>
         </div>
@@ -312,6 +312,163 @@
                     </a>
                 </div>
             </div>
+            {# Beautiful Manager Financial Charts #}
+            {% if managerFinancialSummary is not null %}
+                <style>
+                    .manager-charts-section {
+                        margin-top: 2rem;
+                    }
+
+                    .chart-card {
+                        background: linear-gradient(135deg, rgba(26, 40, 71, 0.8) 0%, rgba(26, 40, 71, 0.6) 100%);
+                        backdrop-filter: blur(20px);
+                        border: 2px solid rgba(0, 242, 254, 0.2);
+                        border-radius: 20px;
+                        overflow: hidden;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 8px 32px rgba(0, 242, 254, 0.1), 0 0 20px rgba(37, 211, 102, 0.05);
+                    }
+
+                    .chart-card:hover {
+                        border-color: rgba(0, 242, 254, 0.4);
+                        box-shadow: 0 16px 48px rgba(0, 242, 254, 0.2), 0 0 40px rgba(37, 211, 102, 0.1);
+                        transform: translateY(-4px);
+                    }
+
+                    .chart-header {
+                        padding: 1.75rem;
+                        background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(37, 211, 102, 0.1) 100%);
+                        border-bottom: 2px solid rgba(0, 242, 254, 0.15);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .chart-header::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        right: -50px;
+                        width: 150px;
+                        height: 150px;
+                        background: radial-gradient(circle, rgba(0, 242, 254, 0.1), transparent);
+                        border-radius: 50%;
+                    }
+
+                    .chart-header h5 {
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        margin: 0;
+                        background: linear-gradient(135deg, #00f2fe, #25d366);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .chart-header i {
+                        font-size: 1.5rem;
+                        color: #00f2fe;
+                        filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.5));
+                    }
+
+                    .chart-body {
+                        padding: 2rem;
+                        position: relative;
+                        min-height: 350px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .chart-body::before {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                        background: radial-gradient(circle at 50% 50%, rgba(0, 242, 254, 0.03), transparent);
+                        pointer-events: none;
+                    }
+
+                    .chart-container {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                        min-height: 320px;
+                    }
+
+                    .charts-grid {
+                        display: grid;
+                        grid-template-columns: 2fr 1fr;
+                        gap: 2rem;
+                        animation: fadeInUp 0.8s ease-out;
+                    }
+
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    @media (max-width: 1024px) {
+                        .charts-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+
+                    .chart-stat-badge {
+                        position: absolute;
+                        top: 1.5rem;
+                        left: 2rem;
+                        background: rgba(0, 242, 254, 0.1);
+                        border: 1px solid rgba(0, 242, 254, 0.3);
+                        padding: 0.5rem 1rem;
+                        border-radius: 50px;
+                        font-size: 0.85rem;
+                        color: #00f2fe;
+                        font-weight: 600;
+                        backdrop-filter: blur(10px);
+                        z-index: 10;
+                    }
+                </style>
+
+                <div class="manager-charts-section">
+                    <div class="charts-grid">
+                        <!-- Line Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5><i class="fas fa-chart-line"></i> Dépenses vs Budget</h5>
+                                <small class="text-muted d-block mt-2" style="position: relative; z-index: 1;">Evolution sur les 6 derniers mois</small>
+                            </div>
+                            <div class="chart-body">
+                                <div class="chart-container">
+                                    <canvas id="managerDepenseBudgetLineChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pie Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5><i class="fas fa-pie-chart"></i> Répartition</h5>
+                                <small class="text-muted d-block mt-2" style="position: relative; z-index: 1;">Par équipe</small>
+                            </div>
+                            <div class="chart-body">
+                                <div class="chart-container">
+                                    <canvas id="managerDepensePieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         {% else %}
             <div class="card">
                 <div class="card-body">
@@ -333,6 +490,243 @@
             </div>
         {% endif %}
     </div>
+
+    {% if is_granted('ROLE_MANAGER') %}
+        {% block javascripts %}
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Beautiful color gradients
+                    const expenseColor = {
+                        main: 'rgb(255, 71, 87)',
+                        light: 'rgba(255, 71, 87, 0.1)',
+                        medium: 'rgba(255, 71, 87, 0.5)'
+                    };
+                    
+                    const budgetColor = {
+                        main: 'rgb(37, 211, 102)',
+                        light: 'rgba(37, 211, 102, 0.1)',
+                        medium: 'rgba(37, 211, 102, 0.5)'
+                    };
+
+                    const pieColors = [
+                        { bg: 'rgba(0, 242, 254, 0.9)', border: 'rgb(0, 242, 254)' },
+                        { bg: 'rgba(37, 211, 102, 0.9)', border: 'rgb(37, 211, 102)' },
+                        { bg: 'rgba(255, 71, 87, 0.9)', border: 'rgb(255, 71, 87)' },
+                        { bg: 'rgba(255, 159, 64, 0.9)', border: 'rgb(255, 159, 64)' },
+                        { bg: 'rgba(147, 112, 219, 0.9)', border: 'rgb(147, 112, 219)' },
+                        { bg: 'rgba(255, 193, 7, 0.9)', border: 'rgb(255, 193, 7)' },
+                        { bg: 'rgba(76, 175, 80, 0.9)', border: 'rgb(76, 175, 80)' },
+                        { bg: 'rgba(33, 150, 243, 0.9)', border: 'rgb(33, 150, 243)' }
+                    };
+
+                    // Line chart: Evolution Dépenses vs Budget (6 derniers mois)
+                    const lineLabels = {{ managerDepenseBudgetLineLabels|json_encode()|raw }};
+                    const depenseLine = {{ managerDepenseBudgetLineDepenses|json_encode()|raw }};
+                    const budgetLine = {{ managerDepenseBudgetLineBudgets|json_encode()|raw }};
+                    const lineCtx = document.getElementById('managerDepenseBudgetLineChart') ? document.getElementById('managerDepenseBudgetLineChart').getContext('2d') : null;
+                    
+                    if (lineCtx) {
+                        // Create gradient for expenses line
+                        const expenseGradient = lineCtx.createLinearGradient(0, 0, 0, 400);
+                        expenseGradient.addColorStop(0, 'rgba(255, 71, 87, 0.4)');
+                        expenseGradient.addColorStop(1, 'rgba(255, 71, 87, 0)');
+
+                        // Create gradient for budget line
+                        const budgetGradient = lineCtx.createLinearGradient(0, 0, 0, 400);
+                        budgetGradient.addColorStop(0, 'rgba(37, 211, 102, 0.4)');
+                        budgetGradient.addColorStop(1, 'rgba(37, 211, 102, 0)');
+
+                        const lineChart = new Chart(lineCtx, {
+                            type: 'line',
+                            data: {
+                                labels: lineLabels,
+                                datasets: [
+                                    {
+                                        label: 'Dépenses validées',
+                                        data: depenseLine,
+                                        borderColor: expenseColor.main,
+                                        backgroundColor: expenseGradient,
+                                        borderWidth: 3,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: expenseColor.main,
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                        pointHoverBorderWidth: 3,
+                                        shadowOffsetX: 2,
+                                        shadowOffsetY: 2,
+                                        shadowBlur: 10,
+                                        shadowColor: 'rgba(255, 71, 87, 0.3)'
+                                    },
+                                    {
+                                        label: 'Budget alloué',
+                                        data: budgetLine,
+                                        borderColor: budgetColor.main,
+                                        backgroundColor: budgetGradient,
+                                        borderWidth: 3,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: budgetColor.main,
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                        pointHoverBorderWidth: 3,
+                                        shadowOffsetX: 2,
+                                        shadowOffsetY: 2,
+                                        shadowBlur: 10,
+                                        shadowColor: 'rgba(37, 211, 102, 0.3)'
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    duration: 1500,
+                                    easing: 'easeInOutQuart',
+                                    delay: (ctx) => {
+                                        let delay = 0;
+                                        if (ctx.type === 'data') {
+                                            delay = ctx.dataIndex * 50 + ctx.datasetIndex * 100;
+                                        }
+                                        return delay;
+                                    }
+                                },
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            usePointStyle: true,
+                                            padding: 20,
+                                            font: { size: 12, weight: '600' },
+                                            color: '#a0a0a0',
+                                            generateLabels: function(chart) {
+                                                const datasets = chart.data.datasets;
+                                                return datasets.map((dataset, i) => ({
+                                                    text: dataset.label,
+                                                    fillStyle: dataset.borderColor,
+                                                    hidden: !chart.isDatasetVisible(i),
+                                                    index: i,
+                                                    pointStyle: 'circle'
+                                                }));
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#fff',
+                                        bodyColor: '#fff',
+                                        borderColor: 'rgba(0, 242, 254, 0.5)',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        displayColors: true,
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString('fr-FR') + ' DT';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            color: '#a0a0a0',
+                                            font: { size: 11 },
+                                            callback: function(value) {
+                                                return (value / 1000).toLocaleString('fr-FR') + 'k';
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 242, 254, 0.05)',
+                                            drawBorder: false
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: '#a0a0a0',
+                                            font: { size: 11 }
+                                        },
+                                        grid: {
+                                            display: false,
+                                            drawBorder: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Pie chart: Répartition des dépenses par équipe
+                    const pieLabels = {{ managerDepensePieLabels|json_encode()|raw }};
+                    const pieData = {{ managerDepensePieValues|json_encode()|raw }};
+                    const pieCtx = document.getElementById('managerDepensePieChart') ? document.getElementById('managerDepensePieChart').getContext('2d') : null;
+                    
+                    if (pieCtx) {
+                        const pieBackgroundColors = pieColors.slice(0, pieLabels.length).map(c => c.bg);
+                        const pieBorderColors = pieColors.slice(0, pieLabels.length).map(c => c.border);
+
+                        const pieChart = new Chart(pieCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: pieLabels,
+                                datasets: [{
+                                    data: pieData,
+                                    backgroundColor: pieBackgroundColors,
+                                    borderColor: pieBorderColors,
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    animateRotate: true,
+                                    animateScale: false,
+                                    duration: 1500,
+                                    easing: 'easeInOutQuart'
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            usePointStyle: true,
+                                            padding: 15,
+                                            font: { size: 12, weight: '600' },
+                                            color: '#a0a0a0'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#fff',
+                                        bodyColor: '#fff',
+                                        borderColor: 'rgba(0, 242, 254, 0.5)',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                                return context.label + ': ' + context.parsed.toLocaleString('fr-FR') + ' DT (' + percentage + '%)';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            </script>
+        {% endblock %}
+    {% endif %}
 
     <!-- Available Teams Section -->
     <div class="team-section">
@@ -428,72 +822,7 @@
         </div>
     </div>
 
-    <!-- Additional Charts at End of Page -->
-    {% if is_granted('ROLE_MANAGER') %}
-    {% if depenses|length > 0 %}
-    <!-- Financial Statistics Charts Section at End -->
-    {% if budgets|length > 0 or depenses|length > 0 %}
-    <div class="additional-charts-section">
-        <div class="section-header">
-            <i class="fas fa-chart-bar"></i>
-            <h2>Financial Statistics</h2>
-        </div>
-
-        <!-- Budget par Équipe Chart (Full Width) -->
-        {% if budgets|length > 0 %}
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-bar"></i> Budget par Équipe
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'partials/_chart_teams_budget_comparison.html.twig' with {'budgets': budgets} %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="row">
-            <!-- Répartition par Catégorie Chart -->
-            {% if depenses|length > 0 %}
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-pie"></i> Répartition par Catégorie
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'partials/_chart_depenses_by_category.html.twig' with {'depenses': depenses} %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Évolution des Dépenses Chart -->
-            {% if depenses|length > 0 %}
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-line"></i> Évolution des Dépenses
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'partials/_chart_depenses_evolution.html.twig' with {'depenses': depenses} %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-    {% endif %}
-    {% endif %}
+    {# Financial charts moved to dedicated Budget dashboard. Keep quick access at top. #}
 </div>
 
 <style>

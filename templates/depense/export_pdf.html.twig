@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Expenses Export - {{ export_date|date('Y-m-d') }}</title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+
+        .header p {
+            color: #666;
+            margin: 5px 0;
+            font-size: 11px;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .filters h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .filters p {
+            margin: 3px 0;
+            font-size: 11px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #333;
+        }
+
+        td {
+            font-size: 11px;
+        }
+
+        .amount {
+            text-align: right;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .status-approved {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .summary h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .summary-grid {
+            display: table;
+            width: 100%;
+        }
+
+        .summary-item {
+            display: table-cell;
+            padding: 5px 10px;
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #666;
+            display: block;
+        }
+
+        .summary-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            display: block;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        @page {
+            margin: 1cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Expenses Report</h1>
+        <p><strong>Generated on:</strong> {{ export_date|date('l, F j, Y \\a\\t g:i A') }}</p>
+        <p><strong>Total Expenses:</strong> {{ depenses|length }}</p>
+    </div>
+
+    {% if search or statut != 'all' or categorie != 'all' or min_amount or max_amount %}
+    <div class="filters">
+        <h3>Applied Filters</h3>
+        {% if search %}<p><strong>Search:</strong> {{ search }}</p>{% endif %}
+        {% if statut != 'all' %}<p><strong>Status:</strong> {{ statut }}</p>{% endif %}
+        {% if categorie != 'all' %}<p><strong>Category:</strong> {{ categorie }}</p>{% endif %}
+        {% if min_amount %}<p><strong>Min Amount:</strong> €{{ min_amount }}</p>{% endif %}
+        {% if max_amount %}<p><strong>Max Amount:</strong> €{{ max_amount }}</p>{% endif %}
+        {% if sort %}<p><strong>Sort by:</strong> {{ sort }} ({{ order }})</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 25%;">Title</th>
+                <th style="width: 15%;">Team</th>
+                <th style="width: 10%;">Category</th>
+                <th style="width: 10%;">Amount</th>
+                <th style="width: 10%;">Status</th>
+                <th style="width: 15%;">Date</th>
+                <th style="width: 10%;">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for depense in depenses %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><strong>{{ depense.titre }}</strong></td>
+                <td>{{ depense.team ? depense.team.name : 'N/A' }}</td>
+                <td><span class="category-badge">{{ depense.categorie }}</span></td>
+                <td class="amount">€{{ depense.montant|number_format(2, ',', ' ') }}</td>
+                <td>
+                    {% if depense.statut == 'validée' %}
+                        <span class="status-approved">✓ Approved</span>
+                    {% elseif depense.statut == 'refusée' %}
+                        <span class="status-rejected">✗ Rejected</span>
+                    {% else %}
+                        <span class="status-pending">⏳ Pending</span>
+                    {% endif %}
+                </td>
+                <td>{{ depense.dateCreation|date('M d, Y') }}</td>
+                <td>{{ depense.description|default('')|slice(0, 50) }}{% if depense.description|length > 50 %}...{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% set totalAmount = 0 %}
+    {% set approvedCount = 0 %}
+    {% set rejectedCount = 0 %}
+    {% set pendingCount = 0 %}
+
+    {% for depense in depenses %}
+        {% set totalAmount = totalAmount + depense.montant %}
+        {% if depense.statut == 'validée' %}
+            {% set approvedCount = approvedCount + 1 %}
+        {% elseif depense.statut == 'refusée' %}
+            {% set rejectedCount = rejectedCount + 1 %}
+        {% else %}
+            {% set pendingCount = pendingCount + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="summary">
+        <h3>Summary</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span class="summary-label">Total Amount</span>
+                <span class="summary-value">€{{ totalAmount|number_format(2, ',', ' ') }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Approved</span>
+                <span class="summary-value">{{ approvedCount }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Rejected</span>
+                <span class="summary-value">{{ rejectedCount }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Pending</span>
+                <span class="summary-value">{{ pendingCount }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This report was generated by Rankup Management System</p>
+        <p>© {{ export_date|date('Y') }} Rankup - All rights reserved</p>
+    </div>
+</body>
+</html>

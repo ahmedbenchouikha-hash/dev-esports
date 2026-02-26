@@ -38,10 +38,35 @@ class DepenseChatbotController extends AbstractController
             return $this->json(['error' => 'Message cannot be empty'], 422);
         }
 
-        $answer = $chatbotService->ask($message);
+        $user = $this->getUser();
+        $answer = $chatbotService->ask($message, $user);
 
         return $this->json([
             'reply' => $answer,
+        ]);
+    }
+
+    #[Route('/history', name: 'history', methods: ['GET'])]
+    public function getHistory(DepenseChatbotService $chatbotService): JsonResponse
+    {
+        if (!$this->isGranted('ROLE_MANAGER') && !$this->isGranted('ROLE_ADMIN')) {
+            return $this->json(['error' => 'Access denied'], 403);
+        }
+
+        $user = $this->getUser();
+        $history = $chatbotService->getConversationHistory($user);
+
+        $formattedHistory = array_map(function ($conversation) {
+            return [
+                'id' => $conversation->getId(),
+                'userMessage' => $conversation->getUserMessage(),
+                'aiResponse' => $conversation->getAiResponse(),
+                'createdAt' => $conversation->getCreatedAt()?->format('Y-m-d H:i:s'),
+            ];
+        }, $history);
+
+        return $this->json([
+            'history' => array_reverse($formattedHistory), // Plus récent en dernier
         ]);
     }
 }
