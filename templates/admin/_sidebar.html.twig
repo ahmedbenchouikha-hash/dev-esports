@@ -1,0 +1,51 @@
+<aside class="sidebar-inner">
+    <div class="brand">
+        <a href="#" class="brand-link">
+            <span class="logo">🎮</span>
+            <span class="brand-text">Dev Esports</span>
+        </a>
+    </div>
+
+    <nav class="nav">
+        <ul>
+            <li><a href="#" class="nav-item">Dashboard</a></li>
+
+            <li>
+                <div class="nav-section">Matches</div>
+                <ul class="nav-sub">
+                    <li><a href="#" class="nav-item">All Matches</a></li>
+                    <li><a href="#" class="nav-item">Create Match</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="nav-section">Tournaments</div>
+                <ul class="nav-sub">
+                    <li><a href="{{ path('admin_tournament_index') }}" class="nav-item">All Tournaments</a></li>
+                    <li><a href="{{ path('admin_tournament_create') }}" class="nav-item">Create Tournament</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="nav-section">Teams</div>
+                <ul class="nav-sub">
+                    <li><a href="#" class="nav-item">All Teams</a></li>
+                    <li><a href="#" class="nav-item">Create Team</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="nav-section">Players</div>
+                <ul class="nav-sub">
+                    <li><a href="#" class="nav-item">All Players</a></li>
+                    <li><a href="#" class="nav-item">Create Player</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <footer class="sidebar-footer">
+        <div class="version">v1.0</div>
+        <div class="copyright">© {{ "now"|date("Y") }} Dev Esports</div>
+    </footer>
+</aside>

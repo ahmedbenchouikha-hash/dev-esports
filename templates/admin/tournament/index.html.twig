@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin - Manage Tournaments - RankUp{% endblock %}
+{% block title %}Admin - Manage Tournaments - Dev Esports{% endblock %}
 
 {% block body %}
 <div class="row mb-4">
     <div class="col-md-6">
-        <h1 class="page-title">⚙️ Manage Tournaments</h1>
+        <h1 class="page-title">Manage Tournaments</h1>
     </div>
     <div class="col-md-6 text-end">
         <a href="{{ path('admin_tournament_create') }}" class="btn btn-primary">+ Create Tournament</a>
@@ -84,6 +84,10 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div class="mt-3 d-flex justify-content-center">
+                {{ knp_pagination_render(tournaments, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
             </div>
         {% endif %}
     </div>

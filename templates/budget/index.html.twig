@@ -163,6 +163,15 @@
                                                 </button>
                                             </form>
                                         {% endif %}
+                                        <a href="{{ path('budget_edit', {id: budget.id}) }}" class="btn btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="{{ path('budget_delete', {id: budget.id}) }}" style="display:inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ budget.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete" onclick="return confirm('Delete this budget?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -179,6 +188,12 @@
 <div class="row mt-4">
     <div class="col-md-12">
         <div class="d-flex gap-2">
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="d-flex gap-2">
+            <a href="{{ path('budget_tracking') }}" class="btn btn-primary">
+                <i class="fas fa-chart-line"></i> Budget Tracking
+            </a>
             <a href="{{ path('budget_alerte') }}" class="btn btn-warning">
                 <i class="fas fa-exclamation-triangle"></i> Alerts
             </a>

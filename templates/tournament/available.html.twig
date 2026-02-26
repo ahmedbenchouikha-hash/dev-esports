@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Available Tournaments - Join Now{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="fas fa-trophy"></i> Available Tournaments
+            </h1>
+            
+            {% if tournaments is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No pending tournaments available at the moment.
+                </div>
+            {% else %}
+                <div class="row">
+                    {% for tournament in tournaments %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm hover-shadow">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="card-title mb-0">{{ tournament.name }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt"></i> {{ tournament.location }}
+                                    </p>
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> 
+                                            {{ tournament.startDate|date('M d, Y') }} - {{ tournament.endDate|date('M d, Y') }}
+                                        </small>
+                                    </div>
+
+                                    {% if tournament.prizePool %}
+                                        <p class="mb-2">
+                                            <strong>Prize Pool:</strong> 
+                                            <span class="badge bg-success">${{ tournament.prizePool|number_format(2) }}</span>
+                                        </p>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        <p class="text-truncate">{{ tournament.description }}</p>
+                                    </div>
+
+                                    <div class="registration-status mb-3">
+                                        {% set registration = registrationStatuses[tournament.id] %}
+                                        {% if registration %}
+                                            {% if registration.isPending() %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock"></i> Pending Approval
+                                                </span>
+                                            {% elseif registration.isApproved() %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Approved
+                                                </span>
+                                            {% elseif registration.isRejected() %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times"></i> Rejected
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Registered</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    {% set registration = registrationStatuses[tournament.id] %}
+                                    {% if registration %}
+                                        <a href="{{ path('tournament_show', {id: tournament.id}) }}" class="btn btn-sm btn-outline-primary w-100">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('tournament_join_form', {id: tournament.id}) }}" class="btn btn-sm btn-primary w-100">
+                                            <i class="fas fa-plus"></i> Join Tournament
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if team %}
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <a href="{{ path('tournament_my_registrations') }}" class="btn btn-info">
+                    <i class="fas fa-list"></i> View Your Registrations
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-shadow {
+        transition: box-shadow 0.3s ease-in-out;
+    }
+    
+    .hover-shadow:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}

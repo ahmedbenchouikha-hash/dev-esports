@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin - Tournament Details - RankUp{% endblock %}
+{% block title %}Admin - Tournament Details - Dev Esports{% endblock %}
 
 {% block body %}
 <div class="row mb-4">
@@ -50,7 +50,6 @@
                     </div>
                     <hr>
                 {% endif %}
-                
                 <p><strong>Created:</strong> {{ tournament.createdAt|date('d M Y - H:i') }}</p>
                 <p><strong>Updated:</strong> {{ tournament.updatedAt|date('d M Y - H:i') }}</p>
 
@@ -66,7 +65,6 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
 <!-- Delete Modal - Outside Page Content -->
 <div class="modal fade" id="deleteModalTournament{{ tournament.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -89,3 +87,4 @@
         </div>
     </div>
 </div>
+{% endblock %}

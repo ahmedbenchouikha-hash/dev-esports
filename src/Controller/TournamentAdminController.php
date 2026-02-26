@@ -6,33 +6,28 @@ use App\Entity\Tournament;
 use App\Form\TournamentType;
 use App\Repository\TournamentRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/tournaments', name: 'admin_tournament_')]
-#[IsGranted('ROLE_ADMIN')]
 class TournamentAdminController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(TournamentRepository $tournamentRepository, Request $request): Response
+    public function index(TournamentRepository $tournamentRepository, Request $request, PaginatorInterface $paginator): Response
     {
-        $search = $request->query->get('search', '');
-        $status = $request->query->get('status', '');
-        $sort = $request->query->get('sort', 'startDate');
-        $direction = $request->query->get('direction', 'ASC');
+        $search = trim((string) $request->query->get('search', ''));
+        $status = (string) $request->query->get('status', '');
+        $sort = (string) $request->query->get('sort', 'startDate');
+        $direction = (string) $request->query->get('direction', 'ASC');
+        $page = max(1, $request->query->getInt('page', 1));
 
-        if ($search) {
-            $tournaments = $tournamentRepository->findBySearchTerm($search, $sort, $direction);
-        } elseif ($status) {
-            $tournaments = $tournamentRepository->findByStatus($status, $sort, $direction);
-        } else {
-            $tournaments = $tournamentRepository->findAllOrdered($sort, $direction);
-        }
+        $queryBuilder = $tournamentRepository->createAdminListQueryBuilder($search, $status, $sort, $direction);
+        $tournaments = $paginator->paginate($queryBuilder, $page, 8);
 
         return $this->render('admin/tournament/index.html.twig', [
             'tournaments' => $tournaments,

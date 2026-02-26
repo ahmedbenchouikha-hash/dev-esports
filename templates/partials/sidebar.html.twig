@@ -89,6 +89,11 @@
                 <a href="{{ path('admin_tournament_index') }}" class="menu-subitem {% if 'admin_tournament_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Tournaments
                 </a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_tournament_registration_list') }}" class="menu-subitem {% if 'admin_tournament_registration' in app.request.attributes.get('_route') %}active{% endif %}">
+                        <i class="fas fa-clipboard-list"></i> Registrations
+                    </a>
+                {% endif %}
                 <a href="{{ path('admin_tournament_create') }}" class="menu-subitem">
                     <i class="fas fa-plus"></i> Create Tournament
                 </a>
@@ -271,6 +276,20 @@
 
         <!-- Divider -->
         <div class="menu-divider"></div>
+
+        <!-- Player Section -->
+        {% if is_granted('ROLE_USER') and app.user is not null %}
+            <div class="menu-section-title">PLAYER</div>
+
+            <!-- Player Dashboard -->
+            <a href="{{ path('player_dashboard') }}" class="menu-item {% if 'player_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+                <i class="fas fa-user-circle menu-icon"></i>
+                <span class="menu-label">My Dashboard</span>
+            </a>
+
+            <!-- Divider -->
+            <div class="menu-divider"></div>
+        {% endif %}
 
         <!-- Public Section Header -->
         <div class="menu-section-title">PUBLIC</div>

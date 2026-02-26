@@ -183,12 +183,20 @@
                         <i class="fas fa-calendar"></i> {{ game.matchdate|date('d M Y H:i') }}
                     </div>
                 </div>
+        <div class="modal-content" style="background-color: var(--secondary-color);">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this match?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST" action="{{ path('admin_match_delete', { id: game.id }) }}" style="display: inline;">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ game.id) }}">
                     <button type="submit" class="btn btn-danger">Delete Match</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>

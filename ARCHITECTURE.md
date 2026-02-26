@@ -379,4 +379,6 @@ Security:
 ---
 
 Generated: February 7, 2026
-PIDEV - RankUp Tournament Management System
+PIDEV - Dev Esports Tournament Management System
+
+> > > > > > > module-tournament

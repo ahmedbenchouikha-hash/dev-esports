@@ -66,9 +66,13 @@ class Tournament
     #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Game::class, cascade: ['remove'])]
     private Collection $games;
 
+    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: TournamentRegistration::class, cascade: ['remove'])]
+    private Collection $registrations;
+
     public function __construct()
     {
         $this->games = new ArrayCollection();
+        $this->registrations = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -239,6 +243,45 @@ class Tournament
             }
         }
         return $this;
+    }
+
+    public function getRegistrations(): Collection
+    {
+        return $this->registrations;
+    }
+
+    public function addRegistration(TournamentRegistration $registration): static
+    {
+        if (!$this->registrations->contains($registration)) {
+            $this->registrations->add($registration);
+            $registration->setTournament($this);
+        }
+        return $this;
+    }
+
+    public function removeRegistration(TournamentRegistration $registration): static
+    {
+        if ($this->registrations->removeElement($registration)) {
+            if ($registration->getTournament() === $this) {
+                $registration->setTournament(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getApprovedRegistrations(): Collection
+    {
+        return $this->registrations->filter(fn(TournamentRegistration $reg) => $reg->isApproved());
+    }
+
+    public function getPendingRegistrations(): Collection
+    {
+        return $this->registrations->filter(fn(TournamentRegistration $reg) => $reg->isPending());
+    }
+
+    public function getRejectedRegistrations(): Collection
+    {
+        return $this->registrations->filter(fn(TournamentRegistration $reg) => $reg->isRejected());
     }
 
     public function __toString(): string
