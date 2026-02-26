@@ -31,3 +31,6 @@ services:
     arguments:
       $fromEmail: "%env(FROM_EMAIL)%"
       $apiKey: "%env(SENDGRID_API_KEY)%"
+  App\Service\AIPricingService:
+    arguments:
+      $groqApiKey: "%env(GROQ_API_KEY)%"

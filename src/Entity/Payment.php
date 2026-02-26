@@ -20,6 +20,10 @@ class Payment
     #[Assert\NotNull(message: 'Ticket is required')]
     private ?Ticket $ticket = null;
 
+    #[ORM\ManyToOne(targetEntity: Player::class, inversedBy: 'payments')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Player $player = null;
+
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Payment intent ID is required')]
     private ?string $paymentIntentId = null;
@@ -48,6 +52,9 @@ class Payment
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $customerPhone = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $qrCode = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
@@ -84,6 +91,17 @@ class Payment
     public function setTicket(?Ticket $ticket): static
     {
         $this->ticket = $ticket;
+        return $this;
+    }
+
+    public function getPlayer(): ?Player
+    {
+        return $this->player;
+    }
+
+    public function setPlayer(?Player $player): static
+    {
+        $this->player = $player;
         return $this;
     }
 
@@ -238,5 +256,16 @@ class Payment
             number_format($this->amount, 2),
             $this->status
         );
+    }
+
+    public function getQrCode(): ?string
+    {
+        return $this->qrCode;
+    }
+
+    public function setQrCode(?string $qrCode): static
+    {
+        $this->qrCode = $qrCode;
+        return $this;
     }
 }

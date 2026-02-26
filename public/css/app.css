@@ -63,6 +63,7 @@ body {
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding-top: 120px !important;
 }
 
 /* Typography - Enhanced Contrast */
@@ -153,7 +154,7 @@ a:hover {
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
     padding: 1rem 0;
-    position: sticky;
+    position: fixed;
     top: 0;
     z-index: 1000;
     box-shadow: var(--shadow-sm);

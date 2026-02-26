@@ -1,0 +1,222 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Smart Pricing - Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-brain"></i> Smart Pricing AI
+            </h1>
+            <p class="text-muted mt-2 mb-0">Intelligent ticket pricing engine based on demand, popularity & scarcity</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary" id="applyAllBtn">
+                <i class="fas fa-check-circle"></i> Apply All Recommendations
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4" id="statsContainer">
+        <div class="col-md-3">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #b622d1 0%, #7c3aed 100%);">
+                <div class="card-body">
+                    <h6 class="text-white mb-2 text-uppercase">Should Increase</h6>
+                    <h2 class="text-white mb-0" style="font-weight: 900;" id="increaseCount">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="card-body">
+                    <h6 class="text-white mb-2 text-uppercase">Keep Current</h6>
+                    <h2 class="text-white mb-0" style="font-weight: 900;" id="keepCount">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);">
+                <div class="card-body">
+                    <h6 class="text-white mb-2 text-uppercase">Should Decrease</h6>
+                    <h2 class="text-white mb-0" style="font-weight: 900;" id="decreaseCount">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                <div class="card-body">
+                    <h6 class="text-white mb-2 text-uppercase">Potential Revenue</h6>
+                    <h2 class="text-white mb-0" style="font-weight: 900;">€<span id="revenueImpact">0</span></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Table -->
+    <div class="table-responsive">
+        <table class="table table-dark table-hover border-primary" style="border: 1px solid rgba(0, 242, 254, 0.3);">
+            <thead style="background-color: rgba(0, 242, 254, 0.1); border-bottom: 2px solid var(--primary);">
+                <tr>
+                    <th style="color: var(--primary);">Ticket</th>
+                    <th style="color: var(--primary);">Current Price</th>
+                    <th style="color: var(--primary);">Smart Price</th>
+                    <th style="color: var(--primary);">Demand</th>
+                    <th style="color: var(--primary);">Popularity</th>
+                    <th style="color: var(--primary);">Scarcity</th>
+                    <th style="color: var(--primary);">Recommendation</th>
+                    <th style="color: var(--primary);">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in recommendations %}
+                <tr style="border-color: rgba(0, 242, 254, 0.2);">
+                    <td>
+                        <strong style="color: var(--primary);">{{ item.ticket.ticketNumber }}</strong><br>
+                        <small class="text-muted">{{ item.ticket.type|upper }}</small>
+                    </td>
+                    <td>
+                        <strong style="color: var(--secondary);">€{{ item.pricing.basePrice|number_format(2) }}</strong>
+                    </td>
+                    <td>
+                        <strong style="color: #00ff9d;">€{{ item.pricing.smartPrice|number_format(2) }}</strong><br>
+                        <small class="text-muted">
+                            {% if item.pricing.percentChange > 0 %}
+                                <span style="color: #28a745;">+{{ item.pricing.percentChange|number_format(2) }}%</span>
+                            {% elseif item.pricing.percentChange < 0 %}
+                                <span style="color: #dc3545;">{{ item.pricing.percentChange|number_format(2) }}%</span>
+                            {% else %}
+                                No change
+                            {% endif %}
+                        </small>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ item.pricing.demand|number_format(2) }}x</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">{{ item.pricing.popularity|number_format(2) }}x</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning">{{ item.pricing.scarcity|number_format(2) }}x</span>
+                    </td>
+                    <td>
+                        {% if item.pricing.recommendedAction == 'INCREASE_PRICE' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-arrow-up"></i> Increase
+                            </span>
+                        {% elseif item.pricing.recommendedAction == 'DECREASE_PRICE' %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-arrow-down"></i> Decrease
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-check"></i> Keep
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary apply-btn" data-ticket-id="{{ item.ticket.id }}">
+                            <i class="fas fa-sync"></i> Apply
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="alert alert-info mt-4 border-info" role="alert">
+        <i class="fas fa-info-circle"></i>
+        <strong>How Smart Pricing Works:</strong>
+        <ul class="mb-0 mt-2">
+            <li><strong>Demand Factor:</strong> Tickets sold vs available - high demand = higher price</li>
+            <li><strong>Popularity Factor:</strong> Historical sales for teams - popular teams can charge more</li>
+            <li><strong>Scarcity Factor:</strong> Days until match - closer to event = higher price</li>
+            <li><strong>Price Cap:</strong> Max 20% increase, 15% decrease to maintain reasonable pricing</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load stats
+    loadStats();
+
+    // Apply all recommendations
+    document.getElementById('applyAllBtn').addEventListener('click', function() {
+        if (confirm('Apply smart pricing to all tickets? This will update ticket prices based on AI recommendations.')) {
+            fetch('{{ path("smart_pricing_apply_all") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message + `\nProjected Revenue Impact: €${data.projectedRevenueImpact}`);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+    });
+
+    // Apply individual recommendations
+    document.querySelectorAll('.apply-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const ticketId = this.dataset.ticketId;
+            fetch(`{{ path("smart_pricing_apply", {"id": "TICKET_ID"}) }}`.replace('TICKET_ID', ticketId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        });
+    });
+
+    function loadStats() {
+        fetch('{{ path("smart_pricing_stats") }}')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('increaseCount').textContent = data.shouldIncrease;
+                document.getElementById('decreaseCount').textContent = data.shouldDecrease;
+                document.getElementById('keepCount').textContent = data.keepCurrent;
+                document.getElementById('revenueImpact').textContent = data.totalPotentialIncrease.toFixed(2);
+            });
+    }
+});
+</script>
+
+<style>
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .apply-btn {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 242, 254, 0.3);
+    }
+</style>
+{% endblock %}

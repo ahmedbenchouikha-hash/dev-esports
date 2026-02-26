@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\Payment;
 use Psr\Log\LoggerInterface;
-use SendGrid;
 use SendGrid\Mail\Mail;
 
 class EmailService
@@ -32,7 +31,7 @@ class EmailService
             $email->addTo($to);
             $email->addContent("text/html", $htmlContent);
 
-            $sendgrid = new SendGrid($this->apiKey);
+            $sendgrid = new \SendGrid($this->apiKey);
             $response = $sendgrid->send($email);
 
             if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
@@ -223,6 +222,9 @@ HTML;
         $team2Name = $game->getTeam2() ? $game->getTeam2()->getName() : 'Team 2';
         $matchDate = $game->getMatchdate() ? $game->getMatchdate()->format('F j, Y - H:i') : 'TBD';
 
+        // Generate QR code HTML separately
+        $qrCodeHtml = $this->getQrCodeHtml($payment);
+
         return <<<HTML
 <!DOCTYPE html>
 <html>
@@ -347,6 +349,34 @@ HTML;
             font-weight: bold;
             color: #333;
         }
+        .qr-code-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(182, 34, 209, 0.05) 0%, rgba(0, 217, 255, 0.05) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(0, 217, 255, 0.2);
+        }
+        .qr-code-section h3 {
+            margin: 0 0 15px 0;
+            color: #b622d1;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .qr-code-section p {
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .qr-code-image {
+            max-width: 250px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
         .button {
             display: inline-block;
             padding: 12px 30px;
@@ -418,6 +448,8 @@ HTML;
                 <code>DEV-{$payment->getId()}</code>
             </div>
             
+            $qrCodeHtml
+            
             <p style="text-align: center; margin: 30px 0;">
                 <a href="https://dev-esports.local/dashboard" class="button">View My Tickets</a>
             </p>
@@ -437,6 +469,43 @@ HTML;
     </div>
 </body>
 </html>
+HTML;
+    }
+
+    /**
+     * Generate QR code HTML for email
+     */
+    private function getQrCodeHtml(Payment $payment): string
+    {
+        if (!$payment->getQrCode()) {
+            return '';
+        }
+
+        $qrCode = $payment->getQrCode();
+        
+        // Extract filename from path
+        $filename = basename($qrCode);
+        
+        // Build public URL for serving QR code
+        $qrCodeUrl = 'https://dev-esports.local/qrcode/' . urlencode($filename);
+        
+        return <<<HTML
+            <div class="qr-code-section">
+                <h3>🎟️ Your Entry Code</h3>
+                <p>Present this QR code at the event entrance for verification</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center" style="padding: 20px 0;">
+                            <img src="$qrCodeUrl" alt="QR Code for Entry Verification" class="qr-code-image" style="max-width: 250px; height: auto; display: block; border-radius: 8px;">
+                        </td>
+                    </tr>
+                </table>
+                <p style="margin-top: 15px; font-size: 12px; color: #999; text-align: center;">
+                    <strong>Payment ID:</strong> {$payment->getPaymentIntentId()}<br>
+                    <strong>Confirmation:</strong> DEV-{$payment->getId()}<br>
+                    <a href="$qrCodeUrl" target="_blank" style="color: #b622d1; text-decoration: none; font-size: 11px;">Download QR Code</a>
+                </p>
+            </div>
 HTML;
     }
 }

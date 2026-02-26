@@ -154,6 +154,15 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             sidebar.classList.toggle('show');
+            // Prevent body overflow when sidebar is open on mobile
+            if (isMobile) {
+                document.body.classList.toggle('sidebar-open');
+                document.documentElement.classList.toggle('sidebar-open');
+                // Scroll to top-left when opening sidebar
+                if (sidebar.classList.contains('show')) {
+                    window.scrollTo(0, 0);
+                }
+            }
         });
     }
 
@@ -163,6 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function() {
             if (isMobile && !item.classList.contains('menu-toggle')) {
                 sidebar.classList.remove('show');
+                document.body.classList.remove('sidebar-open');
+                document.documentElement.classList.remove('sidebar-open');
+                window.scrollTo(0, 0);
             }
         });
     });
@@ -171,6 +183,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle')) {
             sidebar.classList.remove('show');
+            document.body.classList.remove('sidebar-open');
+            document.documentElement.classList.remove('sidebar-open');
+            window.scrollTo(0, 0);
         }
     });
 

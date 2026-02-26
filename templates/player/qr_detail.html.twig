@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}QR Code - Order #{{ payment.id }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Back Button -->
+            <a href="{{ path('player_tickets') }}" class="btn btn-outline-primary mb-4">
+                <i class="fas fa-arrow-left"></i> Back to My Tickets
+            </a>
+
+            <!-- QR Code Card -->
+            <div class="card border-primary bg-dark shadow-lg" style="border-width: 2px;">
+                <div class="card-header bg-dark border-primary" style="border-bottom: 2px solid var(--primary); padding: 2rem;">
+                    <h3 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                        <i class="fas fa-qrcode"></i> Entry Code - Order #{{ payment.id }}
+                    </h3>
+                </div>
+
+                <div class="card-body p-5 text-center">
+                    <!-- QR Code Image -->
+                    {% set filename = payment.qrCode|split('/')|last %}
+                    <div class="mb-4" style="background: white; padding: 1.5rem; border-radius: 12px; display: inline-block;">
+                        <img src="/qrcode/{{ filename }}" alt="QR Code" style="width: 400px; height: 400px; display: block;">
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">Payment ID</h6>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); word-break: break-all;">
+                                    {{ payment.paymentIntentId }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">Confirmation #</h6>
+                                <p style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">
+                                    DEV-{{ payment.id }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Match & Ticket Info -->
+                    <hr style="border-color: rgba(0, 242, 254, 0.2); margin: 2rem 0;">
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">Match</h6>
+                                <p style="font-size: 0.95rem; font-weight: 600; color: var(--primary);">
+                                    {% if payment.ticket and payment.ticket.game %}
+                                        {{ payment.ticket.game.team1.name }} vs {{ payment.ticket.game.team2.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                                {% if payment.ticket and payment.ticket.game.matchdate %}
+                                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                        <i class="fas fa-calendar"></i> {{ payment.ticket.game.matchdate|date('M d, Y - H:i') }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">Ticket Type</h6>
+                                <p style="font-size: 0.95rem; font-weight: 600; color: #25d366;">
+                                    {% if payment.ticket %}
+                                        {% if payment.ticket.type == 'vip' %}
+                                            <i class="fas fa-crown"></i> VIP
+                                        {% elseif payment.ticket.type == 'student' %}
+                                            <i class="fas fa-graduation-cap"></i> Student
+                                        {% else %}
+                                            <i class="fas fa-ticket-alt"></i> Regular
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">Amount</h6>
+                                <p style="font-size: 1.1rem; font-weight: 700; color: var(--secondary);">
+                                    €{{ payment.amount|number_format(2) }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 style="color: var(--secondary); font-weight: 700; margin-bottom: 0.5rem;">Purchase Date</h6>
+                                <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                                    {{ payment.createdAt|date('M d, Y') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div class="mt-4">
+                        {% if payment.status == 'succeeded' %}
+                            <span class="badge bg-success p-2" style="font-size: 1rem;">
+                                <i class="fas fa-check-circle"></i> Confirmed
+                            </span>
+                        {% elseif payment.status == 'pending' %}
+                            <span class="badge bg-warning p-2" style="font-size: 1rem;">
+                                <i class="fas fa-hourglass-half"></i> Pending
+                            </span>
+                        {% elseif payment.status == 'failed' %}
+                            <span class="badge bg-danger p-2" style="font-size: 1rem;">
+                                <i class="fas fa-times-circle"></i> Failed
+                            </span>
+                        {% elseif payment.status == 'refunded' %}
+                            <span class="badge bg-info p-2" style="font-size: 1rem;">
+                                <i class="fas fa-undo"></i> Refunded
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card-footer bg-dark border-primary p-3" style="border-top: 2px solid var(--primary);">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/qrcode/{{ filename }}" class="btn btn-primary btn-lg" download="qr-code-{{ payment.id }}.png">
+                            <i class="fas fa-download"></i> Download QR Code
+                        </a>
+                        <a href="{{ path('player_tickets') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to Tickets
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Alert -->
+            <div class="alert alert-info mt-4 border-info" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <strong>How to use this QR code:</strong> Present this QR code at the event entrance for verification.
+                You can download it to your phone or print it for convenience.
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(182, 34, 209, 0.1) 100%) !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(182, 34, 209, 0.3);
+    }
+
+    .container {
+        max-width: 900px;
+    }
+</style>
+{% endblock %}

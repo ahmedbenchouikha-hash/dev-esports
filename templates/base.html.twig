@@ -46,10 +46,26 @@
                 box-sizing: border-box;
             }
 
+            html {
+                scroll-behavior: smooth;
+                overflow-x: hidden;
+            }
+
+            html.sidebar-open {
+                overflow: hidden;
+            }
+
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: var(--bg-dark);
                 color: var(--text-primary);
+            }
+
+            body.sidebar-open {
+                overflow: hidden;
+                width: 100%;
+                height: 100vh;
+                margin: 0 !important;
             }
 
             /* Navbar Styles */
@@ -58,20 +74,33 @@
                 border-bottom: 1px solid rgba(0, 242, 254, 0.1);
                 box-shadow: var(--shadow);
                 padding: 0.75rem 0;
-                position: sticky;
+                position: fixed;
                 top: 0;
-                z-index: 1020;
+                left: 0;
+                right: 0;
+                z-index: 1022;
                 backdrop-filter: blur(10px);
+                width: 100%;
+                transition: left 0.3s ease, width 0.3s ease;
             }
 
             /* When sidebar is visible */
             body.has-sidebar .navbar-custom {
-                margin-left: 260px;
-                transition: margin 0.3s ease;
+                margin-left: 0;
             }
 
             body.has-sidebar.sidebar-collapsed .navbar-custom {
-                margin-left: 80px;
+                margin-left: 0;
+            }
+
+            @media (max-width: 768px) {
+                body.has-sidebar .navbar-custom {
+                    margin-left: 0 !important;
+                }
+
+                body.has-sidebar.sidebar-collapsed .navbar-custom {
+                    margin-left: 0 !important;
+                }
             }
 
             .navbar-brand-custom {
@@ -226,28 +255,30 @@
                 top: 0;
                 width: 260px;
                 height: 100vh;
-                background: linear-gradient(180deg, var(--bg-sidebar) 0%, #1a2847 100%);
-                border-right: 1px solid var(--border);
-                z-index: 1030;
+                background: linear-gradient(180deg, #1a2847 0%, #0f1b2e 100%);
+                border-right: 2px solid rgba(0, 242, 254, 0.2);
+                z-index: 500;
                 display: flex;
                 flex-direction: column;
                 overflow-y: auto;
                 padding-top: 0;
-                transition: all 0.3s ease;
+                transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                 margin-top: 0;
+                box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
             }
 
+            /* When sidebar is collapsed, keep it but push it off-screen on mobile */
             .sidebar-nav.collapsed {
                 width: 80px;
             }
 
             body.admin-layout {
-                margin-left: 260px;
+                margin-left: 0;
                 margin-top: 0;
             }
 
             body.admin-layout.sidebar-collapsed {
-                margin-left: 80px;
+                margin-left: 0;
             }
 
             body.admin-layout.sidebar-hidden {
@@ -255,26 +286,60 @@
             }
 
             body.admin-layout main {
-                transition: margin 0.3s ease;
+                transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                padding-top: 120px !important;
+                margin-left: 80px;
+                width: calc(100% - 80px);
             }
 
-            /* Ensure main content is visible */
+            body.admin-layout .navbar-custom {
+                left: 0;
+                width: 100%;
+            }
+
+            body.admin-layout.sidebar-collapsed .navbar-custom {
+                left: 0;
+                width: 100%;
+            }
+
+            /* Ensure main content is visible and full width */
             main {
                 display: block;
                 visibility: visible;
                 position: relative;
-                z-index: 1;
+                z-index: 10;
                 background: transparent;
+                padding-top: 120px !important;
+                margin-left: 80px;
+                width: calc(100% - 80px);
             }
 
-            /* Player Sidebar - Adjust main content */
+            body.has-sidebar {
+                overflow-x: hidden;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100%;
+            }
+
             body.has-sidebar main {
-                margin-left: 260px;
-                transition: margin 0.3s ease;
+                margin-left: 80px !important;
+                width: calc(100% - 80px) !important;
+                transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             body.has-sidebar.sidebar-collapsed main {
-                margin-left: 80px;
+                margin-left: 80px !important;
+                width: calc(100% - 80px) !important;
+            }
+
+            @media (max-width: 768px) {
+                body.has-sidebar main {
+                    margin-left: 0 !important;
+                }
+
+                body.has-sidebar.sidebar-collapsed main {
+                    margin-left: 0 !important;
+                }
             }
 
             /* Sidebar Brand */
@@ -318,11 +383,13 @@
             }
 
             .brand-text {
-                transition: opacity 0.3s ease;
+                transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             .sidebar-nav.collapsed .brand-text {
-                display: none;
+                opacity: 0;
+                visibility: hidden;
+                width: 0;
             }
 
             /* Menu Styles */
@@ -353,11 +420,14 @@
                 color: var(--text-secondary);
                 font-weight: 700;
                 margin-top: 0.5rem;
-                transition: all 0.3s ease;
+                transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             .sidebar-nav.collapsed .menu-section-title {
-                display: none;
+                opacity: 0;
+                visibility: hidden;
+                padding: 0.5rem 0.75rem;
+                height: 0;
             }
 
             .menu-item {
@@ -384,7 +454,10 @@
 
             .sidebar-nav.collapsed .menu-item .menu-label,
             .sidebar-nav.collapsed .menu-item .menu-arrow {
-                display: none;
+                opacity: 0;
+                visibility: hidden;
+                width: 0;
+                overflow: hidden;
             }
 
             .menu-item:hover {
@@ -417,6 +490,7 @@
             .menu-label {
                 flex: 1;
                 font-size: 0.95rem;
+                transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             .menu-arrow {
@@ -556,37 +630,26 @@
 
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
-                .sidebar-nav {
-                    width: 100%;
-                    height: 100vh;
-                    transform: translateX(-100%);
-                    box-shadow: var(--shadow);
-                }
-
-                .sidebar-nav.show {
-                    transform: translateX(0);
-                }
-
                 body.admin-layout {
-                    margin-left: 0;
+                    margin-left: 0 !important;
                 }
 
                 body.admin-layout main {
+                    margin-left: 0 !important;
                     width: 100%;
                 }
 
-                .sidebar-toggle {
-                    position: fixed;
-                    top: 1rem;
-                    left: 1rem;
-                }
-
                 .navbar-custom {
-                    padding: 0.75rem 3.5rem 0.75rem 0.75rem;
+                    left: 0 !important;
+                    width: 100% !important;
                 }
 
-                .navbar-nav-custom {
-                    gap: 1rem;
+                body.sidebar-open {
+                    overflow-y: hidden;
+                }
+
+                .sidebar-toggle {
+                    z-index: 10000;
                 }
             }
 
@@ -693,6 +756,9 @@
                     // Save state to localStorage
                     const isCollapsed = sidebarNav.classList.contains('collapsed');
                     localStorage.setItem('sidebarCollapsed', isCollapsed);
+                    
+                    // Prevent body from being pushed - keep it in place
+                    body.style.overflow = 'auto';
                 });
 
                 // Add tooltip on hover for collapsed sidebar
@@ -746,6 +812,11 @@
                                     </a>
                                 </li>
                                 <li class="nav-item-custom">
+                                    <a href="{{ path('ai_pricing_index') }}">
+                                        <i class="fas fa-brain"></i> AI Pricing
+                                    </a>
+                                </li>
+                                <li class="nav-item-custom">
                                     <a href="{{ path('admin_dashboard') }}">
                                         <span class="admin-badge">
                                             <i class="fas fa-lock"></i> Admin
@@ -761,6 +832,9 @@
                                 <div class="dropdown-menu dropdown-menu-custom">
                                     <a class="dropdown-item" href="{{ path('player_dashboard') }}">
                                         <i class="fas fa-user-circle"></i> My Dashboard
+                                    </a>
+                                    <a class="dropdown-item" href="{{ path('player_tickets') }}">
+                                        <i class="fas fa-ticket-alt"></i> My Tickets
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ path('app_logout') }}">
