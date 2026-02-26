@@ -12,6 +12,7 @@
         "doctrine/orm": "^3.6",
         "lexik/jwt-authentication-bundle": "*",
         "phpdocumentor/reflection-docblock": "5.2",
+        "phpmailer/phpmailer": "*",
         "phpstan/phpdoc-parser": "^2.3",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",

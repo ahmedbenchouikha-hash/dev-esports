@@ -1,8 +1,143 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Home - Esports Dev{% endblock %}
 
 {% block body %}
-    <h1>Welcome</h1>
-    <p>This is a minimal homepage.</p>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="mb-4">Welcome to Esports Dev</h1>
+                
+                {% if app.user %}
+                    <div class="alert alert-info">
+                        <p>Welcome back, <strong>{{ app.user.username }}</strong>!</p>
+                    </div>
+
+                    {% if chatHistory %}
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-comments"></i> Recent Chat History</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chat-history-container" style="max-height: 400px; overflow-y: auto;">
+                                    {% for message in chatHistory %}
+                                        <div class="mb-3 pb-2 border-bottom">
+                                            <small class="text-muted">
+                                                <i class="far fa-clock"></i> {{ message.createdAt|date('Y-m-d H:i') }}
+                                            </small>
+                                            <p class="mt-2 mb-1">
+                                                <strong>You:</strong> {{ message.userMessage }}
+                                            </p>
+                                            <p class="mb-0">
+                                                <strong><i class="fas fa-robot"></i> Assistant:</strong> {{ message.botResponse }}
+                                            </p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5>Ready to Get Started?</h5>
+                            <p>Join our esports community and start competing today!</p>
+                            <a href="{{ path('app_register') }}" class="btn btn-primary">Sign Up</a>
+                            <a href="{{ path('app_login') }}" class="btn btn-outline-primary">Log In</a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-comments"></i> Total Chats
+                                </h6>
+                                <h3>{{ statistics.totalMessages }}</h3>
+                                <small class="text-muted">Total conversations processed</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-users"></i> Active Users
+                                </h6>
+                                <h3>{{ statistics.uniqueUsers }}</h3>
+                                <small class="text-muted">Using the chatbot</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6><i class="fas fa-chart-pie"></i> Popular Topics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for topic in statistics.messagesByCategory %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="badge bg-primary p-2 w-100">
+                                        <span class="capitalized">{{ topic.category }}</span>
+                                        <span class="badge bg-light text-dark">{{ topic.count }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Platform Features</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <h6><i class="fas fa-users"></i> Team Management</h6>
+                                <p class="text-muted small">Create and manage your esports teams</p>
+                            </li>
+                            <li class="mb-3">
+                                <h6><i class="fas fa-trophy"></i> Tournaments</h6>
+                                <p class="text-muted small">Join competitions and showcase your skills</p>
+                            </li>
+                            <li class="mb-3">
+                                <h6><i class="fas fa-chart-bar"></i> Live Scoring</h6>
+                                <p class="text-muted small">Track matches and standings in real-time</p>
+                            </li>
+                            <li class="mb-3">
+                                <h6><i class="fas fa-robot"></i> AI Assistant</h6>
+                                <p class="text-muted small">Get help from our intelligent chatbot</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Include Chatbot Widget #}
+    {% include 'components/chatbot_widget.html.twig' %}
+
+    <style>
+        .capitalized {
+            text-transform: capitalize;
+        }
+
+        .chat-history-container {
+            background: #f8f9fa;
+            border-radius: 0.25rem;
+            padding: 1rem;
+        }
+
+        .sticky-top {
+            position: sticky !important;
+        }
+    </style>
 {% endblock %}

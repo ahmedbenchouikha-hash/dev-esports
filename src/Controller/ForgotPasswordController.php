@@ -4,22 +4,22 @@ namespace App\Controller;
 
 use App\Form\ForgotPasswordRequestType;
 use App\Repository\UserRepository;
-use App\Entity\PasswordResetToken;
+use App\Service\PasswordResetService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mailer\TemplatedEmail;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Mime\Address;
 
 class ForgotPasswordController extends AbstractController
 {
-    public function __construct(private readonly HttpClientInterface $httpClient, private readonly UserRepository $userRepo, private readonly EntityManagerInterface $em, private readonly MailerInterface $mailer, private readonly UrlGeneratorInterface $urlGenerator)
-    {
+    public function __construct(
+        private readonly HttpClientInterface $httpClient,
+        private readonly UserRepository $userRepo,
+        private readonly EntityManagerInterface $em,
+        private readonly PasswordResetService $passwordResetService
+    ) {
     }
 
     #[Route('/forgot-password', name: 'app_forgot_password_request')]
@@ -45,7 +45,7 @@ class ForgotPasswordController extends AbstractController
                         ],
                     ]);
                     $dataResp = $resp->toArray(false);
-                    if (! isset($dataResp['success']) || $dataResp['success'] !== true) {
+                    if (!isset($dataResp['success']) || $dataResp['success'] !== true) {
                         $this->addFlash('error', 'reCAPTCHA verification failed.');
                         return $this->render('security/forgot_password_request.html.twig', ['requestForm' => $form->createView()]);
                     }
@@ -54,34 +54,9 @@ class ForgotPasswordController extends AbstractController
 
             $user = $this->userRepo->findOneBy(['email' => $email]);
 
-            // Generate token and persist it linked to the user. In production also send an email with the token link.
+            // Generate and send reset token
             if ($user) {
-                $token = bin2hex(random_bytes(32));
-
-                $tokenEntity = new PasswordResetToken();
-                $tokenEntity->setUser($user)
-                    ->setToken($token)
-                    ->setCreatedAt(new \DateTimeImmutable())
-                    ->setExpiresAt(new \DateTimeImmutable('+1 hour'));
-
-                $this->em->persist($tokenEntity);
-                $this->em->flush();
-
-                // Build reset URL
-                $resetUrl = $this->urlGenerator->generate('app_reset_password', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
-
-                // Send email
-                $email = (new TemplatedEmail())
-                    ->from(new Address('no-reply@example.com', 'Esports Dev'))
-                    ->to($user->getEmail())
-                    ->subject('Password reset request')
-                    ->htmlTemplate('emails/password_reset.html.twig')
-                    ->context([
-                        'resetUrl' => $resetUrl,
-                        'user' => $user,
-                    ]);
-
-                $this->mailer->send($email);
+                $this->passwordResetService->generateAndSendResetToken($user);
             }
 
             // Regardless of whether user exists, show the same message for security

@@ -5,6 +5,13 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     jwt_secret: '%env(JWT_SECRET)%'
+    mailer.smtp_host: '%env(MAILER_SMTP_HOST)%'
+    mailer.smtp_port: '%env(int:MAILER_SMTP_PORT)%'
+    mailer.smtp_username: '%env(MAILER_SMTP_USERNAME)%'
+    mailer.smtp_password: '%env(MAILER_SMTP_PASSWORD)%'
+    mailer.from_email: '%env(MAILER_FROM_EMAIL)%'
+    mailer.from_name: '%env(MAILER_FROM_NAME)%'
+    mailer.smtp_encryption: '%env(bool:MAILER_SMTP_ENCRYPTION)%'
 
 services:
     # default configuration for services in *this* file
@@ -24,6 +31,16 @@ services:
     App\Service\JwtService:
         arguments:
             $jwtSecret: '%jwt_secret%'
+
+    App\Service\MailerService:
+        arguments:
+            $smtpHost: '%mailer.smtp_host%'
+            $smtpPort: '%mailer.smtp_port%'
+            $smtpUsername: '%mailer.smtp_username%'
+            $smtpPassword: '%mailer.smtp_password%'
+            $fromEmail: '%mailer.from_email%'
+            $fromName: '%mailer.from_name%'
+            $smtpEncryption: '%mailer.smtp_encryption%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

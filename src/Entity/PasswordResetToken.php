@@ -27,6 +27,9 @@ class PasswordResetToken
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $expiresAt;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isUsed = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +79,18 @@ class PasswordResetToken
     public function setExpiresAt(\DateTimeImmutable $expiresAt): self
     {
         $this->expiresAt = $expiresAt;
+
+        return $this;
+    }
+
+    public function isIsUsed(): bool
+    {
+        return $this->isUsed;
+    }
+
+    public function setIsUsed(bool $isUsed): self
+    {
+        $this->isUsed = $isUsed;
 
         return $this;
     }

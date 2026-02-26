@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\PasswordResetToken;
+use App\Service\PasswordResetService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,24 +16,22 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ResetPasswordController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $em, private readonly UserPasswordHasherInterface $hasher)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly UserPasswordHasherInterface $hasher,
+        private readonly PasswordResetService $passwordResetService
+    ) {
     }
 
     #[Route('/reset-password/{token}', name: 'app_reset_password')]
     public function reset(Request $request, string $token): Response
     {
-        $repo = $this->em->getRepository(PasswordResetToken::class);
-        $tokenEntity = $repo->findOneBy(['token' => $token]);
+        // Validate token using PasswordResetService
+        $tokenEntity = $this->passwordResetService->validateToken($token);
 
-        if (! $tokenEntity) {
+        if (!$tokenEntity) {
             $this->addFlash('error', 'Invalid or expired token.');
             return $this->redirectToRoute('app_login');
-        }
-
-        if ($tokenEntity->getExpiresAt() < new \DateTimeImmutable()) {
-            $this->addFlash('error', 'Token expired.');
-            return $this->redirectToRoute('app_forgot_password_request');
         }
 
         $user = $tokenEntity->getUser();
@@ -55,11 +53,8 @@ class ResetPasswordController extends AbstractController
             $hashed = $this->hasher->hashPassword($user, $plain);
             $user->setPassword($hashed);
 
-            // remove all tokens for this user
-            $tokens = $this->em->getRepository(PasswordResetToken::class)->findBy(['user' => $user]);
-            foreach ($tokens as $t) {
-                $this->em->remove($t);
-            }
+            // Invalidate the token after successful password reset
+            $this->passwordResetService->invalidateToken($tokenEntity);
 
             $this->em->persist($user);
             $this->em->flush();
