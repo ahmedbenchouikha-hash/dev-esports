@@ -1,0 +1,89 @@
+<!-- Modal Header -->
+<div class="modal-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+    <h5 class="modal-title fw-bold text-white" id="recompenseFormLabel">
+        <i class="fe fe-{{ action == 'edit' ? 'edit-2' : 'plus' }} me-2"></i>
+        {{ action == 'edit' ? 'Edit reward' : 'Add reward' }}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<!-- Modal Body -->
+<div class="modal-body p-4">
+    <div id="formErrors"></div>
+    
+    <form id="recompenseForm" method="POST" class="needs-validation">
+        {% if form._token is defined %}
+            {{ form_widget(form._token) }}
+        {% endif %}
+
+        <div class="mb-3">
+            {{ form_label(form.tournament) }}
+            {{ form_widget(form.tournament, { attr: { class: 'form-select' } }) }}
+            {% if form.tournament.vars.errors|length %}
+                <div class="text-danger small mt-1">
+                    {% for error in form.tournament.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.recompense) }}
+            {{ form_widget(form.recompense, { attr: { class: 'form-control', placeholder: 'Reward name' } }) }}
+            {% if form.recompense.vars.errors|length %}
+                <div class="text-danger small mt-1">
+                    {% for error in form.recompense.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type, { attr: { class: 'form-select' } }) }}
+            {% if form.type.vars.errors|length %}
+                <div class="text-danger small mt-1">
+                    {% for error in form.type.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.classement) }}
+            {{ form_widget(form.classement, { attr: { class: 'form-control', type: 'number', min: 1, max: 30 } }) }}
+            {% if form.classement.vars.errors|length %}
+                <div class="text-danger small mt-1">
+                    {% for error in form.classement.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, { attr: { class: 'form-control', rows: 3, placeholder: 'Description (optional)' } }) }}
+            {% if form.description.vars.errors|length %}
+                <div class="text-danger small mt-1">
+                    {% for error in form.description.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Modal Footer -->
+<div class="modal-footer p-4" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(0, 242, 254, 0.1);">
+    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+        <i class="fe fe-x me-2"></i>Cancel
+    </button>
+    <button type="button" class="btn btn-primary rounded-pill px-4" id="submitRecompenseForm">
+        <i class="fe fe-check me-2"></i>{{ action == 'edit' ? 'Update' : 'Add' }}
+    </button>
+</div>

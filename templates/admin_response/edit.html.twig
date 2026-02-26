@@ -1,0 +1,28 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Edit Response #{{ admin_response.id }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1>Edit Response #{{ admin_response.id }}</h1>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="mb-3">
+                    {{ form_label(form.message, 'Message') }}
+                    {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                    {{ form_errors(form.message) }}
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{{ path('app_admin_response_show', {'id': admin_response.id}) }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

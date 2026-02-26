@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add reward{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1>Add reward</h1>
+            
+            {% if app.flashes %}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            <div class="card">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'form', 'novalidate': true}}) }}
+                    
+                    <div class="mb-3">
+                        {{ form_label(form.recompense) }}
+                        {{ form_widget(form.recompense) }}
+                        {% if form.recompense.vars.errors|length > 0 %}
+                            <div class="text-danger">
+                                {{ form_errors(form.recompense) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.type) }}
+                        {{ form_widget(form.type) }}
+                        {% if form.type.vars.errors|length > 0 %}
+                            <div class="text-danger">
+                                {{ form_errors(form.type) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.classement) }}
+                        {{ form_widget(form.classement) }}
+                        {% if form.classement.vars.errors|length > 0 %}
+                            <div class="text-danger">
+                                {{ form_errors(form.classement) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description) }}
+                        {% if form.description.vars.errors|length > 0 %}
+                            <div class="text-danger">
+                                {{ form_errors(form.description) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add
+                        </button>
+                        <a href="{{ path('recompense_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

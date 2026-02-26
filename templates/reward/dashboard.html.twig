@@ -1,0 +1,453 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Récompenses - Analytics Avancé{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="fas fa-chart-line"></i> Dashboard Récompenses - Analytics Avancé
+            </h1>
+            <p class="text-muted">Analyser en temps réel les performances, dépenses et tendances de votre gestion des récompenses</p>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row mb-4">
+        <!-- Total Demandes -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Demandes</h6>
+                            <h2 class="mb-0">{{ stats.totalDemandes }}</h2>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">Demandes reçues au total</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taux d'Approbation -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Taux Approbation</h6>
+                            <h2 class="mb-0">{{ stats.tauxApprobation }}%</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">{{ stats.totalApprobations }} approuvées</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dépense Totale -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Dépense Totale</h6>
+                            <h2 class="mb-0">{{ stats.depenseTotale|number_format(2, ',', ' ') }}€</h2>
+                        </div>
+                        <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">Coût des récompenses accordées</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coût Moyen -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Coût Moyen</h6>
+                            <h2 class="mb-0">{{ avgCost|number_format(2, ',', ' ') }}€</h2>
+                        </div>
+                        <i class="fas fa-calculator fa-3x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">Par récompense approuvée</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statut Evolution -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-arrow-trending-up"></i> Comparaison Mois Actuel vs Précédent
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h6 class="text-muted">Mois Précédent</h6>
+                                <h3>{{ monthComparison.previousMonth }}</h3>
+                                <p class="text-muted">demandes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h6 class="text-muted">Mois Actuel</h6>
+                                <h3>{{ monthComparison.currentMonth }}</h3>
+                                <p class="text-muted">demandes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h6 class="text-muted">Évolution</h6>
+                                <h3 class="{% if monthComparison.evolution > 0 %}text-danger{% elseif monthComparison.evolution < 0 %}text-success{% else %}text-muted{% endif %}">
+                                    {% if monthComparison.evolution > 0 %}
+                                        <i class="fas fa-arrow-up"></i>
+                                    {% elseif monthComparison.evolution < 0 %}
+                                        <i class="fas fa-arrow-down"></i>
+                                    {% else %}
+                                        <i class="fas fa-minus"></i>
+                                    {% endif %}
+                                    {{ monthComparison.evolution }}%
+                                </h3>
+                                <p class="text-muted">changement</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <!-- Statut Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-pie-chart"></i> Distribution par Statut
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Types Récompense -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gifts"></i> Récompenses par Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="typesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <!-- Tendance Demandes -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-line-chart"></i> Tendance Demandes (6 derniers mois)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="demandsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tendance Dépenses -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Tendance Dépenses (6 derniers mois)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tachometer-alt"></i> Métriques de Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Efficacité</h6>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ performanceScore.efficiency }}%" aria-valuenow="{{ performanceScore.efficiency }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ performanceScore.efficiency }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">Taux d'approbation vs refus</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Qualité</h6>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ performanceScore.quality|min(100) }}%" aria-valuenow="{{ performanceScore.quality }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ performanceScore.quality|min(100) }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">Score qualité global</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Niveau de Confiance</h6>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ performanceScore.trustScore }}%" aria-valuenow="{{ performanceScore.trustScore }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ performanceScore.trustScore }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">Confiance système</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statut Summary -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-check"></i> Résumé des Statuts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h4 class="text-warning">{{ stats.totalEnAttente }}</h4>
+                            <p class="text-muted">En Attente</p>
+                            <span class="badge bg-warning text-dark">À traiter</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-success">{{ stats.totalApprobations }}</h4>
+                            <p class="text-muted">Approuvées</p>
+                            <span class="badge bg-success">✓ Validées</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-danger">{{ stats.totalRefus }}</h4>
+                            <p class="text-muted">Refusées</p>
+                            <span class="badge bg-danger">✗ Rejetées</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-primary">{{ stats.totalDemandes }}</h4>
+                            <p class="text-muted">Total</p>
+                            <span class="badge bg-primary">Décompte</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-download"></i> Actions d'Export
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-primary" onclick="downloadChartAsPNG('statusChart')">
+                        <i class="fas fa-image"></i> Export Statut (PNG)
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadChartAsPNG('demandsChart')">
+                        <i class="fas fa-image"></i> Export Tendances (PNG)
+                    </button>
+                    <a href="#" class="btn btn-success">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </a>
+                    <a href="#" class="btn btn-danger">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ChartJS Library (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+<script>
+    // Configuration commune des charts
+    const chartDefaults = {
+        plugins: {
+            legend: {
+                responsive: true,
+                labels: {
+                    font: {
+                        size: 13,
+                        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                    },
+                    padding: 15,
+                    boxPadding: 10
+                }
+            }
+        },
+        responsive: true,
+        maintainAspectRatio: true
+    };
+
+    // 1. Graphique Statut Distribution
+    fetch('{{ path('reward_dashboard_api_status') }}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    ...chartDefaults,
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        legend: {
+                            ...chartDefaults.plugins.legend,
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+
+    // 2. Graphique Types Récompense
+    fetch('{{ path('reward_dashboard_api_by_type') }}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('typesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // 3. Graphique Tendance Demandes
+    fetch('{{ path('reward_dashboard_api_demands_trend') }}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('demandsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // 4. Graphique Tendance Dépenses
+    fetch('{{ path('reward_dashboard_api_expenses_trend') }}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(0) + '€';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // Fonction pour exporter les charts en PNG
+    function downloadChartAsPNG(chartId) {
+        const chart = Chart.instances.find(c => c.canvas.id === chartId);
+        if (!chart) return;
+        
+        const url = chart.canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = chartId + '_' + new Date().getTime() + '.png';
+        link.click();
+    }
+</script>
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .progress {
+        background-color: #e9ecef;
+        border-radius: 5px;
+    }
+
+    canvas {
+        max-height: 300px;
+    }
+
+    .bg-primary { background-color: #007BFF !important; }
+    .bg-success { background-color: #28A745 !important; }
+    .bg-warning { background-color: #FFC107 !important; }
+    .bg-info { background-color: #17A2B8 !important; }
+</style>
+{% endblock %}

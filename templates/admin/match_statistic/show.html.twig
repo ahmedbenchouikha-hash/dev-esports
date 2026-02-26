@@ -1,0 +1,315 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Match Statistic Details - Admin{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-chart-bar"></i> Player Performance
+            </h1>
+            <p class="text-muted mt-2 mb-0">
+                <strong style="color: var(--text-primary);">{{ statistic.player.nickname }}</strong> 
+                <i class="fas fa-arrow-right" style="margin: 0 0.5rem;"></i>
+                {{ statistic.game.team1.name }} vs {{ statistic.game.team2.name }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('admin_match_statistic_edit', {'id': statistic.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{{ path('admin_match_statistic_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Statistics -->
+        <div class="col-lg-8">
+            <!-- Player Info Card -->
+            <div class="card bg-dark border-primary shadow-lg mb-4">
+                <div class="card-header bg-dark border-primary">
+                    <h5 class="mb-0" style="color: var(--primary);">
+                        <i class="fas fa-user-circle"></i> Player Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div style="text-align: center; padding: 1rem; background: rgba(0, 242, 254, 0.1); border-radius: 6px; margin-bottom: 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <p class="text-muted small mb-0">Team</p>
+                                <p class="h6 mb-0" style="color: var(--primary); font-weight: 700;">
+                                    {{ statistic.player.team.name }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="text-align: center; padding: 1rem; background: rgba(37, 211, 102, 0.1); border-radius: 6px; margin-bottom: 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--secondary);">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <p class="text-muted small mb-0">Role</p>
+                                <p class="h6 mb-0" style="color: var(--secondary); font-weight: 700;">
+                                    {{ statistic.player.role ?? 'N/A' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="text-align: center; padding: 1rem; background: rgba(0, 188, 212, 0.1); border-radius: 6px; margin-bottom: 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem; color: #00bcd4;">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <p class="text-muted small mb-0">Nickname</p>
+                                <p class="h6 mb-0" style="color: #00bcd4; font-weight: 700;">
+                                    {{ statistic.player.nickname }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combat Statistics Card -->
+            <div class="card bg-dark border-success shadow-lg mb-4">
+                <div class="card-header bg-dark border-success">
+                    <h5 class="mb-0" style="color: var(--secondary);">
+                        <i class="fas fa-crosshairs"></i> Combat Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-md-3">
+                            <div style="background: rgba(37, 211, 102, 0.15); padding: 1rem; border-radius: 6px;">
+                                <p class="text-muted small mb-1"><i class="fas fa-skull"></i> Kills</p>
+                                <h2 class="text-success mb-0">{{ statistic.kills }}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="background: rgba(255, 107, 107, 0.15); padding: 1rem; border-radius: 6px;">
+                                <p class="text-muted small mb-1"><i class="fas fa-heart-crack"></i> Deaths</p>
+                                <h2 class="text-danger mb-0">{{ statistic.deaths }}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="background: rgba(255, 193, 7, 0.15); padding: 1rem; border-radius: 6px;">
+                                <p class="text-muted small mb-1"><i class="fas fa-handshake"></i> Assists</p>
+                                <h2 class="text-warning mb-0">{{ statistic.assists }}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="background: rgba(0, 188, 212, 0.15); padding: 1rem; border-radius: 6px;">
+                                <p class="text-muted small mb-1"><i class="fas fa-chart-line"></i> KDA Ratio</p>
+                                <h2 class="h4 mb-0" style="color: #00bcd4; font-weight: 700;">
+                                    {% if statistic.deaths > 0 %}
+                                        {{ (statistic.kda)|number_format(2) }}
+                                    {% else %}
+                                        ∞
+                                    {% endif %}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted small"><i class="fas fa-crosshairs"></i> Objectives Destroyed</label>
+                            <p class="h4 text-primary mb-0">{{ statistic.objectivesDestroyed }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Damage Statistics Card -->
+            <div class="card bg-dark border-danger shadow-lg mb-4">
+                <div class="card-header bg-dark border-danger">
+                    <h5 class="mb-0" style="color: #ff6b6b;">
+                        <i class="fas fa-fire"></i> Damage Report
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div style="background: rgba(255, 107, 107, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid #ff6b6b;">
+                                <small class="text-muted">Damage Dealt</small>
+                                <h3 style="color: #ff6b6b; font-weight: 700;">{{ (statistic.damageDealt)|number_format(0) }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div style="background: rgba(255, 193, 7, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid #ffc107;">
+                                <small class="text-muted">Damage Taken</small>
+                                <h3 style="color: #ffc107; font-weight: 700;">{{ (statistic.damageTaken)|number_format(0) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div style="text-align: center; padding: 1rem; background: rgba(37, 211, 102, 0.1); border-radius: 6px;">
+                                <small class="text-muted">Net Damage</small>
+                                <h4 style="color: var(--secondary); font-weight: 700;">
+                                    {{ (statistic.damageDealt - statistic.damageTaken)|number_format(0) }}
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div style="text-align: center; padding: 1rem; background: rgba(0, 188, 212, 0.1); border-radius: 6px;">
+                                <small class="text-muted">Damage Ratio</small>
+                                <h4 style="color: #00bcd4; font-weight: 700;">
+                                    {% if statistic.damageTaken > 0 %}
+                                        {{ (statistic.damageDealt / statistic.damageTaken)|number_format(2) }}x
+                                    {% else %}
+                                        ∞x
+                                    {% endif %}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Economy Card -->
+            <div class="card bg-dark border-warning shadow-lg">
+                <div class="card-header bg-dark border-warning">
+                    <h5 class="mb-0" style="color: #ffc107;">
+                        <i class="fas fa-coins"></i> Economy
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="text-align: center; padding: 1.5rem; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                        <small class="text-muted">Gold Earned</small>
+                        <h2 style="color: #ffc107; font-weight: 800; margin-top: 0.5rem;">
+                            {{ (statistic.goldEarned)|number_format(0) }} 💰
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <!-- Match Information Card -->
+            <div class="card bg-dark border-info shadow-lg mb-4">
+                <div class="card-header bg-dark border-info">
+                    <h5 class="mb-0" style="color: #00bcd4;">
+                        <i class="fas fa-trophy"></i> Match Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3" style="background: rgba(0, 188, 212, 0.1); padding: 1rem; border-radius: 6px;">
+                        <small class="text-muted">Score</small>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                            <strong style="color: var(--primary);">{{ statistic.game.team1.name }}</strong>
+                            <strong style="color: #00bcd4;">{{ statistic.game.score1 }} - {{ statistic.game.score2 }}</strong>
+                            <strong style="color: var(--secondary);">{{ statistic.game.team2.name }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-trophy"></i> Tournament
+                        </small>
+                        <p class="h6 mb-0" style="color: var(--primary); font-weight: 700;">
+                            {{ statistic.game.tournament.name }}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> Match Date
+                        </small>
+                        <p class="h6 mb-0" style="color: var(--text-primary);">
+                            {{ statistic.game.matchdate|date('d M Y H:i') }}
+                        </p>
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            <i class="fas fa-hourglass"></i> Status
+                        </small>
+                        <p class="h6 mb-0">
+                            {% if statistic.game.status == 'finished' %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Finished</span>
+                            {% elseif statistic.game.status == 'ongoing' %}
+                                <span class="badge bg-danger"><i class="fas fa-play"></i> Ongoing</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ statistic.game.status|capitalize }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Summary Card -->
+            <div class="card bg-dark border-secondary shadow-lg mb-4">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Performance Summary
+                    </h5>
+                </div>
+                <div class="card-body" style="font-size: 0.9rem;">
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="text-muted">Kills:</span>
+                        <strong style="color: var(--secondary);">{{ statistic.kills }}</strong>
+                    </div>
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="text-muted">Deaths:</span>
+                        <strong style="color: #ff6b6b;">{{ statistic.deaths }}</strong>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <span class="text-muted">Assists:</span>
+                        <strong style="color: #ffc107;">{{ statistic.assists }}</strong>
+                    </div>
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="text-muted">Damage:</span>
+                        <strong style="color: #00bcd4;">{{ (statistic.damageDealt)|number_format(0) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Gold:</span>
+                        <strong style="color: #ffc107;">{{ (statistic.goldEarned)|number_format(0) }}</strong>
+                    </div>
+
+                    {% if statistic.notes %}
+                    <hr style="border-color: rgba(0, 242, 254, 0.2);">
+                    <div>
+                        <h6 class="text-primary mb-2"><i class="fas fa-sticky-note"></i> Notes</h6>
+                        <p class="text-muted small mb-0">{{ statistic.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Timestamps Card -->
+            <div class="card bg-dark border-secondary shadow-lg mb-4">
+                <div class="card-body small text-muted">
+                    <p class="mb-1">
+                        <i class="fas fa-calendar-plus"></i> Created: 
+                        <br>
+                        <span style="color: var(--text-primary);">{{ statistic.createdAt|date('d M Y H:i:s') }}</span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-sync-alt"></i> Updated: 
+                        <br>
+                        <span style="color: var(--text-primary);">{{ statistic.updatedAt|date('d M Y H:i:s') }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Delete Button -->
+            <form method="POST" action="{{ path('admin_match_statistic_delete', {'id': statistic.id}) }}" onsubmit="return confirm('Delete this statistic? This cannot be undone.');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ statistic.id) }}">
+                <button type="submit" class="btn btn-danger w-100">
+                    <i class="fas fa-trash"></i> Delete Statistic
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

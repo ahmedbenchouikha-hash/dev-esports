@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - {{ title }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="{{ path('admin_player_index') }}" class="btn btn-outline-primary btn-sm">← Back to Players</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="page-title">{{ title }}</h1>
+
+                {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">{% if player %}Update Player{% else %}Create Player{% endif %}</button>
+                        <a href="{{ path('admin_player_index') }}" class="btn btn-outline-primary">Cancel</a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

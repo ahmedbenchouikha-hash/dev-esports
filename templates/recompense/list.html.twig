@@ -1,0 +1,310 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rewards Management{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <!-- Messages flash -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                <i class="fe fe-alert-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="mb-1"><i class="fe fe-gift me-2"></i>Rewards Management</h1>
+            <p class="text-muted mb-0">{{ recompenses|length }} reward(s) found</p>
+        </div>
+        {% if isAdmin %}
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary add-btn" data-action="create">
+                <i class="fe fe-plus me-2"></i>Add a reward
+            </button>
+            <a href="{{ path('recompense_export_pdf') }}" class="btn btn-danger">
+                <i class="fe fe-file-pdf me-2"></i>Export PDF
+            </a>
+        </div>
+        {% else %}
+        <a href="{{ path('recompense_export_pdf') }}" class="btn btn-danger">
+            <i class="fe fe-file-pdf me-2"></i>Export PDF
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search by name</label>
+                    <input type="text" name="searchName" class="form-control" 
+                           placeholder="Reward name..."
+                           value="{{ searchName ?? '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Type</label>
+                    <select name="searchType" class="form-select">
+                        <option value="">All types</option>
+                        <option value="Accessoire informatique" {% if searchType == 'Accessoire informatique' %}selected{% endif %}>Computer accessory</option>
+                        <option value="Médaille" {% if searchType == 'Médaille' %}selected{% endif %}>Medal</option>
+                        <option value="Argent" {% if searchType == 'Argent' %}selected{% endif %}>Cash</option>
+                        <option value="Trophée" {% if searchType == 'Trophée' %}selected{% endif %}>Trophy</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tournament</label>
+                    <select name="searchTournament" class="form-select">
+                        <option value="">All tournaments</option>
+                        {% for tournament in tournaments %}
+                        <option value="{{ tournament.id }}" {% if searchTournament == tournament.id ~ '' %}selected{% endif %}>
+                            {{ tournament.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-secondary w-100">
+                        <i class="fe fe-search me-1"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    {% if recompenses|length > 0 %}
+        <div class="row mb-4 g-3">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary">{{ recompenses|length }}</h3>
+                        <p class="card-text mb-0">Reward(s)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-info">{{ minClassement ?? '—' }}</h3>
+                        <p class="card-text mb-0">Min rank</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="card-title text-success">{{ maxClassement ?? '—' }}</h3>
+                        <p class="card-text mb-0">Max rank</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Rewards Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Rank</th>
+                        <th>Tournament</th>
+                        <th>Description</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recompenses|length == 0 %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fe fe-inbox me-2"></i>No rewards found
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for recompense in recompenses %}
+                        <tr>
+                            <td><strong>{{ recompense.id }}</strong></td>
+                            <td>{{ recompense.recompense }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ recompense.type }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ recompense.classement }}</span>
+                            </td>
+                            <td>{{ recompense.tournament.name ?? '-' }}</td>
+                            <td>
+                                {% set desc = recompense.description %}
+                                {{ desc ? (desc|slice(0, 50) ~ (desc|length > 50 ? '...' : '')) : '-' }}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ path('recompense_show', { id: recompense.id }) }}" class="btn btn-sm btn-info" title="View details">
+                                    <i class="fe fe-eye me-1"></i>View
+                                </a>
+                                {% if isAdmin %}
+                                <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="{{ recompense.id }}" title="Edit">
+                                    <i class="fe fe-edit-2 me-1"></i>Edit
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ recompense.id }}" title="Delete">
+                                    <i class="fe fe-trash-2 me-1"></i>Delete
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden CSRF Token -->
+<input type="hidden" id="csrfToken" value="{{ csrf_token('recompense_delete') }}">
+
+<!-- Modal Form -->
+<div class="modal fade" id="recompenseFormModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div id="recompenseFormContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fe fe-alert-triangle text-danger me-2"></i>Confirm deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this reward? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fe fe-trash-2 me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recompenseModal = new bootstrap.Modal(document.getElementById('recompenseFormModal'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    let currentRecompenseId = null;
+
+    // Add Button
+    document.querySelector('.add-btn')?.addEventListener('click', function() {
+        currentRecompenseId = null;
+        fetch('{{ path("recompense_modal_form") }}?action=create')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('recompenseFormContent').innerHTML = data.html;
+                recompenseModal.show();
+                attachFormListeners();
+            });
+    });
+
+    // Edit Buttons
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentRecompenseId = this.dataset.id;
+            fetch(`{{ path("recompense_modal_form") }}?action=edit&id=${currentRecompenseId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    document.getElementById('recompenseFormContent').innerHTML = data.html;
+                    recompenseModal.show();
+                    attachFormListeners();
+                });
+        });
+    });
+
+    // Delete Buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentRecompenseId = this.dataset.id;
+            deleteModal.show();
+        });
+    });
+
+    // Confirm Delete
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        const csrfToken = document.getElementById('csrfToken').value;
+        
+        fetch('{{ path("recompense_modal_delete") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `id=${currentRecompenseId}&_token=${csrfToken}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                deleteModal.hide();
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Unable to delete'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    });
+
+    function attachFormListeners() {
+        const form = document.getElementById('recompenseForm');
+        if (!form) return;
+
+        document.getElementById('submitRecompenseForm').addEventListener('click', function() {
+            const formData = new FormData(form);
+            
+            fetch('{{ path("recompense_modal_form") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    recompenseModal.hide();
+                    location.reload();
+                } else if (data.html) {
+                    document.getElementById('recompenseFormContent').innerHTML = data.html;
+                    attachFormListeners();
+                } else if (data.errors) {
+                    const errorsStr = data.errors.join('<br>');
+                    alert('Validation error:\n' + errorsStr);
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the form');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

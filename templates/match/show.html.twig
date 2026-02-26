@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ game.team1.name }} vs {{ game.team2.name }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="{{ path('match_index') }}" class="btn btn-outline-primary btn-sm">← Back to Matches</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <!-- Match Header -->
+                <div class="text-center mb-4">
+                    <h1 class="page-title">{{ game.team1.name }} vs {{ game.team2.name }}</h1>
+                    <span class="badge {% if game.status == 'finished' %}badge-success{% elseif game.status == 'ongoing' %}badge-danger{% elseif game.status == 'pending' %}badge-warning{% else %}badge-secondary{% endif %}" style="font-size: 1rem;">
+                        {{ game.status|capitalize }}
+                    </span>
+                </div>
+
+                <!-- Score Board -->
+                <div class="row mb-4">
+                    <div class="col-md-5">
+                        <div class="text-center">
+                            <h3>{{ game.team1.name }}</h3>
+                            <a href="{{ path('team_show', { id: game.team1.id }) }}" class="btn btn-sm btn-outline-primary mb-3">View Team</a>
+                            {% if game.team1.players|length > 0 %}
+                                <div class="mt-3">
+                                    <h5>Players</h5>
+                                    <ul class="list-unstyled">
+                                        {% for player in game.team1.players %}
+                                            <li><small>{{ player.nickname }} {% if player.role %}<span class="text-muted">({{ player.role }})</span>{% endif %}</small></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                        <div>
+                            <div style="font-size: 3rem; font-weight: bold; text-align: center;">
+                                <span style="color: var(--highlight-color);">{{ game.score1 }}</span>
+                                <div style="font-size: 1rem; color: #999;">-</div>
+                                <span style="color: var(--highlight-color);">{{ game.score2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="text-center">
+                            <h3>{{ game.team2.name }}</h3>
+                            <a href="{{ path('team_show', { id: game.team2.id }) }}" class="btn btn-sm btn-outline-primary mb-3">View Team</a>
+                            {% if game.team2.players|length > 0 %}
+                                <div class="mt-3">
+                                    <h5>Players</h5>
+                                    <ul class="list-unstyled">
+                                        {% for player in game.team2.players %}
+                                            <li><small>{{ player.nickname }} {% if player.role %}<span class="text-muted">({{ player.role }})</span>{% endif %}</small></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Details -->
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>📅 Date & Time:</strong> {{ game.matchdate|date('d M Y - H:i') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>🏆 Tournament:</strong> <a href="{{ path('tournament_show', { id: game.tournament.id }) }}" class="text-decoration-none">{{ game.tournament.name }}</a></p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>📍 Location:</strong> {{ game.tournament.location ?? 'TBD' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>💰 Prize Pool:</strong> {% if game.tournament.prizePool %}${{ game.tournament.prizePool|number_format(2) }}{% else %}TBD{% endif %}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Tournament Info -->
+                <div class="alert alert-info">
+                    <h6>Tournament Information</h6>
+                    <p class="mb-0">{{ game.tournament.description ?? 'No description available' }}</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center">
+                    <a href="{{ path('match_index') }}" class="btn btn-outline-primary">← Back to Matches</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

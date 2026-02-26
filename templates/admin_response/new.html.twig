@@ -1,0 +1,28 @@
+{% extends "base.html.twig" %}
+
+{% block title %}New Admin Response - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1>Create Admin Response</h1>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="mb-3">
+                    {{ form_label(form.message, 'Message') }}
+                    {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                    {{ form_errors(form.message) }}
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Create Response
+                    </button>
+                    <a href="{{ path('app_admin_response_index') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
