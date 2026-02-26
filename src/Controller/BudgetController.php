@@ -4,18 +4,27 @@ namespace App\Controller;
 
 use App\Entity\Budget;
 use App\Entity\Depense;
+<<<<<<< HEAD
 use App\Entity\Player;
 use App\Entity\Team;
 use App\Form\BudgetType;
 use App\Repository\BudgetRepository;
 use App\Repository\DepenseRepository;
 use App\Service\AuthorizationService;
+=======
+use App\Form\BudgetType;
+use App\Repository\BudgetRepository;
+use App\Repository\DepenseRepository;
+>>>>>>> module-rewards
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+=======
+>>>>>>> module-rewards
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use DateTime;
 
@@ -166,7 +175,11 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
+<<<<<<< HEAD
     public function index(Request $request, BudgetRepository $budgetRepository, AuthorizationService $authService): Response
+=======
+    public function index(Request $request, BudgetRepository $budgetRepository): Response
+>>>>>>> module-rewards
     {
         $search = $request->query->get('search', '');
         $sort = $request->query->get('sort', 'dateAllocation');
@@ -186,6 +199,7 @@ class BudgetController extends AbstractController
         
         $budgets = [];
         foreach ($allBudgets as $budget) {
+<<<<<<< HEAD
             // Managers can only see budgets for teams they manage
             if (!$this->isGranted('ROLE_ADMIN') && $this->isGranted('ROLE_MANAGER')) {
                 if (!$authService->canManageTeam($budget->getTeam())) {
@@ -193,6 +207,8 @@ class BudgetController extends AbstractController
                 }
             }
             
+=======
+>>>>>>> module-rewards
             if ($filter === 'all') {
                 $budgets[] = $budget;
             } elseif ($filter === 'actif' && $budget->getStatut() === 'actif') {
@@ -235,6 +251,7 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     #[IsGranted('ROLE_ADMIN')]
     public function new(Request $request, EntityManagerInterface $entityManager, BudgetRepository $budgetRepository, ValidatorInterface $validator, AuthorizationService $authService): Response
     {
@@ -256,6 +273,12 @@ class BudgetController extends AbstractController
         $form = $this->createForm(BudgetType::class, $budget, [
             'teams' => $managerTeams
         ]);
+=======
+    public function new(Request $request, EntityManagerInterface $entityManager, BudgetRepository $budgetRepository, ValidatorInterface $validator): Response
+    {
+        $budget = new Budget();
+        $form = $this->createForm(BudgetType::class, $budget);
+>>>>>>> module-rewards
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -288,11 +311,14 @@ class BudgetController extends AbstractController
 
             if ($budget->getTeam() === null) {
                 $validationErrors[] = '❌ You must select a team';
+<<<<<<< HEAD
             } else {
                 // Check if user has access to manage this team
                 if (!$authService->canManageTeam($budget->getTeam())) {
                     $validationErrors[] = '❌ You don\'t have access to manage this team';
                 }
+=======
+>>>>>>> module-rewards
             }
 
             if (count($validationErrors) > 0) {
@@ -336,6 +362,7 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
+<<<<<<< HEAD
     public function show(Budget $budget, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
     {
         // Managers can only view budgets for their teams
@@ -345,6 +372,10 @@ class BudgetController extends AbstractController
             }
         }
 
+=======
+    public function show(Budget $budget, DepenseRepository $depenseRepository): Response
+    {
+>>>>>>> module-rewards
         $depenses = $depenseRepository->findBy([
             'team' => $budget->getTeam(),
             'statut' => 'validée'
@@ -363,6 +394,7 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function edit(Request $request, Budget $budget, EntityManagerInterface $entityManager, ValidatorInterface $validator, AuthorizationService $authService): Response
     {
         // Check if user has access to this budget's team
@@ -370,6 +402,10 @@ class BudgetController extends AbstractController
             $authService->ensureCanManageTeam($budget->getTeam());
         }
 
+=======
+    public function edit(Request $request, Budget $budget, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    {
+>>>>>>> module-rewards
         $form = $this->createForm(BudgetType::class, $budget);
         $form->handleRequest($request);
 
@@ -443,6 +479,7 @@ class BudgetController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+<<<<<<< HEAD
     public function delete(Request $request, Budget $budget, EntityManagerInterface $entityManager, AuthorizationService $authService): Response
     {
         // Check if user has access to this budget's team
@@ -450,6 +487,10 @@ class BudgetController extends AbstractController
             $authService->ensureCanManageTeam($budget->getTeam());
         }
 
+=======
+    public function delete(Request $request, Budget $budget, EntityManagerInterface $entityManager): Response
+    {
+>>>>>>> module-rewards
         if ($this->isCsrfTokenValid('delete'.$budget->getId(), $request->request->get('_token'))) {
             try {
                 $entityManager->remove($budget);

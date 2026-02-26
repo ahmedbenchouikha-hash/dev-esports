@@ -5,6 +5,10 @@ namespace App\Form;
 use App\Entity\Tournament;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+<<<<<<< HEAD
+=======
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+>>>>>>> module-rewards
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -81,6 +85,27 @@ class TournamentType extends AbstractType
                     'class' => 'form-control'
                 ]
             ])
+<<<<<<< HEAD
+=======
+            ->add('rules', CollectionType::class, [
+                'label' => 'Tournament Rules',
+                'entry_type' => TextType::class,
+                'entry_options' => [
+                    'attr' => [
+                        'placeholder' => 'Enter a rule',
+                        'class' => 'form-control',
+                        'maxlength' => 500
+                    ]
+                ],
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+>>>>>>> module-rewards
         ;
     }
 

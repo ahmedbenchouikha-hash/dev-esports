@@ -33,7 +33,25 @@ class Recompense
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
+<<<<<<< HEAD
     #[ORM\OneToMany(mappedBy: 'recompense', targetEntity: DemandeRecompense::class)]
+=======
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $giphy_url = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $motif_suggere_ia = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $giphy_updated_at = null;
+
+    #[ORM\ManyToOne(inversedBy: 'recompenses')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Le tournoi est requis')]
+    private ?Tournament $tournament = null;
+
+    #[ORM\OneToMany(mappedBy: 'recompense', targetEntity: DemandeRecompense::class, cascade: ['remove'])]
+>>>>>>> module-rewards
     private Collection $demandes;
 
     public function __construct()
@@ -119,4 +137,51 @@ class Recompense
 
         return $this;
     }
+<<<<<<< HEAD
+=======
+
+    public function getTournament(): ?Tournament
+    {
+        return $this->tournament;
+    }
+
+    public function setTournament(?Tournament $tournament): static
+    {
+        $this->tournament = $tournament;
+        return $this;
+    }
+
+    public function getGiphyUrl(): ?string
+    {
+        return $this->giphy_url;
+    }
+
+    public function setGiphyUrl(?string $giphy_url): static
+    {
+        $this->giphy_url = $giphy_url;
+        return $this;
+    }
+
+    public function getMotifSuppereIa(): ?string
+    {
+        return $this->motif_suggere_ia;
+    }
+
+    public function setMotifSuppereIa(?string $motif): static
+    {
+        $this->motif_suggere_ia = $motif;
+        return $this;
+    }
+
+    public function getGiphyUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->giphy_updated_at;
+    }
+
+    public function setGiphyUpdatedAt(?\DateTimeImmutable $date): static
+    {
+        $this->giphy_updated_at = $date;
+        return $this;
+    }
+>>>>>>> module-rewards
 }

@@ -2,7 +2,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
+<<<<<<< HEAD
     <title>Rapport - Récompenses</title>
+=======
+    <title>Report - Rewards</title>
+>>>>>>> module-rewards
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,6 +74,7 @@
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <h1>Rapport des Récompenses</h1>
     
     <div class="statistics">
@@ -83,22 +88,49 @@
         </div>
         <div class="stats-item">
             <span>Classement maximum:</span>
+=======
+    <h1>Rewards Report</h1>
+    
+    <div class="statistics">
+        <div class="stats-item">
+            <span>Total rewards:</span>
+            <div class="stats-value">{{ recompenses|length }}</div>
+        </div>
+        <div class="stats-item">
+            <span>Minimum rank:</span>
+            <div class="stats-value">{{ minClassement ?? 'N/A' }}</div>
+        </div>
+        <div class="stats-item">
+            <span>Maximum rank:</span>
+>>>>>>> module-rewards
             <div class="stats-value">{{ maxClassement ?? 'N/A' }}</div>
         </div>
     </div>
 
+<<<<<<< HEAD
     <h2>Détail des récompenses</h2>
+=======
+    <h2>Reward details</h2>
+>>>>>>> module-rewards
     
     {% if recompenses|length > 0 %}
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
+<<<<<<< HEAD
                     <th>Nom</th>
                     <th>Type</th>
                     <th>Classement</th>
                     <th>Description</th>
                     <th>Demandes</th>
+=======
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Rank</th>
+                    <th>Description</th>
+                    <th>Requests</th>
+>>>>>>> module-rewards
                 </tr>
             </thead>
             <tbody>
@@ -115,12 +147,21 @@
             </tbody>
         </table>
     {% else %}
+<<<<<<< HEAD
         <p style="color: #cc6600; text-align: center;">Aucune récompense trouvée.</p>
     {% endif %}
 
     <footer>
         <p>Rapport généré le {{ "now"|date('d/m/Y à H:i:s') }}</p>
         <p>Gestion des Récompenses - Système E-Sports</p>
+=======
+        <p style="color: #cc6600; text-align: center;">No rewards found.</p>
+    {% endif %}
+
+    <footer>
+        <p>Report generated on {{ "now"|date('d/m/Y à H:i:s') }}</p>
+        <p>Rewards Management - E-Sports System</p>
+>>>>>>> module-rewards
     </footer>
 </body>
 </html>

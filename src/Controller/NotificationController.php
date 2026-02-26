@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/notifications')]
 final class NotificationController extends AbstractController
 {
+<<<<<<< HEAD
     #[Route('', name: 'app_notifications', methods: ['GET'])]
     public function index(NotificationRepository $repo): Response
     {
@@ -23,6 +24,8 @@ final class NotificationController extends AbstractController
         ]);
     }
 
+=======
+>>>>>>> module-rewards
     #[Route('/recent', name: 'notifications_recent', methods: ['GET'])]
     public function recent(NotificationRepository $repo): Response
     {

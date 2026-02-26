@@ -1,6 +1,10 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}Register - RankUp{% endblock %}
+=======
+{% block title %}Register - Dev Esports{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="register-container">
@@ -12,7 +16,11 @@
                 <div class="register-logo">
                     <i class="fas fa-user-plus"></i>
                 </div>
+<<<<<<< HEAD
                 <h1>Join RankUp</h1>
+=======
+                <h1>Join Dev Esports</h1>
+>>>>>>> module-rewards
                 <p class="register-subtitle">Create your account and start playing</p>
             </div>
 
@@ -37,7 +45,17 @@
                 {{ form_widget(registrationForm.email, {
                     attr: { class: 'form-control', placeholder: 'you@example.com', autofocus: true }
                 }) }}
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.email) }}
+=======
+                {% if registrationForm.email.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.email.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- Username Field -->
@@ -46,7 +64,17 @@
                 {{ form_widget(registrationForm.username, {
                     attr: { class: 'form-control', placeholder: 'Choose your username' }
                 }) }}
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.username) }}
+=======
+                {% if registrationForm.username.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.username.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- First Name Field -->
@@ -103,7 +131,17 @@
                         </div>
                     {% endfor %}
                 </div>
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.userRole) }}
+=======
+                {% if registrationForm.userRole.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.userRole.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- Verification File Field (Players Only) -->
@@ -118,7 +156,17 @@
                         Upload ID, passport, or gaming license (PDF, JPG, PNG - max 5MB)
                     </div>
                 </div>
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.verificationFile) }}
+=======
+                {% if registrationForm.verificationFile.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.verificationFile.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- Password Field -->
@@ -138,7 +186,17 @@
                         <i class="fas fa-check-circle"></i> One number
                     </span>
                 </div>
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.password.first) }}
+=======
+                {% if registrationForm.password.first.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.password.first.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- Confirm Password Field -->
@@ -147,7 +205,17 @@
                 {{ form_widget(registrationForm.password.second, {
                     attr: { class: 'form-control', placeholder: 'Repeat your password', autocomplete: 'new-password' }
                 }) }}
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.password.second) }}
+=======
+                {% if registrationForm.password.second.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.password.second.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- Agreement Checkbox -->
@@ -156,7 +224,17 @@
                     attr: { class: 'form-check-input' }
                 }) }}
                 {{ form_label(registrationForm.agreeTerms, 'I agree to the Terms of Service and Privacy Policy', { label_attr: { class: 'form-check-label' } }) }}
+<<<<<<< HEAD
                 {{ form_errors(registrationForm.agreeTerms) }}
+=======
+                {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
+                    <div class="form-error-message">
+                        {% for error in registrationForm.agreeTerms.vars.errors %}
+                            <div><i class="fas fa-times-circle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+>>>>>>> module-rewards
             </div>
 
             <!-- Submit Button -->
@@ -454,6 +532,42 @@
         gap: 0.5rem;
     }
 
+<<<<<<< HEAD
+=======
+    .form-error-message {
+        color: #ff4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: rgba(255, 68, 68, 0.1);
+        border-left: 3px solid #ff4444;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .form-error-message div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-error-message i {
+        font-size: 0.8rem;
+    }
+
+    .form-control.is-invalid {
+        border-color: #ff4444;
+        background: rgba(15, 23, 42, 0.5);
+    }
+
+    .form-control.is-invalid:focus {
+        border-color: #ff4444;
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+    }
+
+>>>>>>> module-rewards
     .file-input-wrapper {
         position: relative;
     }

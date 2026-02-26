@@ -6,7 +6,10 @@ use App\Entity\Punition;
 use App\Form\PunitionType;
 use App\Repository\PunitionRepository;
 use App\Repository\ReclamationRepository;
+<<<<<<< HEAD
 use App\Service\MistralAssistantService;
+=======
+>>>>>>> module-rewards
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +28,7 @@ final class PunitionController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/leaderboard/stats', name: 'app_punition_leaderboard_stats', methods: ['GET'])]
     public function leaderboardStats(PunitionRepository $punitionRepository): JsonResponse
     {
@@ -59,6 +63,8 @@ final class PunitionController extends AbstractController
         ]);
     }
 
+=======
+>>>>>>> module-rewards
     #[Route('/ajax-ban', name: 'app_punition_ajax_ban', methods: ['POST'])]
     public function ajaxBan(
         Request $request,
@@ -104,6 +110,7 @@ final class PunitionController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/voice-assistant', name: 'app_punition_voice_assistant', methods: ['POST'])]
     public function voiceAssistant(Request $request, MistralAssistantService $assistant): JsonResponse
     {
@@ -117,6 +124,8 @@ final class PunitionController extends AbstractController
         return $this->json($result, $status);
     }
 
+=======
+>>>>>>> module-rewards
     #[Route('/new', name: 'app_punition_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -133,10 +142,13 @@ final class PunitionController extends AbstractController
                 return $this->redirectToRoute('app_punition_new');
             }
 
+<<<<<<< HEAD
             $selectedBan = (string) $form->get('playerStatus')->getData();
             $punition->setPlayerStatus('');
             $punition->addBan($selectedBan);
 
+=======
+>>>>>>> module-rewards
             if ($rec->getPlayer()) {
                 $player = $rec->getPlayer();
                 $player->setPlayerStatus('BANNED');
@@ -167,9 +179,13 @@ final class PunitionController extends AbstractController
     #[Route('/{id}/edit', name: 'app_punition_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Punition $punition, EntityManagerInterface $entityManager): Response
     {
+<<<<<<< HEAD
         $form = $this->createForm(PunitionType::class, $punition, [
             'edit_mode' => true,
         ]);
+=======
+        $form = $this->createForm(PunitionType::class, $punition);
+>>>>>>> module-rewards
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -181,11 +197,14 @@ final class PunitionController extends AbstractController
                 return $this->redirectToRoute('app_punition_edit', ['id' => $punition->getId()]);
             }
 
+<<<<<<< HEAD
             $newBan = $form->get('newBan')->getData();
             if (is_string($newBan) && $newBan !== '') {
                 $punition->addBan($newBan);
             }
 
+=======
+>>>>>>> module-rewards
             if ($rec->getPlayer()) {
                 $player = $rec->getPlayer();
                 $player->setPlayerStatus('BANNED');

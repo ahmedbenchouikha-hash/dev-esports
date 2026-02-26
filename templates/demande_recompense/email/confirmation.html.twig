@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation demande</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2>Demande recue</h2>
+    <p>Bonjour <strong>{{ demande.nomDemandeur }}</strong>,</p>
+    <p>Votre demande de recompense a bien ete ajoutee et est en cours de traitement.</p>
+    <ul>
+        <li>Recompense : <strong>{{ demande.recompense.recompense }}</strong></li>
+        <li>Type : {{ demande.recompense.type }}</li>
+        <li>Date : {{ demande.dateDemande|date('d/m/Y H:i') }}</li>
+    </ul>
+    <p>Nous vous informerons des qu'une decision sera prise.</p>
+    <p>Cordialement,<br><strong>L'equipe dev-esports</strong></p>
+</body>
+</html>

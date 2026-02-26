@@ -28,6 +28,7 @@
             </div>
             
             <div class="team-card-content">
+<<<<<<< HEAD
                 {% if currentTeam.logo %}
                     <div style="flex: 0 0 150px; height: 100px; background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6)); display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.15); margin-right: 1.5rem; padding: 0.5rem;">
                         <img src="{{ asset('uploads/logos/' ~ currentTeam.logo) }}" alt="{{ currentTeam.name }} logo" style="max-width: 100%; max-height: 100%; object-fit: contain; width: auto;">
@@ -37,6 +38,8 @@
                         <i class="fas fa-image" style="font-size: 2rem; color: rgba(0, 242, 254, 0.3);"></i>
                     </div>
                 {% endif %}
+=======
+>>>>>>> module-rewards
                 <div class="team-info">
                     <div class="team-header-info">
                         <h3>{{ currentTeam.name }}</h3>
@@ -65,6 +68,13 @@
                 </div>
 
                 <div class="team-actions">
+<<<<<<< HEAD
+=======
+                    <a href="{{ path('admin_team_index') }}" class="btn btn-info btn-sm">
+                        <i class="fas fa-eye"></i> View Team
+                    </a>
+                    
+>>>>>>> module-rewards
                     <form method="POST" action="{{ path('player_leave_team') }}" style="display: inline;">
                         <input type="hidden" name="_token" value="{{ csrf_token('leave_team') }}">
                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to leave this team?')">
@@ -84,6 +94,7 @@
         </div>
     {% endif %}
 
+<<<<<<< HEAD
     <!-- Team Invitations Section -->
     {% if pendingInvitations|length > 0 %}
         <div class="team-section invitations-section">
@@ -195,6 +206,8 @@
         {% endif %}
     </div>
 
+=======
+>>>>>>> module-rewards
     <!-- Available Teams Section -->
     <div class="team-section">
         <div class="section-header">
@@ -207,6 +220,7 @@
             <div class="teams-grid">
                 {% for team in availableTeams %}
                     <div class="team-card">
+<<<<<<< HEAD
                         {% if team.logo %}
                             <div style="height: 120px; background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6)); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0.5rem;">
                                 <img src="{{ asset('uploads/logos/' ~ team.logo) }}" alt="{{ team.name }} logo" style="max-width: 100%; max-height: 100%; object-fit: contain; width: auto;">
@@ -216,6 +230,8 @@
                                 <i class="fas fa-image" style="font-size: 2rem; color: rgba(0, 242, 254, 0.3);"></i>
                             </div>
                         {% endif %}
+=======
+>>>>>>> module-rewards
                         <div class="team-card-header">
                             <h3>{{ team.name }}</h3>
                             <span class="team-size-badge">
@@ -237,6 +253,18 @@
                                 <span class="stat-value">{{ team.createdAt|date('Y') }}</span>
                             </div>
                         </div>
+<<<<<<< HEAD
+=======
+
+                        <div class="team-card-footer">
+                            <form method="POST" action="{{ path('player_join_team', { id: team.id }) }}" style="width: 100%;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('join_team_' ~ team.id) }}">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-plus-circle"></i> Join Team
+                                </button>
+                            </form>
+                        </div>
+>>>>>>> module-rewards
                     </div>
                 {% endfor %}
             </div>
@@ -284,7 +312,13 @@
             </div>
 
             <div class="profile-actions">
+<<<<<<< HEAD
                 <!-- Players can view their profile but not edit through admin panel -->
+=======
+                <a href="{{ path('admin_player_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+>>>>>>> module-rewards
             </div>
         </div>
     </div>

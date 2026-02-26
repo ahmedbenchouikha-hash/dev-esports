@@ -1,0 +1,100 @@
+<!-- Modal Header -->
+<div class="modal-header p-4" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); border-bottom: 2px solid rgba(0, 242, 254, 0.2);">
+    <h5 class="modal-title fw-bold text-white" id="demandeFormLabel">
+        <i class="fe fe-{{ action == 'edit' ? 'edit-2' : 'plus-circle' }} me-2"></i>
+        {{ action == 'edit' ? 'Edit request' : 'New reward request' }}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<!-- Modal Body -->
+<div class="modal-body p-4">
+    <div id="formErrors"></div>
+    
+    <form id="demandeForm" method="POST" class="needs-validation" novalidate>
+        <input type="hidden" name="action" value="{{ action }}">
+        {% if form._token is defined %}
+            {{ form_widget(form._token) }}
+        {% endif %}
+
+        <div class="mb-3">
+            {{ form_label(form.recompense) }}
+            {{ form_widget(form.recompense, { attr: { class: 'form-select' ~ (form.recompense.vars.errors|length ? ' is-invalid' : '') } }) }}
+            {% if form.recompense.vars.errors|length %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.recompense.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="invalid-feedback d-block ai-recompense-error" style="display:none;"></div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.nomDemandeur) }}
+            {{ form_widget(form.nomDemandeur, { attr: { class: 'form-control' ~ (form.nomDemandeur.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Full name' } }) }}
+            {% if form.nomDemandeur.vars.errors|length %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.nomDemandeur.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="invalid-feedback d-block ai-nom-error" style="display:none;"></div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, { attr: { class: 'form-control' ~ (form.email.vars.errors|length ? ' is-invalid' : ''), placeholder: 'your.email@domain.com' } }) }}
+            {% if form.email.vars.errors|length %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.email.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                {{ form_label(form.motif) }}
+                <button type="button" id="suggestMotifBtn" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-wand-magic-sparkles me-1"></i>AI Suggest
+                </button>
+            </div>
+            {{ form_widget(form.motif, { attr: { class: 'form-control' ~ (form.motif.vars.errors|length ? ' is-invalid' : ''), rows: 4, placeholder: 'Leave empty for AI suggestion or explain your request (minimum 50 characters)...' } }) }}
+            <small class="form-text text-muted d-block mt-2">
+                <i class="fe fe-info me-1"></i>AI will generate a prompt for you if you leave this empty
+            </small>
+            <div id="aiSuggestionBox" class="alert alert-info mt-3" style="display:none;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <i class="fas fa-lightbulb me-2" style="color: #6366f1;"></i>
+                        <strong>AI Suggestion:</strong>
+                        <p id="aiSuggestionText" class="mb-0 mt-2" style="font-style: italic; color: #555;"></p>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-success" id="acceptSuggestionBtn">
+                        <i class="fas fa-check me-1"></i>Use it
+                    </button>
+                </div>
+            </div>
+            {% if form.motif.vars.errors|length %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.motif.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Modal Footer -->
+<div class="modal-footer p-4" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(0, 242, 254, 0.1);">
+    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+        <i class="fe fe-x me-2"></i>Cancel
+    </button>
+    <button type="button" class="btn btn-primary rounded-pill px-4" id="submitDemandeForm">
+        <i class="fe fe-check me-2"></i>{{ action == 'edit' ? 'Update' : 'Submit' }}
+    </button>
+</div>

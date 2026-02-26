@@ -1,5 +1,6 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}Reclamation Details - Dev Esports{% endblock %}
 
 {% block stylesheets %}
@@ -19,10 +20,14 @@
         }
     </style>
 {% endblock %}
+=======
+{% block title %}Reclamation #{{ reclamation.id }} - Dev Esports{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
+<<<<<<< HEAD
         <div>
             <h1 class="mb-0">Reclamation Details</h1>
             <p class="module-show-subtitle">Consultez le statut, les informations et les suites administratives de la demande.</p>
@@ -40,6 +45,23 @@
     </div>
 
     <div class="card mb-4 module-show-shell">
+=======
+        <h1>Reclamation #{{ reclamation.id }}</h1>
+        <div>
+            <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+>>>>>>> module-rewards
         <div class="card-header">
             <h5>{{ reclamation.titre }}</h5>
         </div>
@@ -47,6 +69,7 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <h6 class="text-muted">Status</h6>
+<<<<<<< HEAD
                     {% if is_granted('ROLE_ADMIN') and reclamation.etat.value == 'EN_COURS' %}
                     <div class="dropdown">
                         <button class="btn btn-sm btn-warning dropdown-toggle" type="button" id="stateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -68,6 +91,9 @@
                     {% else %}
                     <p><span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">{{ reclamation.etat.value|replace({'_': ' '}) }}</span></p>
                     {% endif %}
+=======
+                    <p><span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">{{ reclamation.etat.value|replace({'_': ' '}) }}</span></p>
+>>>>>>> module-rewards
                 </div>
                 <div class="col-md-6">
                     <h6 class="text-muted">Type</h6>
@@ -122,12 +148,16 @@
             <h5>Punishment Applied</h5>
         </div>
         <div class="card-body">
+<<<<<<< HEAD
             <p>
                 <strong>Bans:</strong>
                 <span class="ms-1 align-middle d-inline-block">
                     {% include 'punition/_ban_chips.html.twig' with { banList: reclamation.punition.banList, containerClass: 'd-inline-flex flex-wrap gap-1' } only %}
                 </span>
             </p>
+=======
+            <p><strong>Player Status:</strong> <span class="badge bg-danger">{{ reclamation.punition.playerStatus }}</span></p>
+>>>>>>> module-rewards
             <p><strong>From:</strong> {{ reclamation.punition.startAt|date('d/m/Y H:i') }}</p>
             <p><strong>To:</strong> {{ reclamation.punition.endAt|date('d/m/Y H:i') }}</p>
             <a href="{{ path('app_punition_show', {'id': reclamation.punition.id}) }}" class="btn btn-sm btn-danger">View Punishment</a>

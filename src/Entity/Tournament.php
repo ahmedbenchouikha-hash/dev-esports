@@ -66,13 +66,22 @@ class Tournament
     #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Game::class, cascade: ['remove'])]
     private Collection $games;
 
+<<<<<<< HEAD
     #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: TournamentRegistration::class, cascade: ['remove'])]
     private Collection $registrations;
+=======
+    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Recompense::class, cascade: ['remove'])]
+    private Collection $recompenses;
+>>>>>>> module-rewards
 
     public function __construct()
     {
         $this->games = new ArrayCollection();
+<<<<<<< HEAD
         $this->registrations = new ArrayCollection();
+=======
+        $this->recompenses = new ArrayCollection();
+>>>>>>> module-rewards
     }
 
     #[ORM\PrePersist]
@@ -245,6 +254,7 @@ class Tournament
         return $this;
     }
 
+<<<<<<< HEAD
     public function getRegistrations(): Collection
     {
         return $this->registrations;
@@ -255,20 +265,41 @@ class Tournament
         if (!$this->registrations->contains($registration)) {
             $this->registrations->add($registration);
             $registration->setTournament($this);
+=======
+    public function getRecompenses(): Collection
+    {
+        return $this->recompenses;
+    }
+
+    public function addRecompense(Recompense $recompense): static
+    {
+        if (!$this->recompenses->contains($recompense)) {
+            $this->recompenses->add($recompense);
+            $recompense->setTournament($this);
+>>>>>>> module-rewards
         }
         return $this;
     }
 
+<<<<<<< HEAD
     public function removeRegistration(TournamentRegistration $registration): static
     {
         if ($this->registrations->removeElement($registration)) {
             if ($registration->getTournament() === $this) {
                 $registration->setTournament(null);
+=======
+    public function removeRecompense(Recompense $recompense): static
+    {
+        if ($this->recompenses->removeElement($recompense)) {
+            if ($recompense->getTournament() === $this) {
+                $recompense->setTournament(null);
+>>>>>>> module-rewards
             }
         }
         return $this;
     }
 
+<<<<<<< HEAD
     public function getApprovedRegistrations(): Collection
     {
         return $this->registrations->filter(fn(TournamentRegistration $reg) => $reg->isApproved());
@@ -284,6 +315,8 @@ class Tournament
         return $this->registrations->filter(fn(TournamentRegistration $reg) => $reg->isRejected());
     }
 
+=======
+>>>>>>> module-rewards
     public function __toString(): string
     {
         return $this->name ?? 'Tournament';

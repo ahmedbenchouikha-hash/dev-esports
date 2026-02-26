@@ -40,6 +40,7 @@
                 box-sizing: border-box;
             }
 
+<<<<<<< HEAD
             html {
                 scroll-behavior: smooth;
                 overflow-x: hidden;
@@ -49,12 +50,15 @@
                 overflow: hidden;
             }
 
+=======
+>>>>>>> module-rewards
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: var(--bg-dark);
                 color: var(--text-primary);
             }
 
+<<<<<<< HEAD
             body.sidebar-open {
                 overflow: hidden;
                 width: 100%;
@@ -62,12 +66,15 @@
                 margin: 0 !important;
             }
 
+=======
+>>>>>>> module-rewards
             /* Navbar Styles */
             .navbar-custom {
                 background: linear-gradient(135deg, var(--bg-navbar) 0%, #1a2a42 100%);
                 border-bottom: 1px solid rgba(0, 242, 254, 0.1);
                 box-shadow: var(--shadow);
                 padding: 0.75rem 0;
+<<<<<<< HEAD
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -95,6 +102,12 @@
                 body.has-sidebar.sidebar-collapsed .navbar-custom {
                     margin-left: 0 !important;
                 }
+=======
+                position: sticky;
+                top: 0;
+                z-index: 1020;
+                backdrop-filter: blur(10px);
+>>>>>>> module-rewards
             }
 
             .navbar-brand-custom {
@@ -249,37 +262,85 @@
                 top: 0;
                 width: 260px;
                 height: 100vh;
+<<<<<<< HEAD
                 background: linear-gradient(180deg, #1a2847 0%, #0f1b2e 100%);
                 border-right: 2px solid rgba(0, 242, 254, 0.2);
                 z-index: 500;
+=======
+                background: linear-gradient(180deg, var(--bg-sidebar) 0%, #1a2847 100%);
+                border-right: 1px solid var(--border);
+                z-index: 1030;
+>>>>>>> module-rewards
                 display: flex;
                 flex-direction: column;
                 overflow-y: auto;
                 padding-top: 0;
+<<<<<<< HEAD
                 transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                 margin-top: 0;
                 box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
             }
 
             /* When sidebar is collapsed, keep it but push it off-screen on mobile */
+=======
+                transition: all 0.3s ease;
+                margin-top: 0;
+            }
+
+>>>>>>> module-rewards
             .sidebar-nav.collapsed {
                 width: 80px;
             }
 
             body.admin-layout {
+<<<<<<< HEAD
                 margin-left: 0;
                 margin-top: 0;
             }
 
+=======
+                margin-left: 260px;
+                margin-top: 0;
+            }
+
+            body.admin-layout.sidebar-collapsed {
+                margin-left: 80px;
+            }
+
+>>>>>>> module-rewards
             body.admin-layout.sidebar-hidden {
                 margin-left: 0;
             }
 
             body.admin-layout main {
+<<<<<<< HEAD
+=======
+                width: calc(100% - 260px);
+                transition: width 0.3s ease;
+            }
+
+            body.admin-layout.sidebar-collapsed main {
+                width: calc(100% - 80px);
+            }
+
+            body.admin-layout.sidebar-hidden main {
+                width: 100%;
+            }
+
+            /* Sidebar Brand */
+>>>>>>> module-rewards
             .sidebar-brand {
                 padding: 2rem 1.5rem;
                 border-bottom: 1px solid rgba(0, 242, 254, 0.1);
                 flex-shrink: 0;
+<<<<<<< HEAD
+=======
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-nav.collapsed .sidebar-brand {
+                padding: 1.5rem 0.75rem;
+>>>>>>> module-rewards
             }
 
             .brand-link {
@@ -293,6 +354,14 @@
                 transition: all 0.3s ease;
             }
 
+<<<<<<< HEAD
+=======
+            .sidebar-nav.collapsed .brand-link {
+                justify-content: center;
+                gap: 0;
+            }
+
+>>>>>>> module-rewards
             .brand-link:hover {
                 transform: scale(1.05);
                 text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
@@ -305,6 +374,18 @@
                 justify-content: center;
             }
 
+<<<<<<< HEAD
+=======
+            .brand-text {
+                transition: opacity 0.3s ease;
+            }
+
+            .sidebar-nav.collapsed .brand-text {
+                display: none;
+            }
+
+            /* Menu Styles */
+>>>>>>> module-rewards
             .sidebar-menu {
                 flex: 1;
                 padding: 1rem 0;
@@ -332,6 +413,7 @@
                 color: var(--text-secondary);
                 font-weight: 700;
                 margin-top: 0.5rem;
+<<<<<<< HEAD
                 transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
@@ -340,6 +422,13 @@
                 visibility: hidden;
                 padding: 0.5rem 0.75rem;
                 height: 0;
+=======
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-nav.collapsed .menu-section-title {
+                display: none;
+>>>>>>> module-rewards
             }
 
             .menu-item {
@@ -366,10 +455,14 @@
 
             .sidebar-nav.collapsed .menu-item .menu-label,
             .sidebar-nav.collapsed .menu-item .menu-arrow {
+<<<<<<< HEAD
                 opacity: 0;
                 visibility: hidden;
                 width: 0;
                 overflow: hidden;
+=======
+                display: none;
+>>>>>>> module-rewards
             }
 
             .menu-item:hover {
@@ -402,7 +495,10 @@
             .menu-label {
                 flex: 1;
                 font-size: 0.95rem;
+<<<<<<< HEAD
                 transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+=======
+>>>>>>> module-rewards
             }
 
             .menu-arrow {
@@ -542,6 +638,7 @@
 
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
+<<<<<<< HEAD
                 body.admin-layout {
                     margin-left: 0 !important;
                 }
@@ -562,6 +659,39 @@
 
                 .sidebar-toggle {
                     z-index: 10000;
+=======
+                .sidebar-nav {
+                    width: 100%;
+                    height: 100vh;
+                    transform: translateX(-100%);
+                    box-shadow: var(--shadow);
+                }
+
+                .sidebar-nav.show {
+                    transform: translateX(0);
+                }
+
+                body.admin-layout {
+                    margin-left: 0;
+                }
+
+                body.admin-layout main {
+                    width: 100%;
+                }
+
+                .sidebar-toggle {
+                    position: fixed;
+                    top: 1rem;
+                    left: 1rem;
+                }
+
+                .navbar-custom {
+                    padding: 0.75rem 3.5rem 0.75rem 0.75rem;
+                }
+
+                .navbar-nav-custom {
+                    gap: 1rem;
+>>>>>>> module-rewards
                 }
             }
 
@@ -588,6 +718,7 @@
                 margin-bottom: 1rem;
                 backdrop-filter: blur(10px);
                 animation: slideIn 0.3s ease;
+<<<<<<< HEAD
                 margin-top: 1rem;
             }
 
@@ -613,6 +744,8 @@
                 background-color: rgba(13, 217, 255, 0.1);
                 color: #0dd9ff;
                 border-left: 4px solid #0dd9ff;
+=======
+>>>>>>> module-rewards
             }
 
             @keyframes slideIn {
@@ -625,6 +758,7 @@
                     transform: translateY(0);
                 }
             }
+<<<<<<< HEAD
 
             .crud-icon-btn {
                 width: 52px;
@@ -749,12 +883,15 @@
                 background: linear-gradient(180deg, #fca5a5 0%, #f87171 100%);
                 color: #450a0a;
             }
+=======
+>>>>>>> module-rewards
         </style>
         
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
     </head>
+<<<<<<< HEAD
     {% set is_admin = 'admin' in app.request.attributes.get('_route', '') %}
     {% set is_logged_in_player = app.user and is_granted('ROLE_USER') %}
     <body{% if is_admin %} class="admin-layout"{% endif %}>
@@ -777,6 +914,22 @@
             const body = document.body;
 
             if (sidebarToggle && sidebarNav) {
+=======
+    <body>
+        {% set is_admin = 'admin' in app.request.attributes.get('_route', '') %}
+        
+        {% if is_admin %}
+            {% include 'partials/sidebar.html.twig' %}
+            <script>
+                // Add admin layout class
+                document.body.classList.add('admin-layout');
+
+                // Sidebar Toggle Functionality
+                const sidebarToggle = document.getElementById('sidebarToggle');
+                const sidebarNav = document.querySelector('.sidebar-nav');
+                const body = document.body;
+
+>>>>>>> module-rewards
                 // Check localStorage for saved state
                 const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
                 if (sidebarCollapsed) {
@@ -792,13 +945,21 @@
                     // Save state to localStorage
                     const isCollapsed = sidebarNav.classList.contains('collapsed');
                     localStorage.setItem('sidebarCollapsed', isCollapsed);
+<<<<<<< HEAD
                     
                     // Prevent body from being pushed - keep it in place
                     body.style.overflow = 'auto';
+=======
+>>>>>>> module-rewards
                 });
 
                 // Add tooltip on hover for collapsed sidebar
                 const menuItems = document.querySelectorAll('.menu-item');
+<<<<<<< HEAD
+=======
+                const subItems = document.querySelectorAll('.menu-subitem');
+
+>>>>>>> module-rewards
                 menuItems.forEach(item => {
                     item.addEventListener('mouseenter', function() {
                         if (sidebarNav.classList.contains('collapsed')) {
@@ -809,15 +970,24 @@
                         }
                     });
                 });
+<<<<<<< HEAD
             }
         </script>
+=======
+            </script>
+        {% endif %}
+>>>>>>> module-rewards
         
         <!-- Navigation Bar - Hide on auth pages -->
         {% if app.request.attributes.get('_route') not in ['app_login', 'app_register', 'app_forgot_password', 'app_reset_password'] %}
         <nav class="navbar-custom">
             <div class="navbar-container-custom">
                 <div style="display: flex; align-items: center; gap: 2rem;">
+<<<<<<< HEAD
                     <a class="navbar-brand-custom" href="{{ path('tournament_index') }}">
+=======
+                    <a class="navbar-brand-custom" href="/">
+>>>>>>> module-rewards
                         <i class="fas fa-gamepad"></i>
                         <span>Dev Esports</span>
                     </a>
@@ -841,6 +1011,7 @@
                             </a>
                         </li>
                         <li class="nav-item-custom">
+<<<<<<< HEAD
                             <a href="{{ path('team_leaderboard') }}">
                                 <i class="fas fa-ranking-star"></i> Leaderboard
                             </a>
@@ -852,6 +1023,12 @@
                                     <div class="notification-dropdown" id="notificationDropdown"></div>
                                 </div>
                             </li>
+=======
+                            <a href="{{ path('recompense_index') }}">
+                                <i class="fas fa-gift"></i> Rewards
+                            </a>
+                        </li>
+>>>>>>> module-rewards
                         {% if app.user %}
                             {% if is_granted('ROLE_ADMIN') %}
                                 <li class="nav-item-custom">
@@ -859,6 +1036,7 @@
                                         <i class="fas fa-user-check"></i> User Approvals
                                     </a>
                                 </li>
+<<<<<<< HEAD
                                 <li class="nav-item-custom">
                                     <a href="{{ path('ai_pricing_index') }}">
                                         <i class="fas fa-brain"></i> AI Pricing
@@ -900,6 +1078,17 @@
                             </li>
 
                             <!-- User Dropdown -->
+=======
+                            {% endif %}
+
+                            <li class="nav-item-custom">
+                                <a href="{{ path('admin_dashboard') }}">
+                                    <span class="admin-badge">
+                                        <i class="fas fa-lock"></i> Admin
+                                    </span>
+                                </a>
+                            </li>
+>>>>>>> module-rewards
                             <li class="nav-item-custom dropdown">
                                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                                     <i class="fas fa-user-circle"></i> 
@@ -909,12 +1098,15 @@
                                     <a class="dropdown-item" href="{{ path('player_dashboard') }}">
                                         <i class="fas fa-user-circle"></i> My Dashboard
                                     </a>
+<<<<<<< HEAD
                                     <a class="dropdown-item" href="{{ path('tournament_my_registrations') }}">
                                         <i class="fas fa-list"></i> My Registrations
                                     </a>
                                     <a class="dropdown-item" href="{{ path('app_notifications') }}">
                                         <i class="fas fa-bell"></i> Notifications
                                     </a>
+=======
+>>>>>>> module-rewards
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ path('app_logout') }}">
                                         <i class="fas fa-sign-out-alt"></i> Logout
@@ -939,6 +1131,7 @@
         </nav>
         {% endif %}
 
+<<<<<<< HEAD
         <!-- Flash Messages -->
         <div class="container-fluid">
             <div class="row">
@@ -957,6 +1150,8 @@
             </div>
         </div>
 
+=======
+>>>>>>> module-rewards
         <!-- Main Content -->
         <main class="container-fluid py-4">
             {% block body %}{% endblock %}
@@ -972,6 +1167,7 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<<<<<<< HEAD
         {{ importmap('app') }}
             <!-- Mercure Notification JS -->
                 <script>
@@ -1089,5 +1285,7 @@
             });
         }
         </script>
+=======
+>>>>>>> module-rewards
     </body>
 </html>

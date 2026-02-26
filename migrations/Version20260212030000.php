@@ -16,6 +16,7 @@ final class Version20260212030000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+<<<<<<< HEAD
         if (!$this->connection->createSchemaManager()->tablesExist(['user'])) {
             return;
         }
@@ -25,6 +26,8 @@ final class Version20260212030000 extends AbstractMigration
             return;
         }
 
+=======
+>>>>>>> module-rewards
         $this->addSql('ALTER TABLE `user` ADD approval_status VARCHAR(20) DEFAULT \'pending\' NOT NULL');
     }
 

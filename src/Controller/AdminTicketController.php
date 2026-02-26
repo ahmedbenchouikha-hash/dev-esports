@@ -10,10 +10,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/tickets')]
 #[IsGranted('ROLE_ADMIN')]
+=======
+
+#[Route('/admin/tickets')]
+>>>>>>> module-rewards
 class AdminTicketController extends AbstractController
 {
     #[Route('', name: 'admin_ticket_index', methods: ['GET'])]

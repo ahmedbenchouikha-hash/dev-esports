@@ -11,10 +11,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/all-players', name: 'admin_player_')]
 #[IsGranted('ROLE_ADMIN')]
+=======
+
+#[Route('/admin/all-players', name: 'admin_player_')]
+>>>>>>> module-rewards
 class PlayerAdminController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]

@@ -1,11 +1,16 @@
 {% extends 'base.html.twig' %}
 
+<<<<<<< HEAD
 {% block title %}Nouvelle demande de récompense{% endblock %}
+=======
+{% block title %}New reward request{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 offset-md-2">
+<<<<<<< HEAD
             <h1>Demander la récompense</h1>
             
             <div class="alert alert-info mb-4">
@@ -14,6 +19,16 @@
                 <strong>Type:</strong> {{ recompense.type }}
                 <br>
                 <strong>Classement:</strong> <span class="badge bg-info">{{ recompense.classement }}</span>
+=======
+            <h1>Request reward</h1>
+            
+            <div class="alert alert-info mb-4">
+                <strong>Reward:</strong> {{ recompense.recompense }}
+                <br>
+                <strong>Type:</strong> {{ recompense.type }}
+                <br>
+                <strong>Rank:</strong> <span class="badge bg-info">{{ recompense.classement }}</span>
+>>>>>>> module-rewards
             </div>
 
             {% if app.flashes %}
@@ -63,10 +78,17 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success">
+<<<<<<< HEAD
                             <i class="fas fa-check"></i> Envoyer la demande
                         </button>
                         <a href="{{ path('recompense_show', {'id': recompense.id}) }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Annuler
+=======
+                            <i class="fas fa-check"></i> Submit request
+                        </button>
+                        <a href="{{ path('recompense_show', {'id': recompense.id}) }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+>>>>>>> module-rewards
                         </a>
                     </div>
 

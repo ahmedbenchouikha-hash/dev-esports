@@ -63,6 +63,17 @@ class Team
     )]
     private ?string $couleurEquipe = null;
 
+<<<<<<< HEAD
+=======
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\Type(type: 'array')]
+    private array $membres = [];
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\Positive(message: 'Captain ID must be a positive number')]
+    private ?int $captainId = null;
+
+>>>>>>> module-rewards
     #[ORM\Column(length: 50)]
     #[Assert\Choice(
         choices: ['en attente', 'approuvé', 'refusé'],
@@ -84,16 +95,25 @@ class Team
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
+<<<<<<< HEAD
+=======
+    #[ORM\OneToMany(mappedBy: 'team', targetEntity: Player::class, cascade: ['remove'])]
+    private Collection $players;
+
+>>>>>>> module-rewards
     #[ORM\OneToMany(mappedBy: 'team1', targetEntity: Game::class)]
     private Collection $gamesAsTeam1;
 
     #[ORM\OneToMany(mappedBy: 'team2', targetEntity: Game::class)]
     private Collection $gamesAsTeam2;
 
+<<<<<<< HEAD
     #[ORM\ManyToMany(targetEntity: Player::class, inversedBy: 'teams')]
     #[ORM\JoinTable(name: 'player_team')]
     private Collection $players;
 
+=======
+>>>>>>> module-rewards
     public function __construct()
     {
         $this->players = new ArrayCollection();
@@ -207,6 +227,31 @@ class Team
         return $this;
     }
 
+<<<<<<< HEAD
+=======
+    public function getMembres(): array
+    {
+        return $this->membres;
+    }
+
+    public function setMembres(?array $membres): static
+    {
+        $this->membres = $membres ?? [];
+        return $this;
+    }
+
+    public function getCaptainId(): ?int
+    {
+        return $this->captainId;
+    }
+
+    public function setCaptainId(?int $captainId): static
+    {
+        $this->captainId = $captainId;
+        return $this;
+    }
+
+>>>>>>> module-rewards
     public function getStatut(): ?string
     {
         return $this->statut;
@@ -263,9 +308,13 @@ class Team
     {
         if (!$this->players->contains($player)) {
             $this->players->add($player);
+<<<<<<< HEAD
             if (!$player->getTeams()->contains($this)) {
                 $player->addTeam($this);
             }
+=======
+            $player->setTeam($this);
+>>>>>>> module-rewards
         }
         return $this;
     }
@@ -273,7 +322,13 @@ class Team
     public function removePlayer(Player $player): static
     {
         if ($this->players->removeElement($player)) {
+<<<<<<< HEAD
             $player->removeTeam($this);
+=======
+            if ($player->getTeam() === $this) {
+                $player->setTeam(null);
+            }
+>>>>>>> module-rewards
         }
         return $this;
     }

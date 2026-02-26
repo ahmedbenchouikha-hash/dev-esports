@@ -15,8 +15,11 @@ class BudgetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+<<<<<<< HEAD
         $teams = $options['teams'] ?? [];
         
+=======
+>>>>>>> module-rewards
         $builder
             ->add('montantAlloue', MoneyType::class, [
                 'label' => 'Allocated Amount (€) *',
@@ -31,7 +34,10 @@ class BudgetType extends AbstractType
             ])
             ->add('team', EntityType::class, [
                 'class' => Team::class,
+<<<<<<< HEAD
                 'choices' => $teams,
+=======
+>>>>>>> module-rewards
                 'choice_label' => 'name',
                 'placeholder' => 'Select a team',
                 'required' => true,
@@ -55,7 +61,10 @@ class BudgetType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Budget::class,
+<<<<<<< HEAD
             'teams' => [],
+=======
+>>>>>>> module-rewards
         ]);
     }
 }

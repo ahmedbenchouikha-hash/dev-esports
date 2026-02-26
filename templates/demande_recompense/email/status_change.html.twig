@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mise a jour statut</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2>Mise a jour du statut</h2>
+    <p>Bonjour <strong>{{ demande.nomDemandeur }}</strong>,</p>
+    <p>{{ message }}</p>
+    <ul>
+        <li>ID demande : #{{ demande.id }}</li>
+        <li>Recompense : <strong>{{ demande.recompense.recompense }}</strong></li>
+        <li>Type : {{ demande.recompense.type }}</li>
+        <li>Date : {{ demande.dateDemande|date('d/m/Y H:i') }}</li>
+    </ul>
+    <p>Statut actuel : <strong>{{ newStatut }}</strong></p>
+    <p>Cordialement,<br><strong>L'equipe dev-esports</strong></p>
+</body>
+</html>

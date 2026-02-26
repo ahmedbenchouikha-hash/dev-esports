@@ -1,5 +1,6 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}Edit Response - Dev Esports{% endblock %}
 
 {% block stylesheets %}
@@ -70,6 +71,15 @@
     <p class="admin-form-subtitle">Mettez à jour la réponse administrative avec un ton clair et cohérent.</p>
 
     <div class="card mt-4 admin-form-shell">
+=======
+{% block title %}Edit Response #{{ admin_response.id }} - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1>Edit Response #{{ admin_response.id }}</h1>
+
+    <div class="card mt-4">
+>>>>>>> module-rewards
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">
@@ -79,6 +89,7 @@
                 </div>
 
                 <div class="form-group mt-4">
+<<<<<<< HEAD
                     <div class="admin-form-actions">
                         <button type="submit" class="crud-view-btn" title="Save Changes" aria-label="Save Changes">
                             <i class="fas fa-save"></i>
@@ -87,10 +98,17 @@
                             <i class="fas fa-arrow-left"></i> Cancel
                         </a>
                     </div>
+=======
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{{ path('app_admin_response_show', {'id': admin_response.id}) }}" class="btn btn-secondary">Cancel</a>
+>>>>>>> module-rewards
                 </div>
             {{ form_end(form) }}
         </div>
     </div>
+<<<<<<< HEAD
 
     {% if admin_response is defined and admin_response.reclamation %}
         <a class="admin-linked-pill" href="{{ path('app_reclamation_show', {'id': admin_response.reclamation.id}) }}">
@@ -100,4 +118,7 @@
     {% endif %}
 </div>
 {% include 'admin_response/_chatbot_widget.html.twig' %}
+=======
+</div>
+>>>>>>> module-rewards
 {% endblock %}

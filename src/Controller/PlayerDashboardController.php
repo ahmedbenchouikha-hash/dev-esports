@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Team;
 use App\Entity\Player;
+<<<<<<< HEAD
 use App\Entity\Payment;
 use App\Repository\TeamInvitationRepository;
 use App\Repository\PaymentRepository;
+=======
+>>>>>>> module-rewards
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +22,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PlayerDashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'player_dashboard', methods: ['GET'])]
+<<<<<<< HEAD
     public function dashboard(EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+=======
+    public function dashboard(EntityManagerInterface $em): Response
+>>>>>>> module-rewards
     {
         $user = $this->getUser();
         
@@ -29,6 +36,7 @@ class PlayerDashboardController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
+<<<<<<< HEAD
         $currentTeams = $user->getTeams();
         $availableTeams = $em->getRepository(Team::class)->findAll();
         
@@ -49,6 +57,20 @@ class PlayerDashboardController extends AbstractController
             'currentTeams' => $currentTeams,
             'availableTeams' => $availableTeams,
             'pendingInvitations' => $pendingInvitations,
+=======
+        $currentTeam = $user->getTeam();
+        $availableTeams = $em->getRepository(Team::class)->findAll();
+        
+        // Remove current team from available teams
+        $availableTeams = array_filter($availableTeams, function($team) use ($currentTeam) {
+            return $team !== $currentTeam;
+        });
+
+        return $this->render('player/dashboard.html.twig', [
+            'player' => $user,
+            'currentTeam' => $currentTeam,
+            'availableTeams' => $availableTeams,
+>>>>>>> module-rewards
         ]);
     }
 
@@ -68,6 +90,7 @@ class PlayerDashboardController extends AbstractController
             return $this->redirectToRoute('player_dashboard');
         }
 
+<<<<<<< HEAD
         try {
             // Check if player is already in the team
             if ($team->getPlayers()->contains($user)) {
@@ -90,6 +113,12 @@ class PlayerDashboardController extends AbstractController
             $this->addFlash('error', '❌ Error joining team: ' . $e->getMessage());
             \error_log('Join team error: ' . $e->getTraceAsString());
         }
+=======
+        $user->setTeam($team);
+        $em->flush();
+
+        $this->addFlash('success', 'You have successfully joined ' . $team->getName() . '!');
+>>>>>>> module-rewards
         
         return $this->redirectToRoute('player_dashboard');
     }
@@ -109,6 +138,7 @@ class PlayerDashboardController extends AbstractController
             return $this->redirectToRoute('player_dashboard');
         }
 
+<<<<<<< HEAD
         $teamId = $request->request->get('team_id');
         if ($teamId) {
             // Leave specific team
@@ -182,3 +212,14 @@ class PlayerDashboardController extends AbstractController
     }
 }
 
+=======
+        $teamName = $user->getTeam()?->getName() ?? 'Unknown Team';
+        $user->setTeam(null);
+        $em->flush();
+
+        $this->addFlash('success', 'You have left ' . $teamName . '.');
+        
+        return $this->redirectToRoute('player_dashboard');
+    }
+}
+>>>>>>> module-rewards

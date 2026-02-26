@@ -1,5 +1,6 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}Punishment Details - Dev Esports{% endblock %}
 
 {% block stylesheets %}
@@ -56,10 +57,14 @@
         }
     </style>
 {% endblock %}
+=======
+{% block title %}Punishment #{{ punition.id }} - Dev Esports{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
+<<<<<<< HEAD
         <div>
             <h1 class="mb-0">Punishment Details</h1>
             <p class="module-show-subtitle">Consultez les informations complètes de la sanction appliquée.</p>
@@ -80,6 +85,23 @@
     </div>
 
     <div class="card module-show-shell">
+=======
+        <h1>Punishment #{{ punition.id }}</h1>
+        <div>
+            <a href="{{ path('app_punition_edit', {'id': punition.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <form method="POST" action="{{ path('app_punition_delete', {'id': punition.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this punishment?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ punition.id) }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+>>>>>>> module-rewards
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -94,8 +116,13 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
+<<<<<<< HEAD
                     <h6 class="text-muted">Bans</h6>
                     {% include 'punition/_ban_chips.html.twig' with { banList: punition.banList, containerClass: 'd-flex flex-wrap gap-2' } only %}
+=======
+                    <h6 class="text-muted">Player Status</h6>
+                    <p><span class="badge bg-danger">{{ punition.playerStatus }}</span></p>
+>>>>>>> module-rewards
                 </div>
                 <div class="col-md-6">
                     <h6 class="text-muted">Related Player</h6>
@@ -103,6 +130,7 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
         </div>
     </div>
 
@@ -116,5 +144,19 @@
             <i class="fas fa-arrow-left"></i> Back to List
         </a>
     </div>
+=======
+            <div class="row">
+                <div class="col-md-12">
+                    <h6 class="text-muted">Reclamation</h6>
+                    <p>
+                        <a href="{{ path('app_reclamation_show', {'id': punition.reclamation.id}) }}">#{{ punition.reclamation.id }} - {{ punition.reclamation.titre }}</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{{ path('app_punition_index') }}" class="btn btn-secondary mt-3">Back to List</a>
+>>>>>>> module-rewards
 </div>
 {% endblock %}

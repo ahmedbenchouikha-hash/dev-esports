@@ -1,12 +1,20 @@
 {% extends 'base.html.twig' %}
 
+<<<<<<< HEAD
 {% block title %}Modifier une récompense{% endblock %}
+=======
+{% block title %}Edit reward{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 offset-md-2">
+<<<<<<< HEAD
             <h1>Modifier la récompense</h1>
+=======
+            <h1>Edit reward</h1>
+>>>>>>> module-rewards
             
             {% if app.flashes %}
                 {% for type, messages in app.flashes %}
@@ -65,10 +73,17 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
+<<<<<<< HEAD
                             <i class="fas fa-save"></i> Modifier
                         </button>
                         <a href="{{ path('recompense_index') }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Annuler
+=======
+                            <i class="fas fa-save"></i> Update
+                        </button>
+                        <a href="{{ path('recompense_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+>>>>>>> module-rewards
                         </a>
                     </div>
 

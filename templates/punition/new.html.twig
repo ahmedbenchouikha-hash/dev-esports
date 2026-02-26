@@ -1,5 +1,6 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}New Punishment - RankUp{% endblock %}
 
 {% block stylesheets %}
@@ -26,6 +27,15 @@
     <p class="module-form-subtitle">Définissez une sanction claire et proportionnée selon le contexte de la réclamation.</p>
 
     <div class="card mt-4 module-form-shell">
+=======
+{% block title %}New Punishment - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1>Create New Punishment</h1>
+
+    <div class="card mt-4">
+>>>>>>> module-rewards
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">
@@ -41,6 +51,7 @@
                 </div>
 
                 <div class="mb-3">
+<<<<<<< HEAD
                     {{ form_label(form.playerStatus, 'Ban') }}
                     <div class="d-none">
                         {{ form_widget(form.playerStatus, {'attr': {'class': 'form-control js-ban-select'}}) }}
@@ -65,6 +76,10 @@
                             {% endfor %}
                         </ul>
                     </div>
+=======
+                    {{ form_label(form.playerStatus, 'Player Status') }}
+                    {{ form_widget(form.playerStatus, {'attr': {'class': 'form-control'}}) }}
+>>>>>>> module-rewards
                     {{ form_errors(form.playerStatus) }}
                 </div>
 
@@ -84,5 +99,8 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 {% include 'punition/_ban_picker_assets.html.twig' %}
+=======
+>>>>>>> module-rewards
 {% endblock %}

@@ -5,10 +5,14 @@
 {% block body %}
 <div class="row mb-4">
     <div class="col-md-12">
+<<<<<<< HEAD
         <h1 class="page-title">Tournaments</h1>
         <a href="{{ path('rawg_games') }}" class="btn btn-secondary mt-2">
             <i class="fas fa-gamepad"></i> Search RAWG Games
         </a>
+=======
+        <h1 class="page-title">🏆 Tournaments</h1>
+>>>>>>> module-rewards
     </div>
 </div>
 
@@ -39,6 +43,7 @@
     </div>
 </div>
 
+<<<<<<< HEAD
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">
@@ -52,6 +57,8 @@
     </div>
 </div>
 
+=======
+>>>>>>> module-rewards
 <!-- Tournaments List -->
 <div class="row">
     {% if tournaments is empty %}
@@ -71,6 +78,7 @@
                                 {{ tournament.status|capitalize }}
                             </span>
                         </div>
+<<<<<<< HEAD
 
                         {% if tournament.description %}
                             <p class="card-text" style="font-size: 0.9rem;">{{ tournament.description|slice(0, 100) }}{% if tournament.description|length > 100 %}...{% endif %}</p>
@@ -95,12 +103,30 @@
                                 <a href="{{ path('tournament_show', { id: tournament.id }) }}" class="btn btn-primary btn-sm w-100">View Tournament</a>
                             {% endif %}
                         </div>
+=======
+                        
+                        {% if tournament.description %}
+                            <p class="card-text" style="font-size: 0.9rem;">{{ tournament.description|slice(0, 100) }}{% if tournament.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                📅 {{ tournament.startDate|date('d M Y') }} to {{ tournament.endDate|date('d M Y') }}<br>
+                                📍 {{ tournament.location ?? 'TBD' }}<br>
+                                💰 {% if tournament.prizePool %}${{ tournament.prizePool|number_format(0) }}{% else %}Prize TBD{% endif %}<br>
+                                🎮 {{ tournament.games|length }} Matches
+                            </small>
+                        </div>
+                        
+                        <a href="{{ path('tournament_show', { id: tournament.id }) }}" class="btn btn-primary w-100 btn-sm">View Tournament</a>
+>>>>>>> module-rewards
                     </div>
                 </div>
             </div>
         {% endfor %}
     {% endif %}
 </div>
+<<<<<<< HEAD
 
 {% if tournaments is not empty %}
     <div class="mt-2 mb-4 d-flex justify-content-center">
@@ -152,4 +178,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+=======
+>>>>>>> module-rewards
 {% endblock %}

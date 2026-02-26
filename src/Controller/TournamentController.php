@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+<<<<<<< HEAD
 use App\Entity\Player;
 use App\Entity\Tournament;
 use App\Entity\TournamentRegistration;
@@ -12,16 +13,23 @@ use App\Repository\TournamentRepository;
 use App\Repository\TournamentRegistrationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+=======
+use App\Repository\TournamentRepository;
+>>>>>>> module-rewards
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+=======
+>>>>>>> module-rewards
 
 #[Route('/tournaments', name: 'tournament_')]
 class TournamentController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
+<<<<<<< HEAD
     public function index(TournamentRepository $tournamentRepository, Request $request, PaginatorInterface $paginator): Response
     {
         $search = trim((string) $request->query->get('search', ''));
@@ -35,13 +43,30 @@ class TournamentController extends AbstractController
 
         $chartLabels = array_map(static fn(string $value): string => ucfirst($value), array_keys($statusCounts));
         $chartData = array_values($statusCounts);
+=======
+    public function index(TournamentRepository $tournamentRepository, Request $request): Response
+    {
+        $search = $request->query->get('search', '');
+        $status = $request->query->get('status', '');
+
+        if ($search) {
+            $tournaments = $tournamentRepository->findBySearchTerm($search);
+        } elseif ($status) {
+            $tournaments = $tournamentRepository->findByStatus($status);
+        } else {
+            $tournaments = $tournamentRepository->findAllOrdered('startDate');
+        }
+>>>>>>> module-rewards
 
         return $this->render('tournament/index.html.twig', [
             'tournaments' => $tournaments,
             'search' => $search,
             'status' => $status,
+<<<<<<< HEAD
             'chart_labels' => $chartLabels,
             'chart_data' => $chartData,
+=======
+>>>>>>> module-rewards
         ]);
     }
 
@@ -55,12 +80,17 @@ class TournamentController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
+=======
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
+>>>>>>> module-rewards
     public function show(int $id, TournamentRepository $tournamentRepository): Response
     {
         $tournament = $tournamentRepository->find($id);
 
         if (!$tournament) {
+<<<<<<< HEAD
             // Check if there are any tournaments at all
             $count = $tournamentRepository->count([]);
             if ($count === 0) {
@@ -69,12 +99,16 @@ class TournamentController extends AbstractController
             }
             
             throw $this->createNotFoundException(sprintf('Tournament with ID %d not found. Available tournament IDs: please check the database.', $id));
+=======
+            throw $this->createNotFoundException('Tournament not found');
+>>>>>>> module-rewards
         }
 
         return $this->render('tournament/show.html.twig', [
             'tournament' => $tournament,
         ]);
     }
+<<<<<<< HEAD
 
     #[Route('/available', name: 'available', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
@@ -378,4 +412,6 @@ class TournamentController extends AbstractController
             'registrations' => $registrations,
         ]);
     }
+=======
+>>>>>>> module-rewards
 }

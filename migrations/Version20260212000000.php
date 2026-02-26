@@ -16,6 +16,7 @@ final class Version20260212000000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+<<<<<<< HEAD
         if (!$this->connection->createSchemaManager()->tablesExist(['player'])) {
             return;
         }
@@ -25,6 +26,8 @@ final class Version20260212000000 extends AbstractMigration
             return;
         }
 
+=======
+>>>>>>> module-rewards
         $this->addSql('ALTER TABLE player ADD player_status VARCHAR(50) DEFAULT NULL');
     }
 

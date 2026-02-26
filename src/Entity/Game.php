@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\GameRepository;
+<<<<<<< HEAD
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+=======
+>>>>>>> module-rewards
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -55,14 +58,20 @@ class Game
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
+<<<<<<< HEAD
     #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'game')]
     private Collection $tickets;
 
+=======
+>>>>>>> module-rewards
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
+<<<<<<< HEAD
         $this->tickets = new ArrayCollection();
+=======
+>>>>>>> module-rewards
     }
 
     public function getId(): ?int
@@ -178,6 +187,7 @@ class Game
     {
         return sprintf('%s vs %s', $this->team1?->getName() ?? 'Team 1', $this->team2?->getName() ?? 'Team 2');
     }
+<<<<<<< HEAD
 
     public function getTickets(): Collection
     {
@@ -204,4 +214,6 @@ class Game
 
         return $this;
     }
+=======
+>>>>>>> module-rewards
 }

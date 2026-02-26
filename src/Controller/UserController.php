@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
+<<<<<<< HEAD
 use App\Entity\Player;
+=======
+>>>>>>> module-rewards
 use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,20 +30,54 @@ class UserController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
+<<<<<<< HEAD
         // Determine the user class based on selection
         $selectedRole = $this->getSelectedRole($request);
         $user = ($selectedRole === 'ROLE_ADMIN' || !$selectedRole) ? new User() : new Player();
         
+=======
+        $user = new User();
+>>>>>>> module-rewards
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
+<<<<<<< HEAD
+=======
+                // Additional server-side validation
+                $email = $user->getEmail();
+                $username = $user->getUsername();
+                $password = $form->get('password')->getData();
+                
+                // Check for duplicate email
+                $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+                if ($existingEmail) {
+                    $this->addFlash('danger', 'This email is already registered. Please use a different email or log in.');
+                    return $this->render('security/register.html.twig', [
+                        'registrationForm' => $form,
+                    ]);
+                }
+                
+                // Check for duplicate username
+                $existingUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
+                if ($existingUsername) {
+                    $this->addFlash('danger', 'This username is already taken. Please choose a different username.');
+                    return $this->render('security/register.html.twig', [
+                        'registrationForm' => $form,
+                    ]);
+                }
+                
+>>>>>>> module-rewards
                 // Encode the plain password
                 $user->setPassword(
                     $userPasswordHasher->hashPassword(
                         $user,
+<<<<<<< HEAD
                         $form->get('password')->getData()
+=======
+                        $password
+>>>>>>> module-rewards
                     )
                 );
 
@@ -58,11 +95,14 @@ class UserController extends AbstractController
                     // Players need approval
                     $user->setApprovalStatus('pending');
                     
+<<<<<<< HEAD
                     // Set required Player fields
                     if ($user instanceof Player) {
                         $user->setNickname($user->getUsername());
                     }
                     
+=======
+>>>>>>> module-rewards
                     // Handle file upload for players
                     $verificationFile = $form->get('verificationFile')->getData();
                     if ($verificationFile) {
@@ -96,7 +136,11 @@ class UserController extends AbstractController
 
                 // Different success messages based on role
                 if ($selectedRole === 'ROLE_ADMIN') {
+<<<<<<< HEAD
                     $this->addFlash('success', 'Admin account created! Please log in.');
+=======
+                    $this->addFlash('success', 'Admin account created successfully! You can now log in.');
+>>>>>>> module-rewards
                 } else {
                     $this->addFlash('success', 'Registration successful! Your account is pending admin approval. Please check back soon.');
                 }
@@ -119,6 +163,7 @@ class UserController extends AbstractController
             'registrationForm' => $form,
         ]);
     }
+<<<<<<< HEAD
     
     private function getSelectedRole(Request $request)
     {
@@ -128,5 +173,7 @@ class UserController extends AbstractController
         }
         return null;
     }
+=======
+>>>>>>> module-rewards
 }
 

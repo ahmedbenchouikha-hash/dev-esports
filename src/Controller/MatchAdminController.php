@@ -10,10 +10,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/matches', name: 'admin_match_')]
 #[IsGranted('ROLE_ADMIN')]
+=======
+
+#[Route('/admin/matches', name: 'admin_match_')]
+>>>>>>> module-rewards
 class MatchAdminController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]

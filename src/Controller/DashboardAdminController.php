@@ -9,12 +9,18 @@ use App\Repository\TournamentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+=======
+>>>>>>> module-rewards
 
 class DashboardAdminController extends AbstractController
 {
     #[Route('/admin/dashboard', name: 'admin_dashboard')]
+<<<<<<< HEAD
     #[IsGranted('ROLE_ADMIN')]
+=======
+>>>>>>> module-rewards
     public function index(
         GameRepository $gameRepository,
         TournamentRepository $tournamentRepository,

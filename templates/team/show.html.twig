@@ -11,6 +11,7 @@
 
 <div class="row">
     <div class="col-lg-8 mx-auto">
+<<<<<<< HEAD
         {% if team.statut != 'approuvé' and not is_granted('ROLE_MANAGER') %}
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">⏳ Team Pending Approval</h4>
@@ -46,6 +47,11 @@
                         {% endif %}
                     </div>
                 </div>
+=======
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="page-title">{{ team.name }}</h1>
+>>>>>>> module-rewards
                 
                 {% if team.country %}
                     <p class="text-muted">📍 <strong>Country:</strong> {{ team.country }}</p>
@@ -73,7 +79,11 @@
                 <!-- Players Section -->
                 {% if team.players|length > 0 %}
                     <hr>
+<<<<<<< HEAD
                     <h3>👥 Current Members ({{ team.players|length }})</h3>
+=======
+                    <h3>Players</h3>
+>>>>>>> module-rewards
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -96,6 +106,7 @@
                             </tbody>
                         </table>
                     </div>
+<<<<<<< HEAD
                 {% else %}
                     <hr>
                     <div class="alert alert-info">
@@ -148,6 +159,8 @@
                             {% endif %}
                         </div>
                     </div>
+=======
+>>>>>>> module-rewards
                 {% endif %}
 
                 <!-- Recent Matches -->

@@ -12,8 +12,11 @@ use App\Enum\StatutPunition;
 #[ORM\HasLifecycleCallbacks]
 class Punition
 {
+<<<<<<< HEAD
     private const BAN_SEPARATOR = '|';
 
+=======
+>>>>>>> module-rewards
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -32,8 +35,13 @@ class Punition
     #[ORM\JoinColumn(nullable: false)]
     private ?Reclamation $reclamation = null;
 
+<<<<<<< HEAD
     #[ORM\Column(length: 255)]
     private string $playerStatus = '';
+=======
+    #[ORM\Column(length: 20)]
+    private string $playerStatus = 'ACTIF';
+>>>>>>> module-rewards
 
     // Getters / Setters
     public function getId(): ?int 
@@ -97,6 +105,7 @@ class Punition
 
     public function setPlayerStatus(string $playerStatus): static
     {
+<<<<<<< HEAD
         $this->playerStatus = trim($playerStatus);
         return $this;
     }
@@ -132,6 +141,9 @@ class Punition
             $this->playerStatus = implode(self::BAN_SEPARATOR, $existingBans);
         }
 
+=======
+        $this->playerStatus = $playerStatus;
+>>>>>>> module-rewards
         return $this;
     }
 

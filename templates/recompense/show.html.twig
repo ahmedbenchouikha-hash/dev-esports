@@ -1,6 +1,10 @@
 {% extends 'base.html.twig' %}
 
+<<<<<<< HEAD
 {% block title %}{{ recompense.recompense }} - Détails{% endblock %}
+=======
+{% block title %}{{ recompense.recompense }} - Details{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="container mt-4">
@@ -24,31 +28,54 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
+<<<<<<< HEAD
                             <h5>Classement</h5>
                             <p><span class="badge bg-info" style="font-size: 1.1rem;">{{ recompense.classement }}</span></p>
                         </div>
                         <div class="col-md-6">
                             <h5>Nombre de demandes</h5>
+=======
+                            <h5>Rank</h5>
+                            <p><span class="badge bg-info" style="font-size: 1.1rem;">{{ recompense.classement }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Number of requests</h5>
+>>>>>>> module-rewards
                             <p><span class="badge bg-secondary" style="font-size: 1.1rem;">{{ recompense.demandes|length }}</span></p>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <h5>Description</h5>
+<<<<<<< HEAD
                         <p>{{ recompense.description ?? 'Aucune description' }}</p>
+=======
+                        <p>{{ recompense.description ?? 'No description' }}</p>
+>>>>>>> module-rewards
                     </div>
 
                     {% if recompense.demandes|length > 0 %}
                         <div class="mb-3">
+<<<<<<< HEAD
                             <h5>Demandes associées</h5>
+=======
+                            <h5>Related requests</h5>
+>>>>>>> module-rewards
                             <div class="table-responsive">
                                 <table class="table table-sm table-striped">
                                     <thead class="table-light">
                                         <tr>
+<<<<<<< HEAD
                                             <th>Demandeur</th>
                                             <th>Email</th>
                                             <th>Date</th>
                                             <th>Statut</th>
+=======
+                                            <th>Requester</th>
+                                            <th>Email</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+>>>>>>> module-rewards
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -59,7 +86,11 @@
                                                 <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
                                                 <td>
                                                     <span class="badge bg-{% if demande.statut == 'acceptee' %}success{% elseif demande.statut == 'rejetee' %}danger{% else %}warning{% endif %}">
+<<<<<<< HEAD
                                                         {{ demande.statut }}
+=======
+                                                        {{ demande.statut == 'acceptee' ? 'Accepted' : (demande.statut == 'rejetee' ? 'Rejected' : 'Pending') }}
+>>>>>>> module-rewards
                                                     </span>
                                                 </td>
                                             </tr>
@@ -71,6 +102,7 @@
                     {% endif %}
 
                     <div class="d-flex gap-2">
+<<<<<<< HEAD
                         <a href="{{ path('recompense_edit', {'id': recompense.id}) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Modifier
                         </a>
@@ -79,6 +111,20 @@
                         </a>
                         <a href="{{ path('recompense_index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Retour
+=======
+                        {% if isAdmin %}
+                        <a href="{{ path('recompense_edit', {'id': recompense.id}) }}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% endif %}
+                        {% if not isAdmin %}
+                        <a href="{{ path('demande_recompense_new') }}?recompense={{ recompense.id }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> New request
+                        </a>
+                        {% endif %}
+                        <a href="{{ path('recompense_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+>>>>>>> module-rewards
                         </a>
                     </div>
                 </div>

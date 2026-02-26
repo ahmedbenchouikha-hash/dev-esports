@@ -4,6 +4,7 @@ namespace App\Enum;
 
 enum StatutPunition: string
 {
+<<<<<<< HEAD
     case BANNED_FROM_THIS_TOURNAMENT = 'banned from this tournament';
     case BANNED_FROM_THIS_MATCH = 'banned from this match';
     case BANNED_FROM_THIS_GAME = 'banned from this game';
@@ -21,4 +22,9 @@ enum StatutPunition: string
     {
         return array_map(static fn(self $case): string => $case->value, self::cases());
     }
+=======
+    case ACTIF = 'ACTIF';
+    case INACTIF = 'INACTIF';
+    case EXPIRE = 'EXPIRE';
+>>>>>>> module-rewards
 }

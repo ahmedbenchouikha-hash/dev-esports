@@ -64,6 +64,7 @@
             "./tests/bootstrap.php"
         ]
     },
+<<<<<<< HEAD
     "stripe/stripe-php": {
         "version": "19.3",
         "recipe": {
@@ -76,6 +77,8 @@
             "./config/packages/stripe.yaml"
         ]
     },
+=======
+>>>>>>> module-rewards
     "symfony/asset-mapper": {
         "version": "6.4",
         "recipe": {
@@ -147,6 +150,7 @@
             "./src/Kernel.php"
         ]
     },
+<<<<<<< HEAD
     "symfony/google-mailer": {
         "version": "6.4",
         "recipe": {
@@ -156,6 +160,8 @@
             "ref": "f8fd4ddb9b477510f8f4bce2b9c054ab428c0120"
         }
     },
+=======
+>>>>>>> module-rewards
     "symfony/mailer": {
         "version": "6.4",
         "recipe": {
@@ -177,6 +183,7 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
+<<<<<<< HEAD
     "symfony/mercure-bundle": {
         "version": "0.4",
         "recipe": {
@@ -189,6 +196,8 @@
             "./config/packages/mercure.yaml"
         ]
     },
+=======
+>>>>>>> module-rewards
     "symfony/messenger": {
         "version": "6.4",
         "recipe": {
@@ -363,5 +372,20 @@
     },
     "twig/extra-bundle": {
         "version": "v3.23.0"
+<<<<<<< HEAD
+=======
+    },
+    "vich/uploader-bundle": {
+        "version": "2.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.13",
+            "ref": "1b3064c2f6b255c2bc2f56461aaeb76b11e07e36"
+        },
+        "files": [
+            "./config/packages/vich_uploader.yaml"
+        ]
+>>>>>>> module-rewards
     }
 }

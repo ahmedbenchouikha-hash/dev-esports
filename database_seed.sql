@@ -225,7 +225,11 @@ INSERT INTO demande_recompense (nom_demandeur, email, motif, date_demande, statu
 INSERT INTO reclamation (player_id, titre, description, type, etat, created_at, attachment_filename) VALUES 
 (2, 'Unfair Match Decision', 'The referee made an incorrect call during the match that caused us to lose. This decision was clearly wrong.', 'JOUEUR', 'EN_COURS', DATE_SUB(NOW(), INTERVAL 7 DAY), 'match_evidence.pdf'),
 (5, 'Inappropriate Conduct', 'Opposing player used abusive language during the match against sportsmanship rules.', 'JOUEUR', 'EN_COURS', DATE_SUB(NOW(), INTERVAL 3 DAY), NULL),
+<<<<<<< HEAD
 (9, 'Equipment Issue', 'Tournament provided faulty equipment that affected my performance.', 'TECHNIQUE', 'EN_COURS', DATE_SUB(NOW(), INTERVAL 5 DAY), 'equipment_photo.jpg');
+=======
+(9, 'Equipment Issue', 'Tournament provided faulty equipment that affected my performance.', 'TECHNIQUE', 'EN_ATTENTE', DATE_SUB(NOW(), INTERVAL 5 DAY), 'equipment_photo.jpg');
+>>>>>>> module-rewards
 
 -- ===================================================
 -- ADMIN RESPONSES

@@ -24,6 +24,7 @@ class NotificationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+<<<<<<< HEAD
 
     /**
      * Mark all notifications as read for a user
@@ -43,4 +44,6 @@ class NotificationRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute();
     }
+=======
+>>>>>>> module-rewards
 }

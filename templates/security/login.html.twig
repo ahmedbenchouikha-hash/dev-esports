@@ -1,6 +1,10 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}Login - RankUp{% endblock %}
+=======
+{% block title %}Login - Dev Esports{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="login-container">
@@ -12,7 +16,10 @@
                 <div class="login-logo">
                     <i class="fas fa-crown"></i>
                 </div>
+<<<<<<< HEAD
                 <h1>RankUp</h1>
+=======
+>>>>>>> module-rewards
                 <h1>Dev Esports</h1>
                 <p class="login-subtitle">Welcome Back</p>
             </div>
@@ -26,7 +33,11 @@
             {% endif %}
 
             <!-- Login Form -->
+<<<<<<< HEAD
             <form method="post">
+=======
+            <form method="post" novalidate>
+>>>>>>> module-rewards
                 <!-- Email Field -->
                 <div class="form-group">
                     <label for="inputEmail" class="form-label">
@@ -37,10 +48,22 @@
                            value="{{ last_email }}" 
                            name="email" 
                            id="inputEmail" 
+<<<<<<< HEAD
                            class="form-control form-control-lg"
                            placeholder="you@example.com"
                            required 
                            autofocus>
+=======
+                           class="form-control form-control-lg{% if validationErrors['email'] | default %} is-invalid{% endif %}"
+                           placeholder="you@example.com"
+                           autofocus>
+                    {% if validationErrors['email'] | default %}
+                        <div class="form-error-message">
+                            <i class="fas fa-times-circle"></i>
+                            <span>{{ validationErrors['email'] }}</span>
+                        </div>
+                    {% endif %}
+>>>>>>> module-rewards
                 </div>
 
                 <!-- Password Field -->
@@ -52,9 +75,20 @@
                     <input type="password" 
                            name="password" 
                            id="inputPassword" 
+<<<<<<< HEAD
                            class="form-control form-control-lg"
                            placeholder="Enter your password"
                            required>
+=======
+                           class="form-control form-control-lg{% if validationErrors['password'] | default %} is-invalid{% endif %}"
+                           placeholder="Enter your password">
+                    {% if validationErrors['password'] | default %}
+                        <div class="form-error-message">
+                            <i class="fas fa-times-circle"></i>
+                            <span>{{ validationErrors['password'] }}</span>
+                        </div>
+                    {% endif %}
+>>>>>>> module-rewards
                 </div>
 
                 <!-- Remember Me -->
@@ -255,6 +289,36 @@
         font-size: 1.025rem;
     }
 
+<<<<<<< HEAD
+=======
+    .form-error-message {
+        color: #ff4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: rgba(255, 68, 68, 0.1);
+        border-left: 3px solid #ff4444;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-error-message i {
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .form-control.is-invalid {
+        border-color: #ff4444 !important;
+        background: rgba(255, 68, 68, 0.05) !important;
+    }
+
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.3) !important;
+    }
+
+>>>>>>> module-rewards
     /* Checkbox */
     .form-check {
         display: flex;

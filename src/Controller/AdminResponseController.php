@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\AdminResponse;
+<<<<<<< HEAD
 use App\Form\AdminResponseType;
 use App\Repository\AdminResponseRepository;
 use App\Service\EmailService;
@@ -30,6 +31,29 @@ final class AdminResponseController extends AbstractController
     }
 
     #[Route('', name: 'app_admin_response_index', methods: ['GET'])]
+=======
+use App\Entity\Notification;
+use App\Form\AdminResponseType;
+use App\Repository\AdminResponseRepository;
+use App\Service\EmailService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/admin/response')]
+final class AdminResponseController extends AbstractController
+{
+    private EmailService $emailService;
+
+    public function __construct(EmailService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
+    #[Route(name: 'app_admin_response_index', methods: ['GET'])]
+>>>>>>> module-rewards
     public function index(AdminResponseRepository $adminResponseRepository): Response
     {
         return $this->render('admin_response/index.html.twig', [
@@ -46,6 +70,10 @@ final class AdminResponseController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $reclamation = $adminResponse->getReclamation();
+<<<<<<< HEAD
+=======
+            
+>>>>>>> module-rewards
             // Validate that reclamation is selected
             if (!$reclamation) {
                 $this->addFlash('error', 'Veuillez sélectionner une réclamation.');
@@ -55,12 +83,22 @@ final class AdminResponseController extends AbstractController
             $entityManager->persist($adminResponse);
             $entityManager->flush();
 
+<<<<<<< HEAD
             // Dispatch Messenger message for Mercure
             $this->bus->dispatch(new \App\DTO\NewResponseNotification(
                 $reclamation->getId(),
                 $reclamation->getTitre(),
                 $this->getUser()?->getUserIdentifier() ?? 'Admin'
             ));
+=======
+            // Auto-create notification for new admin response
+            $notif = new Notification();
+            $notif->setTitle('Réponse à réclamation #' . $reclamation->getId());
+            $notif->setMessage(substr($adminResponse->getMessage(), 0, 200));
+            $notif->setReclamation($reclamation);
+            $entityManager->persist($notif);
+            $entityManager->flush();
+>>>>>>> module-rewards
 
             $this->addFlash('success', 'Réponse d\'administration créée avec succès.');
             return $this->redirectToRoute('app_admin_response_index', [], Response::HTTP_SEE_OTHER);
@@ -72,6 +110,7 @@ final class AdminResponseController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/chatbot', name: 'app_admin_response_chatbot', methods: ['POST'])]
     public function chatbot(Request $request, MistralAssistantService $assistant): JsonResponse
     {
@@ -92,6 +131,8 @@ final class AdminResponseController extends AbstractController
         return $this->json($result, $status);
     }
 
+=======
+>>>>>>> module-rewards
     #[Route('/{id}', name: 'app_admin_response_show', methods: ['GET'])]
     public function show(AdminResponse $adminResponse): Response
     {
@@ -117,6 +158,7 @@ final class AdminResponseController extends AbstractController
 
             $entityManager->flush();
 
+<<<<<<< HEAD
             // Dispatch Messenger message for Mercure notification (edit)
             $this->bus->dispatch(new \App\DTO\NewResponseNotification(
                 $reclamation->getId(),
@@ -124,6 +166,8 @@ final class AdminResponseController extends AbstractController
                 $this->getUser()?->getUserIdentifier() ?? 'Admin'
             ));
 
+=======
+>>>>>>> module-rewards
             $this->addFlash('success', 'Réponse d\'administration modifiée avec succès.');
             return $this->redirectToRoute('app_admin_response_index', [], Response::HTTP_SEE_OTHER);
         }

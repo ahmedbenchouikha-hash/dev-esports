@@ -1,5 +1,6 @@
 {% extends "base.html.twig" %}
 
+<<<<<<< HEAD
 {% block title %}Reclamations - RankUp{% endblock %}
 
 {% block stylesheets %}
@@ -133,10 +134,14 @@
         }
     </style>
 {% endblock %}
+=======
+{% block title %}Reclamations - Dev Esports{% endblock %}
+>>>>>>> module-rewards
 
 {% block body %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
+<<<<<<< HEAD
         <div>
             <h1 class="mb-0">Réclamations</h1>
             <p class="module-header-subtitle">Suivez les demandes reçues et priorisez les actions de traitement.</p>
@@ -146,6 +151,12 @@
                 <i class="fas fa-plus"></i>
             </a>
         {% endif %}
+=======
+        <h1>Reclamations</h1>
+        <a href="{{ path('app_reclamation_new_player') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Reclamation
+        </a>
+>>>>>>> module-rewards
     </div>
 
     {% for message in app.flashes('success') %}
@@ -155,6 +166,7 @@
         </div>
     {% endfor %}
 
+<<<<<<< HEAD
     {% set enCoursCount = 0 %}
     {% set resoluCount = 0 %}
     {% set rejeteCount = 0 %}
@@ -245,6 +257,33 @@
                         <div class="row mb-2">
                             {% if reclamation.player %}
                             <div class="col-12">
+=======
+    {% if reclamations|length > 0 %}
+        <div class="row">
+            {% for reclamation in reclamations %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div id="reclamation-{{ reclamation.id }}">
+                                <h5 class="card-title mb-0">#{{ reclamation.id }} {{ reclamation.titre }}</h5>
+                                <small class="text-muted">Created: {{ reclamation.createdAt|date('d/m/Y H:i') }}</small>
+                            </div>
+                            <span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ reclamation.etat.value|replace({'_': ' '}) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ reclamation.description|slice(0, 200) }}{% if reclamation.description|length > 200 %}...{% endif %}</p>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <small class="text-muted"><strong>Type:</strong></small>
+                                <p class="mb-0">{{ reclamation.type.value|replace({'_': ' '}) }}</p>
+                            </div>
+                            {% if reclamation.player %}
+                            <div class="col-6">
+>>>>>>> module-rewards
                                 <small class="text-muted"><strong>Player:</strong></small>
                                 <p class="mb-0">{{ reclamation.player.nickname }}</p>
                             </div>
@@ -252,6 +291,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
+<<<<<<< HEAD
                         <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="crud-view-btn" title="View" aria-label="View">
                             <i class="fas fa-eye"></i>
                         </a>
@@ -263,11 +303,26 @@
                                 </button>
                             </form>
                         {% endif %}
+=======
+                        <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+>>>>>>> module-rewards
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+<<<<<<< HEAD
         <div class="alert alert-info reclamation-filter-empty" id="reclamationFilterEmpty" role="alert">
             <i class="fas fa-filter"></i> No reclamations match this leaderboard filter.
         </div>
@@ -414,4 +469,12 @@
         });
     })();
 </script>
+=======
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle"></i> No reclamations yet. <a href="{{ path('app_reclamation_new_player') }}">Create one</a>
+        </div>
+    {% endif %}
+</div>
+>>>>>>> module-rewards
 {% endblock %}

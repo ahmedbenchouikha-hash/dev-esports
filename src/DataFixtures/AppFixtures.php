@@ -2,10 +2,13 @@
 
 namespace App\DataFixtures;
 
+<<<<<<< HEAD
 use App\Entity\Game;
 use App\Entity\Player;
 use App\Entity\Team;
 use App\Entity\Tournament;
+=======
+>>>>>>> module-rewards
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -13,6 +16,7 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+<<<<<<< HEAD
         // Create Tournaments
         $tournament1 = new Tournament();
         $tournament1->setName('World Championship 2025');
@@ -193,3 +197,9 @@ class AppFixtures extends Fixture
         echo "   📊 Created: 3 Tournaments, 6 Teams, 30 Players, $matchCount Matches\n\n";
     }
 }
+=======
+        // Base fixture - specific fixtures handle data loading
+    }
+}
+
+>>>>>>> module-rewards

@@ -9,11 +9,17 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="page-title">💰 Budget Details</h1>
                 <div>
+<<<<<<< HEAD
                     {% if is_granted('ROLE_ADMIN') %}
                     <a href="{{ path('budget_edit', {id: budget.id}) }}" class="btn btn-warning btn-sm">
                         <i class="fas fa-edit"></i> Edit
                     </a>
                     {% endif %}
+=======
+                    <a href="{{ path('budget_edit', {id: budget.id}) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+>>>>>>> module-rewards
                     <a href="{{ path('budget_index') }}" class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
@@ -146,7 +152,10 @@
             {% endif %}
 
             <!-- Delete Button -->
+<<<<<<< HEAD
             {% if is_granted('ROLE_ADMIN') %}
+=======
+>>>>>>> module-rewards
             <div class="card">
                 <div class="card-body">
                     <form method="POST" action="{{ path('budget_delete', {id: budget.id}) }}" style="display:inline;">
@@ -157,7 +166,10 @@
                     </form>
                 </div>
             </div>
+<<<<<<< HEAD
             {% endif %}
+=======
+>>>>>>> module-rewards
         </div>
     </div>
 </div>

@@ -19,6 +19,11 @@ use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+<<<<<<< HEAD
+=======
+use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Validator\Constraints\AtLeastOneOf;
+>>>>>>> module-rewards
 
 class RegistrationFormType extends AbstractType
 {
@@ -107,6 +112,17 @@ class RegistrationFormType extends AbstractType
                             'minMessage' => 'Your password should be at least {{ limit }} characters',
                             'max' => 4096,
                         ]),
+<<<<<<< HEAD
+=======
+                        new Regex([
+                            'pattern' => '/[A-Z]/',
+                            'message' => 'Password must contain at least one uppercase letter',
+                        ]),
+                        new Regex([
+                            'pattern' => '/[0-9]/',
+                            'message' => 'Password must contain at least one number',
+                        ]),
+>>>>>>> module-rewards
                     ],
                     'attr' => ['autocomplete' => 'new-password'],
                     'label' => 'Password',

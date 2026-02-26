@@ -3,14 +3,23 @@
 namespace App\Controller;
 
 use App\Entity\Reclamation;
+<<<<<<< HEAD
+=======
+use App\Entity\Notification;
+>>>>>>> module-rewards
 use App\Enum\ReclamationStatus;
 use App\Enum\ReclamationType;
 use App\Form\ReclamationType as ReclamationTypeForm;
 use App\Service\EmailService;
+<<<<<<< HEAD
 use App\Service\MistralAssistantService;
 use App\Repository\ReclamationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+=======
+use App\Repository\ReclamationRepository;
+use Doctrine\ORM\EntityManagerInterface;
+>>>>>>> module-rewards
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,12 +31,19 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ReclamationController extends AbstractController
 {
     private EmailService $emailService;
+<<<<<<< HEAD
     private MessageBusInterface $bus;
 
     public function __construct(EmailService $emailService, MessageBusInterface $bus)
     {
         $this->emailService = $emailService;
         $this->bus = $bus;
+=======
+
+    public function __construct(EmailService $emailService)
+    {
+        $this->emailService = $emailService;
+>>>>>>> module-rewards
     }
 
     #[Route('/home', name: 'app_reclamation_index', methods: ['GET'])]
@@ -48,6 +64,7 @@ final class ReclamationController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/leaderboard/stats', name: 'app_reclamation_leaderboard_stats', methods: ['GET'])]
     public function leaderboardStats(ReclamationRepository $reclamationRepository): JsonResponse
     {
@@ -59,6 +76,8 @@ final class ReclamationController extends AbstractController
         ]);
     }
 
+=======
+>>>>>>> module-rewards
     #[Route('/new/simple', name: 'app_reclamation_new_simple', methods: ['POST'])]
     public function newSimple(
         Request $request,
@@ -104,6 +123,16 @@ final class ReclamationController extends AbstractController
             $entityManager->persist($reclamation);
             $entityManager->flush();
 
+<<<<<<< HEAD
+=======
+            $notif = new Notification();
+            $notif->setTitle('Nouvelle réclamation #' . $reclamation->getId());
+            $notif->setMessage($reclamation->getTitre());
+            $notif->setReclamation($reclamation);
+            $entityManager->persist($notif);
+            $entityManager->flush();
+
+>>>>>>> module-rewards
             return $this->json([
                 'success' => true,
                 'message' => 'Réclamation ajoutée',
@@ -147,6 +176,7 @@ final class ReclamationController extends AbstractController
                 $reclamation->setAttachmentFilename($newFilename);
             }
 
+<<<<<<< HEAD
 
             $entityManager->persist($reclamation); 
             $entityManager->flush(); 
@@ -157,6 +187,17 @@ final class ReclamationController extends AbstractController
                 $reclamation->getTitre(),
                 $this->getUser()?->getUsername() ?? 'User'
             ));
+=======
+            $entityManager->persist($reclamation);
+            $entityManager->flush();
+
+            $notif = new Notification();
+            $notif->setTitle('Nouvelle réclamation #' . $reclamation->getId());
+            $notif->setMessage($reclamation->getTitre());
+            $notif->setReclamation($reclamation);
+            $entityManager->persist($notif);
+            $entityManager->flush();
+>>>>>>> module-rewards
 
             $this->addFlash('success', 'Réclamation ajoutée avec succès');
 
@@ -242,6 +283,7 @@ final class ReclamationController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/{id}/change-state', name: 'app_reclamation_change_state', methods: ['POST'])]
     public function changeState(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -367,6 +409,8 @@ PROMPT;
         ]);
     }
 
+=======
+>>>>>>> module-rewards
     #[Route('/{id}', name: 'app_reclamation_delete', methods: ['POST'])]
     public function delete(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
     {

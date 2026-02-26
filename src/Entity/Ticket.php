@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\TicketRepository;
+<<<<<<< HEAD
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+=======
+>>>>>>> module-rewards
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -17,7 +20,11 @@ class Ticket
     #[ORM\Column]
     private ?int $id = null;
 
+<<<<<<< HEAD
     #[ORM\ManyToOne(inversedBy: 'tickets')]
+=======
+    #[ORM\ManyToOne]
+>>>>>>> module-rewards
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Match is required')]
     private ?Game $game = null;
@@ -56,15 +63,21 @@ class Ticket
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
+<<<<<<< HEAD
     #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'ticket', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $payments;
 
+=======
+>>>>>>> module-rewards
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
         $this->status = 'available';
+<<<<<<< HEAD
         $this->payments = new ArrayCollection();
+=======
+>>>>>>> module-rewards
     }
 
     public function getId(): ?int
@@ -171,6 +184,7 @@ class Ticket
         return $this;
     }
 
+<<<<<<< HEAD
     /**
      * @return Collection<int, Payment>
      */
@@ -198,6 +212,8 @@ class Ticket
         return $this;
     }
 
+=======
+>>>>>>> module-rewards
     public function getAvailableSeats(): int
     {
         return max(0, $this->quantity - $this->sold);
@@ -216,4 +232,7 @@ class Ticket
         return sprintf('[%s] %s - %s', $this->ticketNumber, ucfirst($this->type), $this->price . '€');
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> module-rewards

@@ -15,7 +15,10 @@
 
     <!-- Navigation Menu -->
     <nav class="sidebar-menu">
+<<<<<<< HEAD
         {% if is_granted('ROLE_ADMIN') %}
+=======
+>>>>>>> module-rewards
         <!-- Admin Section Header -->
         <div class="menu-section-title">ADMINISTRATION</div>
 
@@ -24,9 +27,13 @@
             <i class="fas fa-chart-line menu-icon"></i>
             <span class="menu-label">Dashboard</span>
         </a>
+<<<<<<< HEAD
         {% endif %}
 
         {% if is_granted('ROLE_ADMIN') %}
+=======
+
+>>>>>>> module-rewards
         <!-- Matches -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#matchesMenu">
@@ -61,6 +68,7 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         <!-- Payments -->
         <div class="menu-group">
             <a href="{{ path('admin_payment_index') }}" class="menu-item {% if 'admin_payment' in app.request.attributes.get('_route') %}active{% endif %}">
@@ -69,6 +77,8 @@
             </a>
         </div>
 
+=======
+>>>>>>> module-rewards
         <!-- Match Statistics -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#statisticsMenu">
@@ -97,11 +107,14 @@
                 <a href="{{ path('admin_tournament_index') }}" class="menu-subitem {% if 'admin_tournament_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Tournaments
                 </a>
+<<<<<<< HEAD
                 {% if is_granted('ROLE_ADMIN') %}
                     <a href="{{ path('admin_tournament_registration_list') }}" class="menu-subitem {% if 'admin_tournament_registration' in app.request.attributes.get('_route') %}active{% endif %}">
                         <i class="fas fa-clipboard-list"></i> Registrations
                     </a>
                 {% endif %}
+=======
+>>>>>>> module-rewards
                 <a href="{{ path('admin_tournament_create') }}" class="menu-subitem">
                     <i class="fas fa-plus"></i> Create Tournament
                 </a>
@@ -147,6 +160,7 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         <!-- Manager Requests -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#managerMenu">
@@ -161,19 +175,32 @@
             </div>
         </div>
 
+=======
+>>>>>>> module-rewards
         <!-- Recompenses -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#recompenseMenu">
                 <i class="fas fa-gift menu-icon"></i>
+<<<<<<< HEAD
                 <span class="menu-label">Recompenses</span>
+=======
+                <span class="menu-label">Rewards</span>
+>>>>>>> module-rewards
                 <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
             <div id="recompenseMenu" class="collapse {% if 'recompense' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+<<<<<<< HEAD
                     <i class="fas fa-list"></i> All Recompenses
                 </a>
                 <a href="{{ path('recompense_new') }}" class="menu-subitem">
                     <i class="fas fa-plus"></i> Create Recompense
+=======
+                    <i class="fas fa-list"></i> All Rewards
+                </a>
+                <a href="{{ path('recompense_index') }}" class="menu-subitem" onclick="return false;" title="Add from list page">
+                    <i class="fas fa-plus"></i> Create Reward
+>>>>>>> module-rewards
                 </a>
                 <a href="{{ path('recompense_export_pdf') }}" class="menu-subitem">
                     <i class="fas fa-file-pdf"></i> Export PDF
@@ -181,6 +208,26 @@
             </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        <!-- Demandes de Recompenses -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#demandeRecompenseMenu">
+                <i class="fas fa-inbox menu-icon"></i>
+                <span class="menu-label">Reward Requests</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="demandeRecompenseMenu" class="collapse {% if 'demande_recompense' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('demande_recompense_index') }}" class="menu-subitem {% if 'demande_recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> My Requests
+                </a>
+                <a href="{{ path('demande_recompense_index') }}" class="menu-subitem" onclick="return false;" title="Add from list page">
+                    <i class="fas fa-plus"></i> New Request
+                </a>
+            </div>
+        </div>
+
+>>>>>>> module-rewards
         <!-- Depenses -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#depenseMenu">
@@ -280,6 +327,7 @@
                 </a>
             </div>
         </div>
+<<<<<<< HEAD
         {% endif %}
 
         {% if not is_granted('ROLE_ADMIN') %}
@@ -300,6 +348,8 @@
             <i class="fas fa-ticket-alt menu-icon"></i>
             <span class="menu-label">My Tickets</span>
         </a>
+=======
+>>>>>>> module-rewards
 
         <!-- Divider -->
         <div class="menu-divider"></div>
@@ -338,7 +388,10 @@
             <i class="fas fa-eye menu-icon"></i>
             <span class="menu-label">View Teams</span>
         </a>
+<<<<<<< HEAD
         {% endif %}
+=======
+>>>>>>> module-rewards
     </nav>
 
     <!-- Sidebar Footer -->
@@ -362,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             sidebar.classList.toggle('show');
+<<<<<<< HEAD
             // Prevent body overflow when sidebar is open on mobile
             if (isMobile) {
                 document.body.classList.toggle('sidebar-open');
@@ -371,6 +425,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.scrollTo(0, 0);
                 }
             }
+=======
+>>>>>>> module-rewards
         });
     }
 
@@ -380,9 +436,12 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function() {
             if (isMobile && !item.classList.contains('menu-toggle')) {
                 sidebar.classList.remove('show');
+<<<<<<< HEAD
                 document.body.classList.remove('sidebar-open');
                 document.documentElement.classList.remove('sidebar-open');
                 window.scrollTo(0, 0);
+=======
+>>>>>>> module-rewards
             }
         });
     });
@@ -391,9 +450,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle')) {
             sidebar.classList.remove('show');
+<<<<<<< HEAD
             document.body.classList.remove('sidebar-open');
             document.documentElement.classList.remove('sidebar-open');
             window.scrollTo(0, 0);
+=======
+>>>>>>> module-rewards
         }
     });
 

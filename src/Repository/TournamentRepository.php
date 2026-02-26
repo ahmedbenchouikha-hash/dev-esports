@@ -4,7 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Tournament;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+<<<<<<< HEAD
 use Doctrine\ORM\QueryBuilder;
+=======
+>>>>>>> module-rewards
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -58,6 +61,7 @@ class TournamentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+<<<<<<< HEAD
 
     public function createAdminListQueryBuilder(
         string $search = '',
@@ -119,4 +123,6 @@ class TournamentRepository extends ServiceEntityRepository
 
         return $statusCounts;
     }
+=======
+>>>>>>> module-rewards
 }

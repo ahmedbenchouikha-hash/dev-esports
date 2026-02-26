@@ -19,10 +19,13 @@ final class Version20260211182607 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+<<<<<<< HEAD
         if ($this->connection->createSchemaManager()->tablesExist(['demande_recompense'])) {
             return;
         }
 
+=======
+>>>>>>> module-rewards
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE demande_recompense (id INT AUTO_INCREMENT NOT NULL, nom_demandeur VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, motif LONGTEXT DEFAULT NULL, date_demande DATETIME NOT NULL, statut VARCHAR(50) NOT NULL, recompense_id INT NOT NULL, INDEX IDX_E857CA7F4D714096 (recompense_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE equipe (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, logo VARCHAR(255) DEFAULT NULL, date_creation DATETIME NOT NULL, description LONGTEXT DEFAULT NULL, statut VARCHAR(50) NOT NULL, membres JSON DEFAULT NULL, captain_id INT DEFAULT NULL, couleur_equipe VARCHAR(50) DEFAULT NULL, jeu VARCHAR(100) DEFAULT NULL, niveau VARCHAR(50) DEFAULT NULL, date_validation DATETIME DEFAULT NULL, score INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
