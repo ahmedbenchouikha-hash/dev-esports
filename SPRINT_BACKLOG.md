@@ -26,6 +26,7 @@ This sprint focused on implementing a complete payment processing system with St
 **Priority:** P0 (Critical)
 
 **User Story:**
+
 ```
 As a customer,
 I want to purchase event tickets by providing my email and payment information,
@@ -33,6 +34,7 @@ So that I can attend the esports match and receive a confirmation.
 ```
 
 **Acceptance Criteria:**
+
 1. ✅ User can view available tickets for a match
 2. ✅ User can enter email and select quantity
 3. ✅ User can proceed through checkout with ticket details
@@ -54,6 +56,7 @@ So that I can attend the esports match and receive a confirmation.
 | T1.8 | Implement inventory management logic | 2 | ✅ |
 
 **Technical Implementation:**
+
 ```php
 // Ticket Entity CRUD Operations
 - getPrice(): ?float          // Read ticket price
@@ -65,12 +68,13 @@ So that I can attend the esports match and receive a confirmation.
 ```
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE ticket (
     id INT PRIMARY KEY AUTO_INCREMENT,
     game_id INT NOT NULL,
     price DECIMAL(10,2),
-    quantity INT,  
+    quantity INT,
     sold INT DEFAULT 0,
     status VARCHAR(50),
     FOREIGN KEY (game_id) REFERENCES game(id)
@@ -78,12 +82,14 @@ CREATE TABLE ticket (
 ```
 
 **Frontend Integration:**
+
 - Ticket price displayed on match cards
 - "Buy Ticket" button triggers checkout modal
 - Real-time quantity validation
 - Success/error notifications
 
 **Related Code Files:**
+
 - [src/Entity/Ticket.php](src/Entity/Ticket.php) - Entity definition
 - [src/Repository/TicketRepository.php](src/Repository/TicketRepository.php) - Data access
 - [templates/ticket_payment/checkout.html.twig](templates/ticket_payment/checkout.html.twig) - UI
@@ -98,6 +104,7 @@ CREATE TABLE ticket (
 **Priority:** P0 (Critical)
 
 **User Story:**
+
 ```
 As a merchant,
 I want to securely process payments through Stripe's Payment Intent API,
@@ -105,6 +112,7 @@ So that customers can purchase tickets with credit/debit cards in a PCI-complian
 ```
 
 **Acceptance Criteria:**
+
 1. ✅ API endpoint `/ticket/payment/{id}/create-payment` accepts POST with email
 2. ✅ Stripe creates payment intent with correct amount in USD
 3. ✅ Client secret returned for frontend Stripe confirmation
@@ -131,6 +139,7 @@ So that customers can purchase tickets with credit/debit cards in a PCI-complian
 **API Endpoints:**
 
 **POST `/ticket/payment/{id}/create-payment`**
+
 ```json
 Request Body:
 {
@@ -153,6 +162,7 @@ Response (400 Bad Request):
 ```
 
 **POST `/ticket/payment/{id}/confirm-payment`**
+
 ```json
 Request Body:
 {
@@ -196,6 +206,7 @@ getPublishableKey(): string
 ```
 
 **Payment Entity Schema:**
+
 ```php
 private int $id;
 private ?Ticket $ticket;        // FK: which ticket
@@ -214,6 +225,7 @@ private DateTime $updatedAt;    // Updated timestamp
 ```
 
 **PaymentRepository Methods:**
+
 ```php
 findByTicket(int $ticketId): array
 findSucceededByTicket(int $ticketId): array
@@ -227,6 +239,7 @@ findRefundablePayments(): array
 ```
 
 **Frontend Integration:**
+
 ```javascript
 // Stripe.js integration flow:
 1. Create payment intent → API /create-payment
@@ -238,6 +251,7 @@ findRefundablePayments(): array
 ```
 
 **Security Measures:**
+
 - ✅ All amounts validated server-side
 - ✅ Customer email verified before payment
 - ✅ Stripe API key stored in environment variables
@@ -247,6 +261,7 @@ findRefundablePayments(): array
 - ✅ Request validation on all inputs
 
 **Related Code Files:**
+
 - [src/Service/StripeService.php](src/Service/StripeService.php) - Stripe API wrapper
 - [src/Entity/Payment.php](src/Entity/Payment.php) - Payment entity
 - [src/Repository/PaymentRepository.php](src/Repository/PaymentRepository.php) - Data access
@@ -254,6 +269,7 @@ findRefundablePayments(): array
 - [migrations/Version20260222130000.php](migrations/Version20260222130000.php) - Payment table
 
 **Error Handling Examples:**
+
 ```php
 // Handles: Invalid amount, missing email, Stripe API errors
 try {
@@ -279,6 +295,7 @@ try {
 **Priority:** P1
 
 **User Story:**
+
 ```
 As a customer,
 I want to receive professional confirmation emails after purchasing tickets,
@@ -286,6 +303,7 @@ So that I can verify my order and have a record in my inbox.
 ```
 
 **Acceptance Criteria:**
+
 1. ✅ Email sent automatically after payment succeeds
 2. ✅ Email includes ticket details and match information
 3. ✅ Email professionally designed with esports branding
@@ -307,6 +325,7 @@ So that I can verify my order and have a record in my inbox.
 | T3.8 | Add comprehensive error logging | 1 | ✅ |
 
 **Email Design Features:**
+
 - Purple/Cyan gradient headers (esports theme)
 - Dark ticket cards with match details
 - Order confirmation numbers
@@ -323,6 +342,7 @@ So that I can verify my order and have a record in my inbox.
 **Priority:** P1
 
 **User Story:**
+
 ```
 As an event organizer,
 I want to track ticket inventory and availability,
@@ -330,6 +350,7 @@ So that tickets don't oversell and customers know when events are full.
 ```
 
 **Acceptance Criteria:**
+
 1. ✅ Real-time ticket availability displayed
 2. ✅ Automatic sold-out status when inventory depleted
 3. ✅ Ticket counter updates after each purchase
@@ -345,6 +366,7 @@ So that tickets don't oversell and customers know when events are full.
 **Priority:** P2
 
 **User Story:**
+
 ```
 As an administrator,
 I want to view payment history and revenue analytics,
@@ -352,6 +374,7 @@ So that I can track financial performance.
 ```
 
 **Acceptance Criteria:**
+
 1. ✅ View all payments with filtering options
 2. ✅ See revenue by ticket/match
 3. ✅ Download payment reports
@@ -361,21 +384,22 @@ So that I can track financial performance.
 
 ## 📊 Sprint Metrics
 
-| Metric | Value |
-|---|---|
-| **Total Story Points** | 89 |
-| **Completed Points** | 89 |
-| **Sprint Velocity** | 89 pts |
-| **Burn Rate** | ✅ On Track |
-| **User Stories Completed** | 5 |
-| **Test Coverage** | 92% |
-| **Code Quality** | A |
+| Metric                     | Value       |
+| -------------------------- | ----------- |
+| **Total Story Points**     | 89          |
+| **Completed Points**       | 89          |
+| **Sprint Velocity**        | 89 pts      |
+| **Burn Rate**              | ✅ On Track |
+| **User Stories Completed** | 5           |
+| **Test Coverage**          | 92%         |
+| **Code Quality**           | A           |
 
 ---
 
 ## 🧪 Testing Coverage
 
 ### **Automated Tests:**
+
 - ✅ Unit tests for StripeService
 - ✅ Unit tests for PaymentRepository
 - ✅ Integration tests for payment flow
@@ -383,6 +407,7 @@ So that I can track financial performance.
 - ✅ Email template rendering tests
 
 ### **Manual Testing:**
+
 - ✅ End-to-end payment flow (test card: 4242 4242 4242 4242)
 - ✅ Email delivery verification
 - ✅ Error handling scenarios
@@ -390,6 +415,7 @@ So that I can track financial performance.
 - ✅ Multiple ticket purchase
 
 ### **Test Results:**
+
 ```
 Tests run: 24
 Passed: 24 ✅
@@ -402,18 +428,19 @@ Coverage: 92%
 
 ## 🔧 Technical Debt & Improvements
 
-| Item | Priority | Effort | Notes |
-|---|---|---|---|
-| Add admin payment dashboard UI | P2 | Medium | Analytics visualization |
-| Implement webhook for Stripe events | P1 | Medium | Reconciliation support |
-| Add payment installment plans | P3 | Large | Future enhancement |
-| Export payments to accounting software | P2 | Medium | Integration feature |
+| Item                                   | Priority | Effort | Notes                   |
+| -------------------------------------- | -------- | ------ | ----------------------- |
+| Add admin payment dashboard UI         | P2       | Medium | Analytics visualization |
+| Implement webhook for Stripe events    | P1       | Medium | Reconciliation support  |
+| Add payment installment plans          | P3       | Large  | Future enhancement      |
+| Export payments to accounting software | P2       | Medium | Integration feature     |
 
 ---
 
 ## 📁 Deliverables
 
 ### **Code Changes:**
+
 - ✅ 3 new entities (Payment, Game-Ticket relationship updates)
 - ✅ 2 new services (StripeService, EmailService)
 - ✅ 1 new repository (PaymentRepository)
@@ -423,11 +450,13 @@ Coverage: 92%
 - ✅ 1 test command for SendGrid verification
 
 ### **Configuration:**
+
 - ✅ `.env` updated with Stripe & SendGrid credentials
 - ✅ `services.yaml` configured with dependency injection
 - ✅ `composer.json` updated with new dependencies
 
 ### **Documentation:**
+
 - ✅ API documentation in code comments
 - ✅ Email template documentation
 - ✅ Setup instructions in README
@@ -438,6 +467,7 @@ Coverage: 92%
 
 **CRUD Operations (US-001):**
 Students will understand:
+
 - Entity relationships (One-to-Many: Game → Tickets)
 - CRUD operations (Create, Read, Update on Ticket entity)
 - Repository pattern for data access
@@ -446,6 +476,7 @@ Students will understand:
 
 **API Development (US-002):**
 Students will understand:
+
 - RESTful API design principles
 - External API integration (Stripe)
 - Payment processing security
@@ -460,15 +491,18 @@ Students will understand:
 ## 📞 Contact & Dependencies
 
 **Dependencies:**
+
 - stripe/stripe-php: ^19.3
 - symfony/sendgrid-mailer: ^6.4
 - sendgrid/sendgrid: ~7
 
 **External APIs:**
+
 - Stripe Payment Intent API
 - SendGrid Mail Send API
 
 **Team Members:**
+
 - [Student Name] - Lead Developer
 - [Student Name] - Backend Developer
 - [Student Name] - QA/Testing

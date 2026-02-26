@@ -35,14 +35,8 @@ html {
 
 body {
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue",
-    sans-serif;
-  background: linear-gradient(
-    135deg,
-    var(--bg-dark) 0%,
-    #0f1625 50%,
-    var(--bg-secondary) 100%
-  );
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #0f1625 50%, var(--bg-secondary) 100%);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
@@ -89,7 +83,7 @@ h2 {
 }
 
 h2::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -114,11 +108,7 @@ h2::after {
 
 /* Match Card */
 .match-card {
-  background: linear-gradient(
-    135deg,
-    var(--bg-tertiary) 0%,
-    var(--bg-secondary) 100%
-  );
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: 28px;
@@ -132,7 +122,7 @@ h2::after {
 }
 
 .match-card::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -148,11 +138,7 @@ h2::after {
   border-color: var(--primary);
   box-shadow: var(--shadow-lg);
   transform: translateY(-4px);
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
-  );
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 .match-card:hover::before {
@@ -194,11 +180,7 @@ h2::after {
   align-items: center;
   margin-bottom: 24px;
   padding: 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 212, 255, 0.08) 0%,
-    rgba(0, 255, 136, 0.08) 100%
-  );
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(0, 255, 136, 0.08) 100%);
   border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: var(--radius);
   gap: 20px;
@@ -217,12 +199,7 @@ h2::after {
 .score-separator {
   width: 2px;
   height: 50px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    var(--primary) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(180deg, transparent 0%, var(--primary) 50%, transparent 100%);
 }
 
 /* Meta Information */
@@ -294,11 +271,7 @@ h2::after {
 }
 
 .btn-secondary {
-  background: linear-gradient(
-    135deg,
-    var(--bg-tertiary) 0%,
-    var(--bg-secondary) 100%
-  );
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   color: var(--primary);
   border: 1px solid var(--primary);
 }
@@ -329,11 +302,7 @@ h2::after {
 
 /* Navbar */
 .navbar {
-  background: linear-gradient(
-    180deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
-  );
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border-bottom: 1px solid var(--border-color);
   padding: 1rem 0;
   box-shadow: var(--shadow-sm);
@@ -360,7 +329,7 @@ h2::after {
 }
 
 .nav-link::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -5px;
   left: 0;
@@ -426,11 +395,7 @@ textarea:focus {
 }
 
 .table thead {
-  background: linear-gradient(
-    90deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
-  );
+  background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border-bottom: 2px solid var(--border-color);
 }
 
@@ -470,41 +435,25 @@ textarea:focus {
 }
 
 .badge-success {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.2) 0%,
-    rgba(5, 150, 105, 0.2) 100%
-  );
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
 .badge-warning {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 193, 7, 0.2) 0%,
-    rgba(255, 152, 0, 0.2) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.2) 100%);
   color: #ffc107;
   border: 1px solid rgba(255, 193, 7, 0.4);
 }
 
 .badge-danger {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 71, 87, 0.2) 0%,
-    rgba(255, 107, 122, 0.2) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 107, 122, 0.2) 100%);
   color: #ff6b7a;
   border: 1px solid rgba(255, 71, 87, 0.4);
 }
 
 .badge-info {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 212, 255, 0.2) 0%,
-    rgba(0, 153, 204, 0.2) 100%
-  );
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 153, 204, 0.2) 100%);
   color: #00d4ff;
   border: 1px solid rgba(0, 212, 255, 0.4);
 }
@@ -518,52 +467,32 @@ textarea:focus {
 }
 
 .alert-success {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.15) 0%,
-    rgba(5, 150, 105, 0.15) 100%
-  );
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .alert-danger {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 71, 87, 0.15) 0%,
-    rgba(255, 107, 122, 0.15) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.15) 0%, rgba(255, 107, 122, 0.15) 100%);
   color: #ff6b7a;
   border: 1px solid rgba(255, 71, 87, 0.3);
 }
 
 .alert-warning {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 193, 7, 0.15) 0%,
-    rgba(255, 152, 0, 0.15) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.15) 100%);
   color: #ffc107;
   border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
 .alert-info {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 212, 255, 0.15) 0%,
-    rgba(0, 153, 204, 0.15) 100%
-  );
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 153, 204, 0.15) 100%);
   color: #00d4ff;
   border: 1px solid rgba(0, 212, 255, 0.3);
 }
 
 /* Cards */
 .card {
-  background: linear-gradient(
-    135deg,
-    var(--bg-tertiary) 0%,
-    var(--bg-secondary) 100%
-  );
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -576,11 +505,7 @@ textarea:focus {
 }
 
 .card-header {
-  background: linear-gradient(
-    90deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
-  );
+  background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border-bottom: 1px solid var(--border-color);
   padding: 20px;
   color: var(--primary);
@@ -599,20 +524,12 @@ textarea:focus {
 
 /* Modal */
 .modal-content {
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
-  );
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border: 1px solid var(--border-color);
 }
 
 .modal-header {
-  background: linear-gradient(
-    90deg,
-    var(--bg-tertiary) 0%,
-    var(--bg-secondary) 100%
-  );
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -692,7 +609,7 @@ option:checked {
 }
 
 .section-title::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -732,4 +649,90 @@ option:checked {
   .section {
     padding: 40px 0;
   }
+}
+
+/* CRITICAL: Override Bootstrap modal CSS to ensure visibility above navbar/sidebar */
+
+/* Override Bootstrap CSS variables for modal z-index */
+:root {
+  --bs-backdrop-zindex: 999998 !important;
+  --bs-modal-zindex: 999999 !important;
+}
+
+/* Force modal to display and be visible */
+.modal {
+  display: none !important;
+}
+
+.modal.show {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
+.modal.fade.show {
+  opacity: 1 !important;
+}
+
+.modal-backdrop {
+  --bs-backdrop-zindex: 999998 !important;
+  z-index: 999998 !important;
+  position: fixed !important;
+}
+
+.modal-backdrop.show {
+  z-index: 999998 !important;
+  opacity: 0.5 !important;
+}
+
+.modal-dialog {
+  z-index: 999999 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  margin: 1.75rem auto !important;
+  width: auto !important;
+  overflow: visible !important;
+}
+
+.modal-content {
+  z-index: 999999 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  z-index: 999999 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+}
+
+.modal-header .btn-close {
+  z-index: 999999 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.modal-footer button,
+.modal-footer .btn,
+.modal-footer a {
+  z-index: 999999 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+body.modal-open {
+  overflow: visible !important;
+  padding-right: 0 !important;
 }

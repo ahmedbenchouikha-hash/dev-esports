@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Team;
 use App\Entity\Player;
+use App\Entity\Payment;
 use App\Repository\TeamInvitationRepository;
+use App\Repository\PaymentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -133,4 +135,50 @@ class PlayerDashboardController extends AbstractController
         
         return $this->redirectToRoute('player_dashboard');
     }
+
+    #[Route('/my-tickets', name: 'player_tickets', methods: ['GET'])]
+    public function myTickets(PaymentRepository $paymentRepo): Response
+    {
+        $user = $this->getUser();
+        
+        // Check if user is a Player
+        if (!$user instanceof Player) {
+            $this->addFlash('error', 'You must be a player to access this page.');
+            return $this->redirectToRoute('home');
+        }
+
+        // Get payments linked to this player (ordered by newest first)
+        $payments = $paymentRepo->findBy(
+            ['player' => $user],
+            ['createdAt' => 'DESC']
+        );
+
+        return $this->render('player/my_tickets.html.twig', [
+            'payments' => $payments,
+            'player' => $user,
+        ]);
+    }
+
+    #[Route('/qr-code/{id}', name: 'player_qr_detail', methods: ['GET'])]
+    public function viewQrCode(Payment $payment): Response
+    {
+        $user = $this->getUser();
+        
+        // Check if user is a Player
+        if (!$user instanceof Player) {
+            $this->addFlash('error', 'You must be a player to access this page.');
+            return $this->redirectToRoute('home');
+        }
+
+        // Check if payment belongs to this player
+        if ($payment->getPlayer() !== $user) {
+            $this->addFlash('error', 'You don\'t have access to this payment.');
+            return $this->redirectToRoute('player_tickets');
+        }
+
+        return $this->render('player/qr_detail.html.twig', [
+            'payment' => $payment,
+        ]);
+    }
 }
+

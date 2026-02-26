@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Tickets & Payments - Dev Esports{% endblock %}
+
+{% block body %}
+<div class="container-lg mt-5">
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="fas fa-ticket-alt"></i> My Tickets & Payments
+            </h1>
+            <p class="text-muted mt-2 mb-0">View all your purchased tickets and payment history</p>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #b622d1 0%, #7c3aed 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white mb-2 text-uppercase">Total Tickets</h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">{{ payments|length }}</h2>
+                        </div>
+                        <i class="fas fa-ticket-alt" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white mb-2 text-uppercase">Total Spent</h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">
+                                €{{ payments|reduce((sum, p) => sum + (p.status == 'succeeded' ? p.amount * p.quantityPurchased : 0), 0)|number_format(2) }}
+                            </h2>
+                        </div>
+                        <i class="fas fa-sack-dollar" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-gradient border-0 shadow-lg" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white mb-2 text-uppercase">Confirmed</h6>
+                            <h2 class="text-white mb-0" style="font-weight: 900;">
+                                {% set confirmed = 0 %}
+                                {% for payment in payments %}
+                                    {% if payment.status == 'succeeded' %}
+                                        {% set confirmed = confirmed + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ confirmed }}
+                            </h2>
+                        </div>
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments List -->
+    {% if payments|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-dark table-hover border-primary" style="border: 1px solid rgba(0, 242, 254, 0.3);">
+            <thead style="background-color: rgba(0, 242, 254, 0.1); border-bottom: 2px solid var(--primary);">
+                <tr>
+                    <th style="color: var(--primary);">Match</th>
+                    <th style="color: var(--primary);">Ticket Type</th>
+                    <th style="color: var(--primary);">Amount</th>
+                    <th style="color: var(--primary);">Quantity</th>
+                    <th style="color: var(--primary);">Date</th>
+                    <th style="color: var(--primary);">Status</th>
+                    <th style="color: var(--primary); text-align: center;">QR Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr style="border-color: rgba(0, 242, 254, 0.2); vertical-align: middle;">
+                    <td>
+                        <strong style="color: var(--primary);">
+                            {% if payment.ticket and payment.ticket.game %}
+                                {{ payment.ticket.game.team1.name }} vs {{ payment.ticket.game.team2.name }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </strong><br>
+                        <small class="text-muted">
+                            {% if payment.ticket and payment.ticket.game.matchdate %}
+                                {{ payment.ticket.game.matchdate|date('M d, Y - H:i') }}
+                            {% endif %}
+                        </small>
+                    </td>
+                    <td>
+                        <strong style="color: #25d366;">
+                            {% if payment.ticket %}
+                                {% if payment.ticket.type == 'vip' %}
+                                    <i class="fas fa-crown"></i> VIP
+                                {% elseif payment.ticket.type == 'student' %}
+                                    <i class="fas fa-graduation-cap"></i> Student
+                                {% else %}
+                                    <i class="fas fa-ticket-alt"></i> Regular
+                                {% endif %}
+                            {% endif %}
+                        </strong>
+                    </td>
+                    <td>
+                        <strong style="color: var(--secondary);">€{{ payment.amount|number_format(2) }}</strong>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">{{ payment.quantityPurchased }}</span>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ payment.createdAt|date('M d, Y') }}</small>
+                    </td>
+                    <td>
+                        {% if payment.status == 'succeeded' %}
+                            <span class="badge bg-success" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-check"></i> Confirmed
+                            </span>
+                        {% elseif payment.status == 'pending' %}
+                            <span class="badge bg-warning" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-hourglass-half"></i> Pending
+                            </span>
+                        {% elseif payment.status == 'failed' %}
+                            <span class="badge bg-danger" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-times"></i> Failed
+                            </span>
+                        {% elseif payment.status == 'refunded' %}
+                            <span class="badge bg-info" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-undo"></i> Refunded
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        {% if payment.qrCode and payment.status == 'succeeded' %}
+                            <a href="{{ path('player_qr_detail', {'id': payment.id}) }}" class="btn btn-sm btn-primary" title="View QR Code">
+                                <i class="fas fa-qrcode"></i>
+                            </a>
+                        {% elseif payment.status != 'succeeded' %}
+                            <span class="text-muted small">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info border-info" role="alert" style="text-align: center;">
+        <i class="fas fa-info-circle"></i>
+        <strong>No tickets purchased yet</strong><br>
+        <p class="mb-0 mt-2">Go to <a href="{{ path('match_index') }}" class="alert-link">View Matches</a> to purchase tickets for upcoming events!</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .container-lg {
+        max-width: 1200px;
+    }
+
+    .card {
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

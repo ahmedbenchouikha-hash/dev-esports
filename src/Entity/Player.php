@@ -26,6 +26,9 @@ class Player extends User // <--- 1. Extends User
     #[ORM\ManyToMany(targetEntity: Team::class, mappedBy: 'players')]
     private Collection $teams;
 
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'player', cascade: ['remove'])]
+    private Collection $payments;
+
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
 
@@ -35,6 +38,7 @@ class Player extends User // <--- 1. Extends User
     public function __construct()
     {
         $this->teams = new ArrayCollection();
+        $this->payments = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
@@ -107,6 +111,28 @@ class Player extends User // <--- 1. Extends User
         $this->teams->clear();
         if ($team !== null) {
             $this->addTeam($team);
+        }
+        return $this;
+    }
+
+    public function getPayments(): Collection
+    {
+        return $this->payments;
+    }
+
+    public function addPayment(Payment $payment): static
+    {
+        if (!$this->payments->contains($payment)) {
+            $this->payments->add($payment);
+            $payment->setPlayer($this);
+        }
+        return $this;
+    }
+
+    public function removePayment(Payment $payment): static
+    {
+        if ($this->payments->removeElement($payment)) {
+            $payment->setPlayer(null);
         }
         return $this;
     }

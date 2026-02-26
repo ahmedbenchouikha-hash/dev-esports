@@ -4,11 +4,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-  logos_directory: "%kernel.project_dir%/public/uploads/logos"
-  rawg_api_key: "%env(default::RAWG_API_KEY)%"
-  rawg_allow_insecure_ssl: "%env(bool:RAWG_ALLOW_INSECURE_SSL)%"
-  gemini_api_key: "%env(default::GEMINI_API_KEY)%"
-  gemini_model: "%env(default::GEMINI_MODEL)%"
+  logos_directory: '%kernel.project_dir%/public/uploads/logos'
+  rawg_api_key: '%env(default::RAWG_API_KEY)%'
+  rawg_allow_insecure_ssl: '%env(bool:RAWG_ALLOW_INSECURE_SSL)%'
+  gemini_api_key: '%env(default::GEMINI_API_KEY)%'
+  gemini_model: '%env(default::GEMINI_MODEL)%'
 
 services:
   # default configuration for services in *this* file
@@ -19,21 +19,21 @@ services:
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
   App\:
-    resource: "../src/"
+    resource: '../src/'
     exclude:
-      - "../src/DependencyInjection/"
-      - "../src/Entity/"
-      - "../src/Kernel.php"
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Kernel.php'
 
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
 
   App\Service\StripeService:
     arguments:
-      $stripeApiKey: "%env(STRIPE_SECRET_KEY)%"
+      $stripeApiKey: '%env(STRIPE_SECRET_KEY)%'
   App\Service\EmailService:
     arguments:
-      $fromEmail: "%env(FROM_EMAIL)%"
-      $apiKey: "%env(SENDGRID_API_KEY)%"
+      $fromEmail: '%env(FROM_EMAIL)%'
+      $apiKey: '%env(SENDGRID_API_KEY)%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

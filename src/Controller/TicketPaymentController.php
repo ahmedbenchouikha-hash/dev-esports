@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Ticket;
 use App\Entity\Payment;
+use App\Entity\Player;
 use App\Repository\PaymentRepository;
 use App\Service\StripeService;
 use App\Service\EmailService;
+use App\Service\QrCodeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +23,8 @@ class TicketPaymentController extends AbstractController
         private StripeService $stripeService,
         private EntityManagerInterface $entityManager,
         private PaymentRepository $paymentRepository,
-        private EmailService $emailService
+        private EmailService $emailService,
+        private QrCodeService $qrCodeService
     ) {}
 
     /**
@@ -109,6 +112,12 @@ class TicketPaymentController extends AbstractController
                     $payment->setAmount($ticket->getPrice());
                     $payment->setQuantityPurchased(1);
                     $payment->setStatus('succeeded');
+                    
+                    // Link payment to logged-in player if available
+                    $user = $this->getUser();
+                    if ($user instanceof Player) {
+                        $payment->setPlayer($user);
+                    }
                 } else {
                     // Update existing record
                     $payment->setStatus('succeeded');
@@ -116,6 +125,15 @@ class TicketPaymentController extends AbstractController
 
                 // Update ticket as sold
                 $ticket->setSold($ticket->getSold() + $payment->getQuantityPurchased());
+
+                // Generate QR code for payment if not already generated
+                if (!$payment->getQrCode()) {
+                    $qrCodeUrl = $this->qrCodeService->generateAndSavePaymentQrCode(
+                        $payment->getPaymentIntentId(),
+                        $ticket->getTicketNumber()
+                    );
+                    $payment->setQrCode($qrCodeUrl);
+                }
 
                 // Update ticket status if all sold
                 if ($ticket->getSold() >= $ticket->getQuantity()) {

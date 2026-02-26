@@ -61,6 +61,14 @@
             </div>
         </div>
 
+        <!-- Payments -->
+        <div class="menu-group">
+            <a href="{{ path('admin_payment_index') }}" class="menu-item {% if 'admin_payment' in app.request.attributes.get('_route') %}active{% endif %}">
+                <i class="fas fa-credit-card menu-icon"></i>
+                <span class="menu-label">Payments</span>
+            </a>
+        </div>
+
         <!-- Match Statistics -->
         <div class="menu-group">
             <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#statisticsMenu">
@@ -274,6 +282,25 @@
         </div>
         {% endif %}
 
+        {% if not is_granted('ROLE_ADMIN') %}
+        <!-- Divider -->
+        <div class="menu-divider"></div>
+
+        <!-- Player Section Header -->
+        <div class="menu-section-title">MY ACCOUNT</div>
+
+        <!-- Dashboard -->
+        <a href="{{ path('player_dashboard') }}" class="menu-item {% if 'player_dashboard' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-user-circle menu-icon"></i>
+            <span class="menu-label">Dashboard</span>
+        </a>
+
+        <!-- My Tickets & Payments -->
+        <a href="{{ path('player_tickets') }}" class="menu-item {% if 'player_tickets' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-ticket-alt menu-icon"></i>
+            <span class="menu-label">My Tickets</span>
+        </a>
+
         <!-- Divider -->
         <div class="menu-divider"></div>
 
@@ -311,6 +338,7 @@
             <i class="fas fa-eye menu-icon"></i>
             <span class="menu-label">View Teams</span>
         </a>
+        {% endif %}
     </nav>
 
     <!-- Sidebar Footer -->
@@ -334,6 +362,15 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             sidebar.classList.toggle('show');
+            // Prevent body overflow when sidebar is open on mobile
+            if (isMobile) {
+                document.body.classList.toggle('sidebar-open');
+                document.documentElement.classList.toggle('sidebar-open');
+                // Scroll to top-left when opening sidebar
+                if (sidebar.classList.contains('show')) {
+                    window.scrollTo(0, 0);
+                }
+            }
         });
     }
 
@@ -343,6 +380,9 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function() {
             if (isMobile && !item.classList.contains('menu-toggle')) {
                 sidebar.classList.remove('show');
+                document.body.classList.remove('sidebar-open');
+                document.documentElement.classList.remove('sidebar-open');
+                window.scrollTo(0, 0);
             }
         });
     });
@@ -351,6 +391,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (isMobile && !e.target.closest('.sidebar-nav') && !e.target.closest('.sidebar-toggle')) {
             sidebar.classList.remove('show');
+            document.body.classList.remove('sidebar-open');
+            document.documentElement.classList.remove('sidebar-open');
+            window.scrollTo(0, 0);
         }
     });
 
