@@ -1,0 +1,16 @@
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+---
+{
+  "mercure": {
+    "subscribe": ["http://esports.com/reclamation/*"]
+  }
+}
+---
+# Instructions:
+# 1. Use a JWT generator (like jwt.io or a CLI tool) with your Mercure secret to create a new token.
+# 2. Set the header and payload above.
+# 3. Copy the resulting JWT and update the 'value' in config/packages/mercure.yaml.
+# 4. Restart Mercure and Symfony if needed.

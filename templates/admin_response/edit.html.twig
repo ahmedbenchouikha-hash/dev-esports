@@ -1,12 +1,75 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Edit Response #{{ admin_response.id }} - RankUp{% endblock %}
+{% block title %}Edit Response - Dev Esports{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .admin-form-shell {
+            background: rgba(30, 41, 79, 0.72);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+        }
+
+        .admin-form-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+
+        .admin-form-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1rem;
+        }
+
+        .admin-cancel-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            background: rgba(30, 41, 59, 0.55);
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 0.45rem 0.9rem;
+            font-weight: 600;
+        }
+
+        .admin-cancel-pill:hover {
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.7);
+        }
+
+        .admin-linked-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.34rem 0.72rem;
+            font-size: 0.8rem;
+            color: #cfe8ff;
+            text-decoration: none;
+            border: 1px solid rgba(125, 211, 252, 0.34);
+            background: rgba(14, 116, 144, 0.28);
+            margin-top: 0.75rem;
+        }
+
+        .admin-linked-pill:hover {
+            color: #ecfeff;
+            border-color: rgba(125, 211, 252, 0.56);
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
 <div class="container py-4">
-    <h1>Edit Response #{{ admin_response.id }}</h1>
+    <h1 class="mb-0">Edit Response</h1>
+    <p class="admin-form-subtitle">Mettez à jour la réponse administrative avec un ton clair et cohérent.</p>
 
-    <div class="card mt-4">
+    <div class="card mt-4 admin-form-shell">
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">
@@ -16,13 +79,25 @@
                 </div>
 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <a href="{{ path('app_admin_response_show', {'id': admin_response.id}) }}" class="btn btn-secondary">Cancel</a>
+                    <div class="admin-form-actions">
+                        <button type="submit" class="crud-view-btn" title="Save Changes" aria-label="Save Changes">
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <a href="{{ path('app_admin_response_show', {'id': admin_response.id}) }}" class="admin-cancel-pill">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
                 </div>
             {{ form_end(form) }}
         </div>
     </div>
+
+    {% if admin_response is defined and admin_response.reclamation %}
+        <a class="admin-linked-pill" href="{{ path('app_reclamation_show', {'id': admin_response.reclamation.id}) }}">
+            <i class="fas fa-link"></i>
+            Réclamation liée: {{ admin_response.reclamation.titre }}
+        </a>
+    {% endif %}
 </div>
+{% include 'admin_response/_chatbot_widget.html.twig' %}
 {% endblock %}

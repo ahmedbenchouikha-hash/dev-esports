@@ -3,13 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Reclamation;
-use App\Entity\Notification;
 use App\Enum\ReclamationStatus;
 use App\Enum\ReclamationType;
 use App\Form\ReclamationType as ReclamationTypeForm;
 use App\Service\EmailService;
+use App\Service\MistralAssistantService;
 use App\Repository\ReclamationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,10 +22,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ReclamationController extends AbstractController
 {
     private EmailService $emailService;
+    private MessageBusInterface $bus;
 
-    public function __construct(EmailService $emailService)
+    public function __construct(EmailService $emailService, MessageBusInterface $bus)
     {
         $this->emailService = $emailService;
+        $this->bus = $bus;
     }
 
     #[Route('/home', name: 'app_reclamation_index', methods: ['GET'])]
@@ -42,6 +45,17 @@ final class ReclamationController extends AbstractController
         return $this->render('reclamation/index.html.twig', [
             'reclamations' => $reclamationRepository->findBy([], ['createdAt' => 'DESC']),
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/leaderboard/stats', name: 'app_reclamation_leaderboard_stats', methods: ['GET'])]
+    public function leaderboardStats(ReclamationRepository $reclamationRepository): JsonResponse
+    {
+        return $this->json([
+            'total' => $reclamationRepository->count([]),
+            'en_cours' => $reclamationRepository->count(['etat' => ReclamationStatus::EN_COURS]),
+            'resolu' => $reclamationRepository->count(['etat' => ReclamationStatus::RESOLU]),
+            'rejete' => $reclamationRepository->count(['etat' => ReclamationStatus::REJETE]),
         ]);
     }
 
@@ -90,13 +104,6 @@ final class ReclamationController extends AbstractController
             $entityManager->persist($reclamation);
             $entityManager->flush();
 
-            $notif = new Notification();
-            $notif->setTitle('Nouvelle réclamation #' . $reclamation->getId());
-            $notif->setMessage($reclamation->getTitre());
-            $notif->setReclamation($reclamation);
-            $entityManager->persist($notif);
-            $entityManager->flush();
-
             return $this->json([
                 'success' => true,
                 'message' => 'Réclamation ajoutée',
@@ -140,15 +147,16 @@ final class ReclamationController extends AbstractController
                 $reclamation->setAttachmentFilename($newFilename);
             }
 
-            $entityManager->persist($reclamation);
-            $entityManager->flush();
 
-            $notif = new Notification();
-            $notif->setTitle('Nouvelle réclamation #' . $reclamation->getId());
-            $notif->setMessage($reclamation->getTitre());
-            $notif->setReclamation($reclamation);
-            $entityManager->persist($notif);
-            $entityManager->flush();
+            $entityManager->persist($reclamation); 
+            $entityManager->flush(); 
+ 
+            // Dispatch Messenger/Mercure notification (no entity)
+            $this->bus->dispatch(new \App\DTO\NewResponseNotification(
+                $reclamation->getId(),
+                $reclamation->getTitre(),
+                $this->getUser()?->getUsername() ?? 'User'
+            ));
 
             $this->addFlash('success', 'Réclamation ajoutée avec succès');
 
@@ -231,6 +239,131 @@ final class ReclamationController extends AbstractController
         return $this->render('reclamation/edit.html.twig', [
             'reclamation' => $reclamation,
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{id}/change-state', name: 'app_reclamation_change_state', methods: ['POST'])]
+    public function changeState(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Validate CSRF token
+        $token = $request->request->get('_token') ?? $request->getPayload()->get('_token');
+        if (!$this->isCsrfTokenValid('change_state', $token)) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Token CSRF invalide'
+            ], 403);
+        }
+
+        // Only allow state change if currently EN_COURS
+        if ($reclamation->getEtat()->value !== ReclamationStatus::EN_COURS->value) {
+            return $this->json([
+                'success' => false,
+                'error' => 'La réclamation ne peut être modifiée que si elle est en cours'
+            ], 400);
+        }
+
+        $newState = $request->request->get('state') ?? $request->getPayload()->get('state');
+        
+        // Validate new state
+        $validStates = [ReclamationStatus::RESOLU->value, ReclamationStatus::REJETE->value];
+        if (!in_array($newState, $validStates)) {
+            return $this->json([
+                'success' => false,
+                'error' => 'État invalide'
+            ], 400);
+        }
+
+        // Update state
+        $reclamation->setEtat(ReclamationStatus::from($newState));
+        $entityManager->flush();
+
+        // Dispatch notification
+        $this->bus->dispatch(new \App\DTO\NewResponseNotification(
+            $reclamation->getId(),
+            'État modifié: ' . $newState,
+            'Admin'
+        ));
+
+        return $this->json([
+            'success' => true,
+            'message' => 'État modifié avec succès',
+            'newState' => $newState,
+            'badge_class' => $newState === ReclamationStatus::RESOLU->value ? 'bg-success' : 'bg-danger'
+        ]);
+    }
+
+    #[Route('/{id}/analyze-emotion', name: 'app_reclamation_analyze_emotion', methods: ['POST'])]
+    public function analyzeEmotion(Reclamation $reclamation, MistralAssistantService $assistant): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $prompt = <<<'PROMPT'
+Tu es un analyste de modération e-sport.
+Analyse UNIQUEMENT l'état émotionnel du joueur et le niveau d'urgence à partir d'une réclamation.
+
+Retourne STRICTEMENT un JSON valide, sans markdown ni texte additionnel:
+{
+  "emotion_state": "urgent matter|angry user|frustrated user|confused user|neutral user",
+  "urgency": "high|medium|low",
+  "short_reason": "phrase courte en français"
+}
+
+Règles:
+- "urgent matter" si risque immédiat, menace, harcèlement fort, sécurité/intégrité compétitive critique.
+- "angry user" si ton agressif/colérique explicite.
+- "frustrated user" si plainte forte mais sans agressivité majeure.
+- "confused user" si incompréhension dominante.
+- "neutral user" sinon.
+PROMPT;
+
+        $textToAnalyze = sprintf(
+            "Titre: %s\nType: %s\nDescription: %s",
+            $reclamation->getTitre() ?? '',
+            $reclamation->getType()->value,
+            $reclamation->getDescription() ?? ''
+        );
+
+        $result = $assistant->askWithPrompt($textToAnalyze, $prompt);
+        if (!($result['success'] ?? false)) {
+            return $this->json([
+                'success' => false,
+                'error' => $result['error'] ?? 'Analyse impossible.'
+            ], $result['status'] ?? 502);
+        }
+
+        $raw = trim((string) ($result['answer'] ?? ''));
+        $clean = preg_replace('/^```json\s*|^```|```$/m', '', $raw) ?? $raw;
+        $decoded = json_decode(trim($clean), true);
+
+        if (!is_array($decoded)) {
+            $fallbackState = 'neutral user';
+            $rawLower = mb_strtolower($raw);
+
+            if (str_contains($rawLower, 'urgent')) {
+                $fallbackState = 'urgent matter';
+            } elseif (str_contains($rawLower, 'angry')) {
+                $fallbackState = 'angry user';
+            } elseif (str_contains($rawLower, 'frustr')) {
+                $fallbackState = 'frustrated user';
+            } elseif (str_contains($rawLower, 'confus')) {
+                $fallbackState = 'confused user';
+            }
+
+            return $this->json([
+                'success' => true,
+                'emotion_state' => $fallbackState,
+                'urgency' => 'medium',
+                'short_reason' => 'Analyse IA générée (format simplifié).',
+            ]);
+        }
+
+        return $this->json([
+            'success' => true,
+            'emotion_state' => (string) ($decoded['emotion_state'] ?? 'neutral user'),
+            'urgency' => (string) ($decoded['urgency'] ?? 'medium'),
+            'short_reason' => (string) ($decoded['short_reason'] ?? 'Analyse effectuée.'),
         ]);
     }
 

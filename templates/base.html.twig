@@ -626,22 +626,128 @@
                 }
             }
 
-            .footer {
-                background: rgba(26, 40, 71, 0.8);
-                backdrop-filter: blur(10px);
-                border-top: 1px solid rgba(0, 242, 254, 0.1);
-                padding: 2rem 0;
-                margin-top: 3rem;
+            .crud-icon-btn {
+                width: 52px;
+                height: 52px;
+                border-radius: 50%;
+                border: 1px solid rgba(226, 232, 240, 0.18);
+                color: #ffffff;
+                font-size: 1.25rem;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                box-shadow: 0 8px 16px rgba(2, 6, 23, 0.26);
+                transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, border-color 0.2s ease;
+                margin-right: 0.35rem;
+                vertical-align: middle;
             }
 
-            .footer p {
-                margin-bottom: 0.5rem;
-                color: var(--text-secondary);
+            .crud-icon-btn:last-child {
+                margin-right: 0;
             }
 
-            .footer .text-muted {
-                color: var(--text-secondary) !important;
-                font-size: 0.9rem;
+            .crud-icon-btn:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.06);
+                border-color: rgba(226, 232, 240, 0.35);
+                color: #ffffff;
+            }
+
+            .crud-icon-btn:active {
+                transform: translateY(1px);
+                box-shadow: 0 4px 10px rgba(2, 6, 23, 0.22);
+            }
+
+            .crud-icon-btn-add {
+                background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            }
+
+            .crud-icon-btn-edit {
+                background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%);
+            }
+
+            .crud-icon-btn-delete {
+                background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%);
+            }
+
+            .crud-icon-btn-sm {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+                margin-right: 0.25rem;
+            }
+
+            .crud-view-btn {
+                height: 40px;
+                min-width: 78px;
+                padding: 0 1rem;
+                border-radius: 999px;
+                border: 1px solid rgba(226, 232, 240, 0.2);
+                background: linear-gradient(180deg, #22d3ee 0%, #0891b2 100%);
+                color: #ecfeff;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.45rem;
+                text-decoration: none;
+                box-shadow: 0 8px 16px rgba(2, 6, 23, 0.24);
+                transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, border-color 0.2s ease;
+                vertical-align: middle;
+                margin-right: 0.25rem;
+            }
+
+            .crud-view-btn:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.06);
+                border-color: rgba(226, 232, 240, 0.35);
+                color: #ecfeff;
+            }
+
+            .crud-view-btn:active {
+                transform: translateY(1px);
+                box-shadow: 0 4px 10px rgba(2, 6, 23, 0.2);
+            }
+
+            .reclamation-state-menu {
+                background: #1f2d4f;
+                border: 1px solid #334155;
+                border-radius: 12px;
+                padding: 0.5rem;
+                min-width: 210px;
+            }
+
+            .reclamation-state-option {
+                display: block;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 0.55rem 0.7rem;
+                font-weight: 700;
+                text-decoration: none;
+                transition: transform 0.15s ease, filter 0.2s ease;
+                margin-bottom: 0.45rem;
+            }
+
+            .reclamation-state-option:last-child {
+                margin-bottom: 0;
+            }
+
+            .reclamation-state-option:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.04);
+            }
+
+            .reclamation-state-option-resolved {
+                background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+                color: #052e16;
+            }
+
+            .reclamation-state-option-rejected {
+                background: linear-gradient(180deg, #fca5a5 0%, #f87171 100%);
+                color: #450a0a;
             }
         </style>
         
@@ -734,6 +840,18 @@
                                 <i class="fas fa-users"></i> Teams
                             </a>
                         </li>
+                        <li class="nav-item-custom">
+                            <a href="{{ path('team_leaderboard') }}">
+                                <i class="fas fa-ranking-star"></i> Leaderboard
+                            </a>
+                        </li>
+                            <li class="nav-item-custom">
+                                <div class="notification-bell" id="notificationBell">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="count" id="notificationCount">0</span>
+                                    <div class="notification-dropdown" id="notificationDropdown"></div>
+                                </div>
+                            </li>
                         {% if app.user %}
                             {% if is_granted('ROLE_ADMIN') %}
                                 <li class="nav-item-custom">
@@ -854,113 +972,122 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        
-        <!-- Notification Scripts -->
+        {{ importmap('app') }}
+            <!-- Mercure Notification JS -->
+                <script>
+                // Notification Bell Dropdown Toggle
+                const bell = document.getElementById('notificationBell');
+                const dropdown = document.getElementById('notificationDropdown');
+                bell.addEventListener('click', function(e) {
+                    bell.classList.toggle('active');
+                    e.stopPropagation();
+                });
+                document.addEventListener('click', function() {
+                    bell.classList.remove('active');
+                });
+
+                // Mercure EventSource for live notifications only
+                let notificationCount = 0;
+                // Use the correct Mercure hub URL from backend config
+                const mercureUrl = 'http://127.0.0.1:2019/.well-known/mercure';
+                const url = new URL(mercureUrl);
+                url.searchParams.append('topic', 'http://esports.com/reclamation/*');
+                const es = new EventSource(url);
+                es.onopen = function() {
+                    console.log('Mercure connection established');
+                };
+                es.onerror = function(e) {
+                    console.error('Mercure connection error:', e);
+                };
+                es.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        notificationCount++;
+                        document.getElementById('notificationCount').textContent = notificationCount;
+                        const item = document.createElement('a');
+                        item.className = 'dropdown-item';
+                        item.href = `{{ path('app_reclamation_index') }}#reclamation-${data.reclamationId}`;
+                        item.innerHTML = `${data.reclamationTitle} <span class="text-muted">(par ${data.adminName})</span>`;
+                        dropdown.prepend(item);
+                    } catch (e) {
+                        console.error('Mercure notification parse error:', e);
+                    }
+                };
+                </script>
+
+        <!-- Global CSRF Token & State Change Script -->
+        <form id="stateChangeForm" style="display: none;">
+            <input type="hidden" name="_token" value="{{ csrf_token('change_state') }}">
+        </form>
+
         <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            {% if app.user %}
-                loadNotifications();
-                
-                // Load notifications every 30 seconds
-                setInterval(loadNotifications, 30000);
-                
-                // Mark all as read button
-                document.getElementById('markAllReadBtn')?.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    markAllNotificationsRead();
-                });
-            {% endif %}
+        function changeReclamationState(reclamationId, newState) {
+            // Find the button - could be stateDropdown (show) or stateDropdown-{id} (index)
+            let btn = document.getElementById('stateDropdown') || document.getElementById('stateDropdown-' + reclamationId);
+            if (!btn) return;
             
-            function loadNotifications() {
-                // Update unread count
-                fetch('/notifications/unread-count')
-                    .then(response => response.json())
-                    .then(data => {
-                        const badge = document.getElementById('notificationBadge');
-                        if (badge) {
-                            if (data.count > 0) {
-                                badge.textContent = data.count;
-                                badge.style.display = 'inline';
-                            } else {
-                                badge.style.display = 'none';
-                            }
-                        }
-                    });
-                
-                // Load recent notifications for dropdown
-                fetch('/notifications/recent')
-                    .then(response => response.json())
-                    .then(data => {
-                        const notificationList = document.getElementById('notificationList');
-                        if (notificationList) {
-                            if (data.notifications && data.notifications.length > 0) {
-                                let html = '';
-                                data.notifications.forEach(notification => {
-                                    const unreadClass = !notification.isRead ? 'unread' : '';
-                                    const iconClass = notification.icon || 'fas fa-bell';
-                                    html += `
-                                        <a href="${notification.link || '#'}" class="notification-item ${unreadClass}">
-                                            <div class="d-flex gap-3">
-                                                <div class="notification-icon">
-                                                    <i class="${iconClass}"></i>
-                                                </div>
-                                                <div class="notification-content">
-                                                    <div>${notification.message}</div>
-                                                    <small class="notification-time">${notification.time}</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    `;
-                                });
-                                notificationList.innerHTML = html;
-                            } else {
-                                notificationList.innerHTML = `
-                                    <div class="text-center p-4 text-muted">
-                                        <i class="fas fa-bell-slash fa-2x mb-2"></i>
-                                        <p>No notifications</p>
-                                    </div>
-                                `;
-                            }
-                        }
-                    });
-            }
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Modification...';
             
-            function markAllNotificationsRead() {
-                fetch('/notifications/mark-all-read', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update badge
-                        const badge = document.getElementById('notificationBadge');
-                        if (badge) {
-                            badge.style.display = 'none';
+            const formData = new FormData();
+            formData.append('state', newState);
+            formData.append('_token', document.querySelector('#stateChangeForm input[name="_token"]').value);
+            
+            fetch('/reclamation/' + reclamationId + '/change-state', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Replace dropdown with static badge
+                    const badgeContainer = btn.parentElement;
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'badge ' + data.badge_class;
+                    newBadge.textContent = (newState === 'RESOLU' ? 'RÉSOLU' : 'REJETÉ');
+                    badgeContainer.replaceChild(newBadge, btn);
+
+                    const cardElement = document.querySelector('#reclamation-' + reclamationId);
+                    if (cardElement) {
+                        const cardItem = cardElement.closest('.reclamation-item');
+                        if (cardItem) {
+                            cardItem.dataset.state = newState;
                         }
-                        
-                        // Reload notifications
-                        loadNotifications();
-                        
-                        // Show success message
-                        const alert = document.createElement('div');
-                        alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
-                        alert.style.zIndex = '9999';
-                        alert.innerHTML = `
-                            All notifications marked as read!
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        `;
-                        document.body.appendChild(alert);
-                        
-                        setTimeout(() => {
-                            alert.remove();
-                        }, 3000);
                     }
-                });
-            }
-        });
+
+                    window.dispatchEvent(new CustomEvent('reclamation-state-updated', {
+                        detail: {
+                            id: reclamationId,
+                            state: newState,
+                        }
+                    }));
+                    
+                    // Show success alert - find best location
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> État modifié avec succès. <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                    
+                    // Insert at top of container
+                    const container = document.querySelector('.container-fluid') || document.querySelector('main') || document.body;
+                    container.insertBefore(alertDiv, container.firstChild);
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('Erreur: ' + (data.error || 'Impossible de modifier l\'état'));
+                }
+            })
+            .catch(error => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Erreur: ' + error.message);
+            });
+        }
         </script>
     </body>
 </html>

@@ -1,12 +1,75 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Edit Punishment #{{ punition.id }} - RankUp{% endblock %}
+{% block title %}Edit Punishment - Dev Esports{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .module-form-shell {
+            background: rgba(30, 41, 79, 0.72);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+        }
+
+        .module-form-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+
+        .module-form-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1rem;
+        }
+
+        .module-cancel-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            background: rgba(30, 41, 59, 0.55);
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 0.45rem 0.9rem;
+            font-weight: 600;
+        }
+
+        .module-cancel-pill:hover {
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.7);
+        }
+
+        .module-linked-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.34rem 0.72rem;
+            font-size: 0.8rem;
+            color: #cfe8ff;
+            text-decoration: none;
+            border: 1px solid rgba(125, 211, 252, 0.34);
+            background: rgba(14, 116, 144, 0.28);
+            margin-top: 0.75rem;
+        }
+
+        .module-linked-pill:hover {
+            color: #ecfeff;
+            border-color: rgba(125, 211, 252, 0.56);
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
 <div class="container py-4">
-    <h1>Edit Punishment #{{ punition.id }}</h1>
+    <h1 class="mb-0">Edit Punishment</h1>
+    <p class="module-form-subtitle">Mettez à jour la durée et le niveau de sanction avec cohérence.</p>
 
-    <div class="card mt-4">
+    <div class="card mt-4 module-form-shell">
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">
@@ -22,9 +85,36 @@
                 </div>
 
                 <div class="mb-3">
-                    {{ form_label(form.playerStatus, 'Player Status') }}
-                    {{ form_widget(form.playerStatus, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.playerStatus) }}
+                    <label class="form-label">Existing Bans</label>
+                    {% include 'punition/_ban_chips.html.twig' with { banList: punition.banList, containerClass: 'd-flex flex-wrap gap-2' } only %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.newBan, 'Add ban') }}
+                    <div class="d-none">
+                        {{ form_widget(form.newBan, {'attr': {'class': 'form-control js-ban-select'}}) }}
+                    </div>
+                    <div class="dropdown ban-picker mt-2" data-target-id="{{ form.newBan.vars.id }}">
+                        <button class="btn btn-outline-light dropdown-toggle w-100 text-start ban-picker-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="js-ban-label">Choose a new ban</span>
+                        </button>
+                        <ul class="dropdown-menu w-100 p-2 ban-picker-menu">
+                            {% for choice in form.newBan.vars.choices %}
+                                {% set banClass = 'ban-option-game' %}
+                                {% if 'tournament' in choice.value %}
+                                    {% set banClass = 'ban-option-tournament' %}
+                                {% elseif 'match' in choice.value %}
+                                    {% set banClass = 'ban-option-match' %}
+                                {% endif %}
+                                <li>
+                                    <button type="button" class="dropdown-item rounded p-0 {% if not loop.last %}mb-2{% endif %} js-ban-option" data-value="{{ choice.value }}" data-label="{{ choice.label }}">
+                                        <span class="d-block rounded p-2 ban-option-card {{ banClass }}">{{ choice.label }}</span>
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {{ form_errors(form.newBan) }}
                 </div>
 
                 <div class="mb-3">
@@ -34,13 +124,25 @@
                 </div>
 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <a href="{{ path('app_punition_show', {'id': punition.id}) }}" class="btn btn-secondary">Cancel</a>
+                    <div class="module-form-actions">
+                        <button type="submit" class="crud-view-btn" title="Save Changes" aria-label="Save Changes">
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <a href="{{ path('app_punition_show', {'id': punition.id}) }}" class="module-cancel-pill">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
                 </div>
             {{ form_end(form) }}
         </div>
     </div>
+
+    {% if punition.reclamation %}
+        <a class="module-linked-pill" href="{{ path('app_reclamation_show', {'id': punition.reclamation.id}) }}">
+            <i class="fas fa-link"></i>
+            Réclamation liée: {{ punition.reclamation.titre }}
+        </a>
+    {% endif %}
 </div>
+{% include 'punition/_ban_picker_assets.html.twig' %}
 {% endblock %}

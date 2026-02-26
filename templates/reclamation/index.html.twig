@@ -2,13 +2,150 @@
 
 {% block title %}Reclamations - RankUp{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .module-header-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+
+        .module-card-shell {
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(2, 6, 23, 0.3);
+        }
+
+        .reclamation-item {
+            position: relative;
+        }
+
+        .reclamation-leaderboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .reclamation-card-grid {
+            --bs-gutter-x: 1.6rem;
+            --bs-gutter-y: 1.6rem;
+        }
+
+        .reclamation-leaderboard-btn {
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #1f2f53 0%, #1a2744 100%);
+            color: #e2e8f0;
+            padding: 0.8rem 0.9rem;
+            text-align: left;
+            transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+        }
+
+        .reclamation-leaderboard-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(0, 242, 254, 0.45);
+        }
+
+        .reclamation-leaderboard-btn.active {
+            border-color: rgba(0, 242, 254, 0.75);
+            box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.25), 0 8px 18px rgba(0, 0, 0, 0.22);
+        }
+
+        .reclamation-leaderboard-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.92;
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        .reclamation-leaderboard-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .reclamation-leaderboard-btn-total .reclamation-leaderboard-value { color: #67e8f9; }
+        .reclamation-leaderboard-btn-progress .reclamation-leaderboard-value { color: #facc15; }
+        .reclamation-leaderboard-btn-approved .reclamation-leaderboard-value { color: #4ade80; }
+        .reclamation-leaderboard-btn-rejected .reclamation-leaderboard-value { color: #f87171; }
+
+        .reclamation-filter-empty {
+            display: none;
+        }
+
+        .emotion-analyzer-bubble {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            position: absolute;
+            top: -34px;
+            left: 8px;
+            z-index: 6;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #0f3b5f 0%, #0e2a47 100%);
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            box-shadow: 0 8px 18px rgba(2, 6, 23, 0.35);
+            padding: 0.26rem 0.42rem;
+        }
+
+        .emotion-analyzer-bubble .emotion-analyze-btn {
+            border: none;
+            background: transparent;
+            color: #bae6fd;
+            padding: 0.18rem 0.42rem;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .emotion-analyzer-bubble .emotion-analyze-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            color: #e0f2fe;
+        }
+
+        .emotion-state-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 0.28rem 0.55rem;
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-right: 0.1rem;
+        }
+
+        .emotion-urgency-high { background: #ef4444; color: #fff; }
+        .emotion-urgency-medium { background: #f59e0b; color: #111827; }
+
+        .emotion-reason {
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Reclamations</h1>
-        <a href="{{ path('app_reclamation_new_player') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> New Reclamation
-        </a>
+        <div>
+            <h1 class="mb-0">Réclamations</h1>
+            <p class="module-header-subtitle">Suivez les demandes reçues et priorisez les actions de traitement.</p>
+        </div>
+        {% if not is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_reclamation_new_player') }}" class="crud-icon-btn crud-icon-btn-add" title="Add Reclamation" aria-label="Add Reclamation">
+                <i class="fas fa-plus"></i>
+            </a>
+        {% endif %}
     </div>
 
     {% for message in app.flashes('success') %}
@@ -18,31 +155,96 @@
         </div>
     {% endfor %}
 
+    {% set enCoursCount = 0 %}
+    {% set resoluCount = 0 %}
+    {% set rejeteCount = 0 %}
+    {% for reclamation in reclamations %}
+        {% if reclamation.etat.value == 'EN_COURS' %}
+            {% set enCoursCount = enCoursCount + 1 %}
+        {% elseif reclamation.etat.value == 'RESOLU' %}
+            {% set resoluCount = resoluCount + 1 %}
+        {% elseif reclamation.etat.value == 'REJETE' %}
+            {% set rejeteCount = rejeteCount + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="reclamation-leaderboard" id="reclamationLeaderboard">
+        <button type="button" class="reclamation-leaderboard-btn reclamation-leaderboard-btn-total active" data-filter="ALL">
+            <span class="reclamation-leaderboard-label">Total Reclamations</span>
+            <span class="reclamation-leaderboard-value" id="leaderboard-total">{{ reclamations|length }}</span>
+        </button>
+        <button type="button" class="reclamation-leaderboard-btn reclamation-leaderboard-btn-progress" data-filter="EN_COURS">
+            <span class="reclamation-leaderboard-label">En Cours</span>
+            <span class="reclamation-leaderboard-value" id="leaderboard-en-cours">{{ enCoursCount }}</span>
+        </button>
+        <button type="button" class="reclamation-leaderboard-btn reclamation-leaderboard-btn-approved" data-filter="RESOLU">
+            <span class="reclamation-leaderboard-label">Approuvées</span>
+            <span class="reclamation-leaderboard-value" id="leaderboard-resolu">{{ resoluCount }}</span>
+        </button>
+        <button type="button" class="reclamation-leaderboard-btn reclamation-leaderboard-btn-rejected" data-filter="REJETE">
+            <span class="reclamation-leaderboard-label">Rejetées</span>
+            <span class="reclamation-leaderboard-value" id="leaderboard-rejete">{{ rejeteCount }}</span>
+        </button>
+    </div>
+
     {% if reclamations|length > 0 %}
-        <div class="row">
+        <div class="row reclamation-card-grid" id="reclamationList">
             {% for reclamation in reclamations %}
-            <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-header bg-light">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div id="reclamation-{{ reclamation.id }}">
-                                <h5 class="card-title mb-0">#{{ reclamation.id }} {{ reclamation.titre }}</h5>
-                                <small class="text-muted">Created: {{ reclamation.createdAt|date('d/m/Y H:i') }}</small>
-                            </div>
-                            <span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">
-                                {{ reclamation.etat.value|replace({'_': ' '}) }}
-                            </span>
+            <div class="col-md-6 mb-5 reclamation-item" data-state="{{ reclamation.etat.value }}">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="emotion-analyzer-bubble">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-info emotion-analyze-btn"
+                                data-id="{{ reclamation.id }}"
+                                data-url="{{ path('app_reclamation_analyze_emotion', {'id': reclamation.id}) }}"
+                            >
+                                <i class="fas fa-brain"></i> Analyser
+                            </button>
+                            <span class="emotion-state-badge emotion-urgency-low" id="emotionStateBadge-{{ reclamation.id }}">not analyzed</span>
                         </div>
-                    </div>
+                    {% endif %}
+
+                    <div class="card h-100 reclamation-card module-card-shell" id="reclamation-{{ reclamation.id }}">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-0">{{ reclamation.titre }}</h5>
+                                    <small class="text-muted">Created: {{ reclamation.createdAt|date('d/m/Y H:i') }}</small>
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <div class="emotion-reason" id="emotionReason-{{ reclamation.id }}"></div>
+                                    {% endif %}
+                                </div>
+                                {% if is_granted('ROLE_ADMIN') and reclamation.etat.value == 'EN_COURS' %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-warning dropdown-toggle" type="button" id="stateDropdown-{{ reclamation.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="badge bg-warning">{{ reclamation.etat.value|replace({'_': ' '}) }}</span>
+                                    </button>
+                                    <ul class="dropdown-menu reclamation-state-menu" aria-labelledby="stateDropdown-{{ reclamation.id }}">
+                                        <li>
+                                            <a class="reclamation-state-option reclamation-state-option-resolved" href="#" onclick="changeReclamationState({{ reclamation.id }}, 'RESOLU'); return false;">
+                                                ✓ Résolu
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="reclamation-state-option reclamation-state-option-rejected" href="#" onclick="changeReclamationState({{ reclamation.id }}, 'REJETE'); return false;">
+                                                ✗ Rejeté
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                {% else %}
+                                <span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ reclamation.etat.value|replace({'_': ' '}) }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
                     <div class="card-body">
                         <p class="card-text">{{ reclamation.description|slice(0, 200) }}{% if reclamation.description|length > 200 %}...{% endif %}</p>
                         <div class="row mb-2">
-                            <div class="col-6">
-                                <small class="text-muted"><strong>Type:</strong></small>
-                                <p class="mb-0">{{ reclamation.type.value|replace({'_': ' '}) }}</p>
-                            </div>
                             {% if reclamation.player %}
-                            <div class="col-6">
+                            <div class="col-12">
                                 <small class="text-muted"><strong>Player:</strong></small>
                                 <p class="mb-0">{{ reclamation.player.nickname }}</p>
                             </div>
@@ -50,27 +252,166 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">
-                            <i class="fas fa-eye"></i> View
+                        <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="crud-view-btn" title="View" aria-label="View">
+                            <i class="fas fa-eye"></i>
                         </a>
-                        <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </form>
+                        {% if not is_granted('ROLE_ADMIN') %}
+                            <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                <button type="submit" class="crud-icon-btn crud-icon-btn-delete crud-icon-btn-sm" title="Delete" aria-label="Delete">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+        <div class="alert alert-info reclamation-filter-empty" id="reclamationFilterEmpty" role="alert">
+            <i class="fas fa-filter"></i> No reclamations match this leaderboard filter.
+        </div>
     {% else %}
         <div class="alert alert-info" role="alert">
-            <i class="fas fa-info-circle"></i> No reclamations yet. <a href="{{ path('app_reclamation_new_player') }}">Create one</a>
+            <i class="fas fa-info-circle"></i> No reclamations yet.{% if not is_granted('ROLE_ADMIN') %} <a href="{{ path('app_reclamation_new_player') }}">Create one</a>{% endif %}
         </div>
     {% endif %}
 </div>
+
+<script>
+    (function () {
+        const leaderboardButtons = document.querySelectorAll('.reclamation-leaderboard-btn');
+        const leaderboardTotal = document.getElementById('leaderboard-total');
+        const leaderboardEnCours = document.getElementById('leaderboard-en-cours');
+        const leaderboardResolu = document.getElementById('leaderboard-resolu');
+        const leaderboardRejete = document.getElementById('leaderboard-rejete');
+        const reclamationItems = document.querySelectorAll('.reclamation-item');
+        const emotionButtons = document.querySelectorAll('.emotion-analyze-btn');
+        const filterEmpty = document.getElementById('reclamationFilterEmpty');
+        let activeFilter = 'ALL';
+
+        const updateLeaderboardValues = (stats) => {
+            if (leaderboardTotal) leaderboardTotal.textContent = stats.total;
+            if (leaderboardEnCours) leaderboardEnCours.textContent = stats.en_cours;
+            if (leaderboardResolu) leaderboardResolu.textContent = stats.resolu;
+            if (leaderboardRejete) leaderboardRejete.textContent = stats.rejete;
+        };
+
+        const applyLeaderboardFilter = () => {
+            if (!reclamationItems.length) {
+                return;
+            }
+
+            let visibleCount = 0;
+            reclamationItems.forEach((item) => {
+                const itemState = item.dataset.state;
+                const shouldShow = activeFilter === 'ALL' || itemState === activeFilter;
+                item.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) {
+                    visibleCount++;
+                }
+            });
+
+            if (filterEmpty) {
+                filterEmpty.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        };
+
+        const refreshLeaderboardStats = async () => {
+            try {
+                const response = await fetch('{{ path('app_reclamation_leaderboard_stats') }}', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const data = await response.json();
+                updateLeaderboardValues(data);
+            } catch (error) {
+            }
+        };
+
+        leaderboardButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                activeFilter = button.dataset.filter;
+                leaderboardButtons.forEach((btn) => btn.classList.remove('active'));
+                button.classList.add('active');
+                applyLeaderboardFilter();
+            });
+        });
+
+        window.addEventListener('reclamation-state-updated', (event) => {
+            const detail = event.detail || {};
+            if (detail.id && detail.state) {
+                const card = document.querySelector('#reclamation-' + detail.id);
+                const item = card ? card.closest('.reclamation-item') : null;
+                if (item) {
+                    item.dataset.state = detail.state;
+                }
+            }
+
+            refreshLeaderboardStats();
+            applyLeaderboardFilter();
+        });
+
+        applyLeaderboardFilter();
+        setInterval(refreshLeaderboardStats, 10000);
+
+        const urgencyClassMap = {
+            high: 'emotion-urgency-high',
+            medium: 'emotion-urgency-medium',
+            low: 'emotion-urgency-low',
+        };
+
+        emotionButtons.forEach((button) => {
+            button.addEventListener('click', async () => {
+                const id = button.dataset.id;
+                const url = button.dataset.url;
+                const badge = document.getElementById('emotionStateBadge-' + id);
+                const reason = document.getElementById('emotionReason-' + id);
+
+                if (!id || !url || !badge || !reason) {
+                    return;
+                }
+
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Analyse...';
+                reason.textContent = '';
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        reason.textContent = data.error || 'Erreur lors de l\'analyse.';
+                        return;
+                    }
+
+                    const emotionState = (data.emotion_state || 'neutral user').toString();
+                    const urgency = (data.urgency || 'medium').toString().toLowerCase();
+                    const shortReason = (data.short_reason || 'Analyse effectuée.').toString();
+
+                    badge.textContent = emotionState;
+                    badge.classList.remove('emotion-urgency-high', 'emotion-urgency-medium', 'emotion-urgency-low');
+                    badge.classList.add(urgencyClassMap[urgency] || 'emotion-urgency-medium');
+                    reason.textContent = shortReason;
+                } catch (error) {
+                    reason.textContent = 'Erreur réseau pendant l\'analyse émotionnelle.';
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            });
+        });
+    })();
+</script>
 {% endblock %}

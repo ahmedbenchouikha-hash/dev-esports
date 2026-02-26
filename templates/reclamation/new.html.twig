@@ -2,11 +2,32 @@
 
 {% block title %}New Reclamation - RankUp{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .module-form-shell {
+            background: rgba(30, 41, 79, 0.72);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+        }
+
+        .module-form-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="container py-4">
-    <h1>Create New Reclamation</h1>
+    <div class="mb-4">
+        <h1 class="mb-0">Create New Reclamation</h1>
+        <p class="module-form-subtitle">Soumettez une nouvelle demande avec des informations claires et structurées.</p>
+    </div>
 
-    <div class="card mt-4">
+    <div class="card mt-4 module-form-shell">
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">

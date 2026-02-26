@@ -2,11 +2,30 @@
 
 {% block title %}New Punishment - RankUp{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .module-form-shell {
+            background: rgba(30, 41, 79, 0.72);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+        }
+
+        .module-form-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="container py-4">
-    <h1>Create New Punishment</h1>
+    <h1 class="mb-0">Create New Punishment</h1>
+    <p class="module-form-subtitle">Définissez une sanction claire et proportionnée selon le contexte de la réclamation.</p>
 
-    <div class="card mt-4">
+    <div class="card mt-4 module-form-shell">
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="mb-3">
@@ -22,8 +41,30 @@
                 </div>
 
                 <div class="mb-3">
-                    {{ form_label(form.playerStatus, 'Player Status') }}
-                    {{ form_widget(form.playerStatus, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_label(form.playerStatus, 'Ban') }}
+                    <div class="d-none">
+                        {{ form_widget(form.playerStatus, {'attr': {'class': 'form-control js-ban-select'}}) }}
+                    </div>
+                    <div class="dropdown ban-picker mt-2" data-target-id="{{ form.playerStatus.vars.id }}">
+                        <button class="btn btn-outline-light dropdown-toggle w-100 text-start ban-picker-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="js-ban-label">Select a ban</span>
+                        </button>
+                        <ul class="dropdown-menu w-100 p-2 ban-picker-menu">
+                            {% for choice in form.playerStatus.vars.choices %}
+                                {% set banClass = 'ban-option-game' %}
+                                {% if 'tournament' in choice.value %}
+                                    {% set banClass = 'ban-option-tournament' %}
+                                {% elseif 'match' in choice.value %}
+                                    {% set banClass = 'ban-option-match' %}
+                                {% endif %}
+                                <li>
+                                    <button type="button" class="dropdown-item rounded p-0 {% if not loop.last %}mb-2{% endif %} js-ban-option" data-value="{{ choice.value }}" data-label="{{ choice.label }}">
+                                        <span class="d-block rounded p-2 ban-option-card {{ banClass }}">{{ choice.label }}</span>
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                     {{ form_errors(form.playerStatus) }}
                 </div>
 
@@ -43,4 +84,5 @@
         </div>
     </div>
 </div>
+{% include 'punition/_ban_picker_assets.html.twig' %}
 {% endblock %}

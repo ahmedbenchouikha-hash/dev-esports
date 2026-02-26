@@ -1,25 +1,45 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Reclamation #{{ reclamation.id }} - RankUp{% endblock %}
+{% block title %}Reclamation Details - Dev Esports{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .module-show-shell {
+            background: rgba(30, 41, 79, 0.72);
+            border: 1px solid rgba(71, 85, 105, 0.55);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+        }
+
+        .module-show-subtitle {
+            margin-top: 0.35rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Reclamation #{{ reclamation.id }}</h1>
         <div>
-            <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-warning">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </form>
+            <h1 class="mb-0">Reclamation Details</h1>
+            <p class="module-show-subtitle">Consultez le statut, les informations et les suites administratives de la demande.</p>
+        </div>
+        <div>
+            {% if not is_granted('ROLE_ADMIN') %}
+                <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                    <button type="submit" class="crud-icon-btn crud-icon-btn-delete" title="Delete" aria-label="Delete">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+            {% endif %}
         </div>
     </div>
 
-    <div class="card mb-4">
+    <div class="card mb-4 module-show-shell">
         <div class="card-header">
             <h5>{{ reclamation.titre }}</h5>
         </div>
@@ -27,7 +47,27 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <h6 class="text-muted">Status</h6>
+                    {% if is_granted('ROLE_ADMIN') and reclamation.etat.value == 'EN_COURS' %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-warning dropdown-toggle" type="button" id="stateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="stateBadge" class="badge bg-warning">{{ reclamation.etat.value|replace({'_': ' '}) }}</span>
+                        </button>
+                        <ul class="dropdown-menu reclamation-state-menu" aria-labelledby="stateDropdown">
+                            <li>
+                                <a class="reclamation-state-option reclamation-state-option-resolved" href="#" onclick="changeReclamationState({{ reclamation.id }}, 'RESOLU'); return false;">
+                                    ✓ Résolu
+                                </a>
+                            </li>
+                            <li>
+                                <a class="reclamation-state-option reclamation-state-option-rejected" href="#" onclick="changeReclamationState({{ reclamation.id }}, 'REJETE'); return false;">
+                                    ✗ Rejeté
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    {% else %}
                     <p><span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">{{ reclamation.etat.value|replace({'_': ' '}) }}</span></p>
+                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <h6 class="text-muted">Type</h6>
@@ -82,7 +122,12 @@
             <h5>Punishment Applied</h5>
         </div>
         <div class="card-body">
-            <p><strong>Player Status:</strong> <span class="badge bg-danger">{{ reclamation.punition.playerStatus }}</span></p>
+            <p>
+                <strong>Bans:</strong>
+                <span class="ms-1 align-middle d-inline-block">
+                    {% include 'punition/_ban_chips.html.twig' with { banList: reclamation.punition.banList, containerClass: 'd-inline-flex flex-wrap gap-1' } only %}
+                </span>
+            </p>
             <p><strong>From:</strong> {{ reclamation.punition.startAt|date('d/m/Y H:i') }}</p>
             <p><strong>To:</strong> {{ reclamation.punition.endAt|date('d/m/Y H:i') }}</p>
             <a href="{{ path('app_punition_show', {'id': reclamation.punition.id}) }}" class="btn btn-sm btn-danger">View Punishment</a>

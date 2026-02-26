@@ -16,6 +16,15 @@ final class Version20260212010000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        if (!$this->connection->createSchemaManager()->tablesExist(['user'])) {
+            return;
+        }
+
+        $columns = $this->connection->createSchemaManager()->listTableColumns('user');
+        if (isset($columns['first_name'])) {
+            return;
+        }
+
         $this->addSql('ALTER TABLE `user` ADD first_name VARCHAR(100), ADD last_name VARCHAR(100), ADD birth_date DATE');
     }
 

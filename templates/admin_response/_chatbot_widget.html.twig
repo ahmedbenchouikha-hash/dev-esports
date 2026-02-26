@@ -1,0 +1,138 @@
+<style>
+    {% set inlineMode = chatbot_inline|default(false) %}
+
+    .admin-chatbot-wrapper {
+        position: {% if inlineMode %}relative{% else %}fixed{% endif %};
+        right: {% if inlineMode %}auto{% else %}20px{% endif %};
+        bottom: {% if inlineMode %}auto{% else %}20px{% endif %};
+        z-index: 1200;
+        display: inline-flex;
+        vertical-align: middle;
+    }
+
+    .admin-chatbot-icon {
+        width: 56px;
+        height: 56px;
+        border: none;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), #00a8cc);
+        color: #0f172a;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .admin-chatbot-panel {
+        position: absolute;
+        right: 0;
+        bottom: {% if inlineMode %}auto{% else %}70px{% endif %};
+        top: {% if inlineMode %}64px{% else %}auto{% endif %};
+        width: 320px;
+        background: #1a2847;
+        border: 1px solid rgba(0, 242, 254, 0.25);
+        border-radius: 10px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+        padding: 12px;
+        display: none;
+    }
+
+    .admin-chatbot-panel.active {
+        display: block;
+    }
+
+    .admin-chatbot-panel textarea {
+        width: 100%;
+        min-height: 92px;
+        resize: vertical;
+        border-radius: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: #0f172a;
+        color: #fff;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+
+    .admin-chatbot-response {
+        margin-top: 10px;
+        white-space: pre-wrap;
+        font-size: 0.95rem;
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 8px;
+        padding: 10px;
+        min-height: 52px;
+        background: rgba(15, 23, 42, 0.55);
+    }
+</style>
+
+<div class="admin-chatbot-wrapper" id="adminResponseChatbot">
+    <button type="button" class="admin-chatbot-icon" id="adminChatbotIcon" aria-label="Open admin chatbot">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div class="admin-chatbot-panel" id="adminChatbotPanel">
+        <textarea id="adminChatbotMessage" placeholder="Rédigez votre demande pour l'assistant admin..."></textarea>
+        <button type="button" class="btn btn-primary w-100" id="adminChatbotSubmit">Envoyer</button>
+        <div class="admin-chatbot-response" id="adminChatbotResponse">Assistant prêt.</div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const root = document.getElementById('adminResponseChatbot');
+        const icon = document.getElementById('adminChatbotIcon');
+        const panel = document.getElementById('adminChatbotPanel');
+        const message = document.getElementById('adminChatbotMessage');
+        const submit = document.getElementById('adminChatbotSubmit');
+        const responseBox = document.getElementById('adminChatbotResponse');
+
+        if (!root || !icon || !panel || !message || !submit || !responseBox) {
+            return;
+        }
+
+        icon.addEventListener('click', function (event) {
+            event.stopPropagation();
+            panel.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!root.contains(event.target)) {
+                panel.classList.remove('active');
+            }
+        });
+
+        submit.addEventListener('click', async function () {
+            const text = message.value.trim();
+            if (!text) {
+                responseBox.textContent = 'Veuillez entrer un message.';
+                return;
+            }
+
+            submit.disabled = true;
+            submit.textContent = 'Envoi...';
+            responseBox.textContent = 'Génération en cours...';
+
+            try {
+                const response = await fetch('{{ path('app_admin_response_chatbot') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                responseBox.textContent = data.answer || data.error || 'Aucune réponse.';
+            } catch (error) {
+                responseBox.textContent = 'Erreur de connexion à l\'assistant.';
+            } finally {
+                submit.disabled = false;
+                submit.textContent = 'Envoyer';
+            }
+        });
+    })();
+</script>

@@ -16,6 +16,10 @@ final class Version20260219130000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        if ($this->connection->createSchemaManager()->tablesExist(['ticket'])) {
+            return;
+        }
+
         $this->addSql('CREATE TABLE ticket (
             id INT AUTO_INCREMENT NOT NULL,
             game_id INT NOT NULL,
