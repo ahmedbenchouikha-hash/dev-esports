@@ -706,23 +706,11 @@
             }
         </script>
         
-    <body>
-        {% set is_admin = 'admin' in app.request.attributes.get('_route', '') %}
-        
-        {% if is_admin %}
-            {% include 'partials/sidebar.html.twig' %}
-            <script>
-                // Add admin layout class
-                document.body.classList.add('admin-layout');
-            </script>
-        {% endif %}
-        
         <!-- Navigation Bar - Hide on auth pages -->
         {% if app.request.attributes.get('_route') not in ['app_login', 'app_register', 'app_forgot_password', 'app_reset_password'] %}
         <nav class="navbar-custom">
             <div class="navbar-container-custom">
                 <div style="display: flex; align-items: center; gap: 2rem;">
-                    <a class="navbar-brand-custom" href="/">
                     <a class="navbar-brand-custom" href="{{ path('tournament_index') }}">
                         <i class="fas fa-gamepad"></i>
                         <span>Dev Esports</span>
@@ -766,15 +754,6 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            <li class="nav-item-custom dropdown">
-                                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user-circle"></i> 
-                                    {{ app.user.nickname|default(app.user.email|slice(0, 20)) }}
-                                    <a href="{{ path('admin_tournament_registration_list') }}">
-                                        <i class="fas fa-clipboard-list"></i> Registrations
-                                    </a>
-                                </li>
-                            {% endif %}
 
                             <!-- Notifications Dropdown -->
                             <li class="nav-item-custom dropdown">
@@ -802,6 +781,7 @@
                                 </div>
                             </li>
 
+                            <!-- User Dropdown -->
                             <li class="nav-item-custom dropdown">
                                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                                     <i class="fas fa-user-circle"></i> 

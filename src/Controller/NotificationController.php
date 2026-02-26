@@ -14,6 +14,15 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/notifications')]
 final class NotificationController extends AbstractController
 {
+    #[Route('', name: 'app_notifications', methods: ['GET'])]
+    public function index(NotificationRepository $repo): Response
+    {
+        $notifications = $repo->findBy(['user' => $this->getUser()], ['createdAt' => 'DESC']);
+        return $this->render('notification/index.html.twig', [
+            'notifications' => $notifications,
+        ]);
+    }
+
     #[Route('/recent', name: 'notifications_recent', methods: ['GET'])]
     public function recent(NotificationRepository $repo): Response
     {
