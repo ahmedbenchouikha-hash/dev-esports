@@ -123,15 +123,6 @@
                 {{ form_errors(registrationForm.plainPassword.second) }}
             </div>
 
-            <!-- Agreement Checkbox -->
-            <div class="form-check">
-                {{ form_widget(registrationForm.agreeTerms, {
-                    attr: { class: 'form-check-input' }
-                }) }}
-                {{ form_label(registrationForm.agreeTerms, 'I agree to the Terms of Service and Privacy Policy', { label_attr: { class: 'form-check-label' } }) }}
-                {{ form_errors(registrationForm.agreeTerms) }}
-            </div>
-
             <!-- Submit Button -->
             <button class="btn btn-register btn-primary" type="submit">
                 <i class="fas fa-user-check"></i>
