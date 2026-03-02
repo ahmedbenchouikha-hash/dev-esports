@@ -76,7 +76,7 @@ class SecurityController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {
-        // controller can be blank: handled by Symfony security
-        throw new \Exception('Don\'t forget to activate logout in security.yaml');
+        // This method will be intercepted by the logout listener
+        // No code is needed here
     }
 }
