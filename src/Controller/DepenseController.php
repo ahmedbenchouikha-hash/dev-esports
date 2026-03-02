@@ -10,6 +10,7 @@ use App\Repository\DepenseRepository;
 use App\Service\BudgetAlertService;
 use App\Service\AuthorizationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,11 +34,87 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/pending', name: 'pending', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function pending(DepenseRepository $depenseRepository): Response
     {
         $depenses = $depenseRepository->findBy(['statut' => 'en_attente']);
         
         return $this->render('depense/pending.html.twig', [
+            'depenses' => $depenses,
+        ]);
+    }
+
+    #[Route('/finance/stats', name: 'finance_stats', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function financeStats(DepenseRepository $depenseRepository, EntityManagerInterface $em): Response
+    {
+        // Get all budgets and expenses
+        $budgetRepo = $em->getRepository(\App\Entity\Budget::class);
+        $teamRepo = $em->getRepository(Team::class);
+        
+        $budgets = $budgetRepo->findAll();
+        $depenses = $depenseRepository->findAll();
+        $teams = $teamRepo->findAll();
+        
+        // Prepare data for charts
+        $budgetsByTeam = [];
+        $expensesByTeam = [];
+        $expensesByCategory = [];
+        $totalStats = [
+            'total_budget' => 0,
+            'total_expenses' => 0,
+            'total_approved' => 0,
+            'total_pending' => 0,
+            'total_rejected' => 0,
+        ];
+        
+        // Process budgets
+        foreach ($budgets as $budget) {
+            $teamName = $budget->getTeam() ? $budget->getTeam()->getName() : 'Unknown';
+            $budgetsByTeam[$teamName] = [
+                'alloue' => (float)$budget->getMontantAlloue(),
+                'utilise' => (float)$budget->getMontantUtilise(),
+            ];
+            $totalStats['total_budget'] += (float)$budget->getMontantAlloue();
+        }
+        
+        // Process expenses
+        foreach ($depenses as $depense) {
+            $teamName = $depense->getTeam() ? $depense->getTeam()->getName() : 'Unknown';
+            $category = $depense->getCategorie();
+            $montant = (float)$depense->getMontant();
+            
+            // Group by team
+            if (!isset($expensesByTeam[$teamName])) {
+                $expensesByTeam[$teamName] = 0;
+            }
+            $expensesByTeam[$teamName] += $montant;
+            
+            // Group by category
+            if (!isset($expensesByCategory[$category])) {
+                $expensesByCategory[$category] = 0;
+            }
+            $expensesByCategory[$category] += $montant;
+            
+            // Count by status
+            $statut = $depense->getStatut();
+            if ($statut === 'validée') {
+                $totalStats['total_approved'] += $montant;
+            } elseif ($statut === 'en_attente' || $statut === 'en attente') {
+                $totalStats['total_pending'] += $montant;
+            } elseif ($statut === 'refusée') {
+                $totalStats['total_rejected'] += $montant;
+            }
+            
+            $totalStats['total_expenses'] += $montant;
+        }
+        
+        return $this->render('depense/finance_stats.html.twig', [
+            'budgetsByTeam' => $budgetsByTeam,
+            'expensesByTeam' => $expensesByTeam,
+            'expensesByCategory' => $expensesByCategory,
+            'totalStats' => $totalStats,
+            'budgets' => $budgets,
             'depenses' => $depenses,
         ]);
     }
@@ -65,7 +142,7 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
+    public function index(Request $request, DepenseRepository $depenseRepository, AuthorizationService $authService, PaginatorInterface $paginator): Response
     {
         // Paramètres de recherche et tri
         $search = $request->query->get('search', '');
@@ -75,6 +152,7 @@ class DepenseController extends AbstractController
         $categorie = $request->query->get('categorie', 'all');
         $minAmount = $request->query->get('min_amount', '');
         $maxAmount = $request->query->get('max_amount', '');
+        $page = $request->query->getInt('page', 1);
 
         // Validations
         if (!in_array($order, ['ASC', 'DESC'])) {
@@ -91,14 +169,13 @@ class DepenseController extends AbstractController
 
         // Filter by team access for managers (admins see everything)
         $currentPlayer = $authService->getCurrentPlayer();
-        $managerTeams = $currentPlayer ? $currentPlayer->getTeams()->toArray() : [];
 
         // Filtrer
         $depenses = [];
         foreach ($allDepenses as $depense) {
-            // Managers can only see their own team's expenses
-            if ($currentPlayer && !in_array('ROLE_ADMIN', $currentPlayer->getRoles())) {
-                if (!$depense->getTeam() || !in_array($depense->getTeam(), $managerTeams)) {
+            // Managers can only see expenses for teams they belong to
+            if (!$this->isGranted('ROLE_ADMIN') && $this->isGranted('ROLE_MANAGER')) {
+                if (!$depense->getTeam() || !$depense->getTeam()->getPlayers()->contains($currentPlayer)) {
                     continue;
                 }
             }
@@ -140,6 +217,13 @@ class DepenseController extends AbstractController
             });
         }
 
+        // Pagination
+        $pagination = $paginator->paginate(
+            $depenses,
+            $page,
+            3  // 3 items per page
+        );
+
         // Stats
         $stats = [
             'total_montant' => 0,
@@ -161,7 +245,8 @@ class DepenseController extends AbstractController
         }
 
         return $this->render('depense/index.html.twig', [
-            'depenses' => $depenses,
+            'pagination' => $pagination,
+            'depenses' => $pagination->getItems(),
             'stats' => $stats,
             'search' => $search,
             'sort' => $sort,
@@ -177,7 +262,17 @@ class DepenseController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, AuthorizationService $authService): Response
     {
         $depense = new Depense();
-        $form = $this->createForm(DepenseType::class, $depense);
+        
+        // Get manager's teams (only teams where manager is a member with ROLE_MANAGER)
+        $managerTeams = [];
+        $currentPlayer = $authService->getCurrentPlayer();
+        if ($currentPlayer && in_array('ROLE_MANAGER', $currentPlayer->getRoles())) {
+            $managerTeams = $currentPlayer->getTeams()->getValues();
+        }
+        
+        $form = $this->createForm(DepenseType::class, $depense, [
+            'manager_teams' => $managerTeams,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -297,7 +392,16 @@ class DepenseController extends AbstractController
             $authService->ensureCanManageTeam($depense->getTeam());
         }
 
-        $form = $this->createForm(DepenseType::class, $depense);
+        // Get manager's teams (only teams where manager is a member with ROLE_MANAGER)
+        $managerTeams = [];
+        $currentPlayer = $authService->getCurrentPlayer();
+        if ($currentPlayer && in_array('ROLE_MANAGER', $currentPlayer->getRoles())) {
+            $managerTeams = $currentPlayer->getTeams()->getValues();
+        }
+
+        $form = $this->createForm(DepenseType::class, $depense, [
+            'manager_teams' => $managerTeams,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -400,9 +504,9 @@ class DepenseController extends AbstractController
     #[Route('/{id}/valider', name: 'valider', methods: ['POST'])]
     public function valider(Request $request, Depense $depense, EntityManagerInterface $entityManager, BudgetAlertService $budgetAlertService, AuthorizationService $authService): Response
     {
-        // Allow only admin to validate expenses or manager of the team
-        if (!$this->isGranted('ROLE_ADMIN') && $depense->getTeam() && !$authService->canManageTeam($depense->getTeam())) {
-            throw $this->createAccessDeniedException('You cannot validate this expense');
+        // Allow only admin to validate expenses
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Only admins can approve expenses');
         }
 
         if ($this->isCsrfTokenValid('valider'.$depense->getId(), $request->request->get('_token'))) {
@@ -427,9 +531,9 @@ class DepenseController extends AbstractController
     #[Route('/{id}/refuser', name: 'refuser', methods: ['POST'])]
     public function refuser(Request $request, Depense $depense, EntityManagerInterface $entityManager, AuthorizationService $authService): Response
     {
-        // Allow only admin to refuse expenses or manager of the team
-        if ($depense->getTeam() && !$authService->canManageTeam($depense->getTeam())) {
-            throw $this->createAccessDeniedException('You cannot refuse this expense');
+        // Allow only admin to refuse expenses
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Only admins can refuse expenses');
         }
 
         if ($this->isCsrfTokenValid('refuser'.$depense->getId(), $request->request->get('_token'))) {
@@ -443,6 +547,136 @@ class DepenseController extends AbstractController
         }
 
         return $this->redirectToRoute('depense_index');
+    }
+
+    #[Route('/{id}/download-pdf', name: 'download_pdf', methods: ['GET'])]
+    public function downloadPdf(Depense $depense): Response
+    {
+        // Generate PDF for a single expense
+        $html = $this->renderView('depense/single_pdf.html.twig', [
+            'depense' => $depense,
+        ]);
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'expense_' . $depense->getId() . '_' . date('Y-m-d') . '.pdf';
+
+        return new Response(
+            $dompdf->output(),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
+    }
+
+    #[Route('/export-pdf', name: 'export_pdf', methods: ['GET'])]
+    public function exportPdf(Request $request, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
+    {
+        // Paramètres de recherche et tri (mêmes que la méthode index)
+        $search = $request->query->get('search', '');
+        $sort = $request->query->get('sort', 'date_creation');
+        $order = $request->query->get('order', 'DESC');
+        $statut = $request->query->get('statut', 'all');
+        $categorie = $request->query->get('categorie', 'all');
+        $minAmount = $request->query->get('min_amount', '');
+        $maxAmount = $request->query->get('max_amount', '');
+
+        // Validations
+        if (!in_array($order, ['ASC', 'DESC'])) {
+            $order = 'DESC';
+        }
+
+        $validSorts = ['date_creation', 'montant', 'titre', 'statut', 'categorie'];
+        if (!in_array($sort, $validSorts)) {
+            $sort = 'date_creation';
+        }
+
+        // Récupérer toutes les dépenses
+        $allDepenses = $depenseRepository->findBy([], [$sort => $order]);
+
+        // Filter by team access for managers (admins see everything)
+        $currentPlayer = $authService->getCurrentPlayer();
+
+        // Filtrer (même logique que index)
+        $depenses = [];
+        foreach ($allDepenses as $depense) {
+            // Managers can only see expenses for teams they belong to
+            if (!$this->isGranted('ROLE_ADMIN') && $this->isGranted('ROLE_MANAGER')) {
+                if (!$depense->getTeam() || !$depense->getTeam()->getPlayers()->contains($currentPlayer)) {
+                    continue;
+                }
+            }
+
+            $pass = true;
+
+            // Filtre statut
+            if ($statut !== 'all' && $depense->getStatut() !== $statut) {
+                $pass = false;
+            }
+
+            // Filtre catégorie
+            if ($categorie !== 'all' && $depense->getCategorie() !== $categorie) {
+                $pass = false;
+            }
+
+            // Filtre montant min
+            if (!empty($minAmount) && is_numeric($minAmount) && $depense->getMontant() < (float)$minAmount) {
+                $pass = false;
+            }
+
+            // Filtre montant max
+            if (!empty($maxAmount) && is_numeric($maxAmount) && $depense->getMontant() > (float)$maxAmount) {
+                $pass = false;
+            }
+
+            if ($pass) {
+                $depenses[] = $depense;
+            }
+        }
+
+        // Recherche par titre ou équipe
+        if (!empty($search)) {
+            $search = strtolower(trim($search));
+            $depenses = array_filter($depenses, function($depense) use ($search) {
+                $titleMatch = strpos(strtolower($depense->getTitre()), $search) !== false;
+                $teamMatch = $depense->getTeam() && strpos(strtolower($depense->getTeam()->getName()), $search) !== false;
+                return $titleMatch || $teamMatch;
+            });
+        }
+
+        // Générer le PDF
+        $html = $this->renderView('depense/export_pdf.html.twig', [
+            'depenses' => $depenses,
+            'search' => $search,
+            'sort' => $sort,
+            'order' => $order,
+            'statut' => $statut,
+            'categorie' => $categorie,
+            'min_amount' => $minAmount,
+            'max_amount' => $maxAmount,
+            'export_date' => new \DateTime(),
+        ]);
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'expenses_export_' . date('Y-m-d_H-i-s') . '.pdf';
+
+        return new Response(
+            $dompdf->output(),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]

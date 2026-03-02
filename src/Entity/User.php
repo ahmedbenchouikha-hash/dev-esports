@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -55,6 +57,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserProfile::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?UserProfile $profile = null;
+
+    /**
+     * @var Collection<int, ChatbotConversation>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ChatbotConversation::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $chatbotConversations;
+
+    public function __construct()
+    {
+        $this->chatbotConversations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -208,6 +221,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setBirthDate(?\DateTimeInterface $birthDate): static
     {
         $this->birthDate = $birthDate;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChatbotConversation>
+     */
+    public function getChatbotConversations(): Collection
+    {
+        return $this->chatbotConversations;
+    }
+
+    public function addChatbotConversation(ChatbotConversation $chatbotConversation): static
+    {
+        if (!$this->chatbotConversations->contains($chatbotConversation)) {
+            $this->chatbotConversations->add($chatbotConversation);
+            $chatbotConversation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChatbotConversation(ChatbotConversation $chatbotConversation): static
+    {
+        if ($this->chatbotConversations->removeElement($chatbotConversation)) {
+            if ($chatbotConversation->getUser() === $this) {
+                $chatbotConversation->setUser(null);
+            }
+        }
+
         return $this;
     }
 

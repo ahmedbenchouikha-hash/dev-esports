@@ -191,9 +191,42 @@
         align-items: center;
         min-height: calc(100vh - 80px);
         padding: 2rem 1rem;
-        background: linear-gradient(135deg, #0f172a 0%, #1a2847 100%);
+        background:
+            radial-gradient(ellipse at 14% 20%, rgba(0, 242, 254, 0.12), transparent 50%),
+            radial-gradient(ellipse at 84% 24%, rgba(0, 255, 157, 0.1), transparent 46%),
+            linear-gradient(180deg, #070b19 0%, #080b1a 48%, #0b1030 100%);
+        background-size: 160% 160%, 140% 140%, 100% 100%;
+        animation: registerBgShift 22s ease-in-out infinite alternate;
         position: relative;
         overflow: hidden;
+    }
+
+    .register-container::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 24% 78%, rgba(0, 242, 254, 0.14), transparent 38%),
+            radial-gradient(circle at 76% 30%, rgba(0, 255, 157, 0.12), transparent 36%);
+        filter: blur(26px);
+        opacity: 0.75;
+        animation: registerOrbsFloat 18s ease-in-out infinite alternate;
+    }
+
+    .register-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(0, 242, 254, 0.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 242, 254, 0.045) 1px, transparent 1px);
+        background-size: 46px 46px;
+        opacity: 0.2;
+        mask-image: radial-gradient(circle at center, black 24%, transparent 82%);
+        -webkit-mask-image: radial-gradient(circle at center, black 24%, transparent 82%);
+        animation: registerGridDrift 26s linear infinite;
     }
 
     .register-wrapper {
@@ -204,12 +237,27 @@
     }
 
     .register-card {
-        backdrop-filter: blur(10px);
-        background: rgba(26, 40, 71, 0.8);
-        border: 1px solid rgba(0, 242, 254, 0.1);
-        border-radius: 16px;
+        backdrop-filter: blur(20px);
+        background: rgba(22, 27, 53, 0.7);
+        border: 1px solid rgba(0, 242, 254, 0.08);
+        border-radius: 20px;
         padding: 2.5rem;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes registerBgShift {
+        0% { background-position: 0% 0%, 100% 100%, 0% 0%; }
+        100% { background-position: 16% 18%, 82% 86%, 0% 0%; }
+    }
+
+    @keyframes registerOrbsFloat {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        100% { transform: translate3d(2%, -2%, 0) scale(1.05); }
+    }
+
+    @keyframes registerGridDrift {
+        0% { background-position: 0 0, 0 0; }
+        100% { background-position: 0 46px, 46px 0; }
     }
 
     .register-header {
@@ -220,15 +268,15 @@
     .register-logo {
         width: 60px;
         height: 60px;
-        background: linear-gradient(135deg, #00f2fe 0%, #0089b3 100%);
-        border-radius: 12px;
+        background: linear-gradient(135deg, #00f2fe 0%, #00ff9d 100%);
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.75rem;
-        color: white;
+        color: #080b1a;
         margin: 0 auto 1rem;
-        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
     }
 
     .register-header h1 {

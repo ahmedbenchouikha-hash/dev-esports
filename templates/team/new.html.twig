@@ -402,15 +402,17 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
             // Send invitation via AJAX
-            fetch(`{{ path('team_invite_from_suggestions', {'id': ''}) }}${teamId}/invite/${playerId}`, {
+            fetch(`{{ path('team_invite') }}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({
-                    '_token': '{{ csrf_token("invite_player") }}' // You may not need this for AJAX requests
-                })
+                body: new URLSearchParams({
+                    team_id: teamId,
+                    player_id: playerId,
+                    _token: '{{ csrf_token("invite_player") }}'
+                }).toString()
             })
             .then(response => response.json())
             .then(data => {

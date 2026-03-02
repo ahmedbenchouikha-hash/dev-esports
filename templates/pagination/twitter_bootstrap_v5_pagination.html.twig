@@ -1,0 +1,52 @@
+{%- if pageCount > 1 -%}
+    <nav role="navigation" aria-label="Pagination Navigation">
+        <ul class="pagination mb-0">
+            {%- if first is defined and current != first -%}
+                <li class="page-item">
+                    <a rel="start" class="page-link" href="{{ path(route, query|merge({(pageParameterName): first})) }}">
+                        <span aria-hidden="true">&laquo;</span> First
+                    </a>
+                </li>
+            {%- endif -%}
+
+            {%- if previous is defined -%}
+                <li class="page-item">
+                    <a rel="prev" class="page-link" href="{{ path(route, query|merge({(pageParameterName): previous})) }}">
+                        <span aria-hidden="true">&lsaquo;</span> Previous
+                    </a>
+                </li>
+            {%- endif -%}
+
+            {%- for page in pagesInRange -%}
+                {%- if page != current -%}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): page})) }}">{{ page }}</a>
+                    </li>
+                {%- else -%}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">
+                            {{ page }}
+                            <span class="visually-hidden">(current)</span>
+                        </span>
+                    </li>
+                {%- endif -%}
+            {%- endfor -%}
+
+            {%- if next is defined -%}
+                <li class="page-item">
+                    <a rel="next" class="page-link" href="{{ path(route, query|merge({(pageParameterName): next})) }}">
+                        Next <span aria-hidden="true">&rsaquo;</span>
+                    </a>
+                </li>
+            {%- endif -%}
+
+            {%- if last is defined and current != last -%}
+                <li class="page-item">
+                    <a rel="end" class="page-link" href="{{ path(route, query|merge({(pageParameterName): last})) }}">
+                        Last <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {%- endif -%}
+        </ul>
+    </nav>
+{%- endif -%}

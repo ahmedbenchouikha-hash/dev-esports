@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ team.name }} - Dev Esports{% endblock %}
+{% block title %}{{ team.name }} - Rankup{% endblock %}
 
 {% block body %}
 <div class="row mb-4">
@@ -70,6 +70,127 @@
                     </div>
                 </div>
 
+                {% if is_granted('ROLE_MANAGER') and team.players is defined and app.user and team.players.contains(app.user) %}
+                    <hr>
+                    <h3>🤖 Assistant IA - Composition d'équipe</h3>
+                    {% if app.request.query.get('post_create') and reco_mode == 'choose' %}
+                        <div class="alert alert-info" role="alert">
+                            Ton équipe est créée. Choisis maintenant le mode IA:
+                            <strong>Auto</strong> (Gemini propose la meilleure composition) ou <strong>Manuel</strong> (joueurs recommandés + invitations manuelles).
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 flex-wrap mb-3">
+                        <a href="{{ path('team_show', {id: team.id, reco_mode: 'auto'}) }}" class="btn {{ reco_mode == 'auto' ? 'btn-success' : 'btn-outline-success' }}">
+                            <i class="fas fa-wand-magic-sparkles"></i> IA Auto: Best Team
+                        </a>
+                        <a href="{{ path('team_show', {id: team.id, reco_mode: 'manual'}) }}" class="btn {{ reco_mode == 'manual' ? 'btn-primary' : 'btn-outline-primary' }}">
+                            <i class="fas fa-users"></i> IA Manuel: Recommended Players
+                        </a>
+                    </div>
+
+                    {% if reco_mode == 'choose' %}
+                        <div class="alert alert-secondary mb-0" role="alert">
+                            Sélectionne un mode ci-dessus pour voir les recommandations IA.
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if reco_mode == 'auto' and perfect_team_plan is defined and perfect_team_plan %}
+                    <div class="alert alert-success" role="alert">
+                        <strong>Pourquoi cette équipe ?</strong><br>
+                        {{ perfect_team_plan.summary }}
+                    </div>
+                    {% if perfect_team_plan.slotsRemaining == 0 %}
+                        <div class="alert alert-info" role="alert">
+                            L'équipe est déjà complète.
+                        </div>
+                    {% elseif perfect_team_plan.recommendedPlayers is defined and perfect_team_plan.recommendedPlayers|length > 0 %}
+                        <h5 class="mb-3">Top choix IA pour compléter l'équipe ({{ perfect_team_plan.slotsRemaining }} place(s) restante(s))</h5>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Joueur</th>
+                                        <th>Rôle suggéré</th>
+                                        <th>Score IA</th>
+                                        <th>Raison</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in perfect_team_plan.recommendedPlayers %}
+                                        <tr>
+                                            <td>{{ item.player.nickname ?? item.player.username }}</td>
+                                            <td><span class="badge bg-secondary">{{ item.suggestedRole }}</span></td>
+                                            <td><span class="badge bg-success">{{ item.aiScore }}</span></td>
+                                            <td>{{ item.reason }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ path('team_invite') }}" class="m-0">
+                                                    <input type="hidden" name="team_id" value="{{ team.id }}">
+                                                    <input type="hidden" name="player_id" value="{{ item.player.id }}">
+                                                    <input type="hidden" name="reco_mode" value="{{ reco_mode }}">
+                                                    <button type="submit" class="btn btn-sm btn-primary" {% if team.statut != 'approuvé' %}disabled{% endif %}>
+                                                        <i class="fas fa-paper-plane"></i>
+                                                        {% if team.statut == 'approuvé' %}Inviter{% else %}En attente d'approbation{% endif %}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if reco_mode == 'manual' and ai_recommendations is defined and ai_recommendations|length > 0 %}
+                    <h5>👥 Joueurs recommandés (choix manuel)</h5>
+                    <div class="alert alert-info" role="alert">
+                        L'IA te propose des profils; tu choisis qui inviter.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Joueur</th>
+                                    <th>Score IA</th>
+                                    <th>Raison</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in ai_recommendations %}
+                                    <tr>
+                                        <td>{{ item.player.nickname ?? item.player.username }}</td>
+                                        <td><span class="badge bg-success">{{ item.aiScore }}</span></td>
+                                        <td>{{ item.reason }}</td>
+                                        <td>
+                                            <form method="POST" action="{{ path('team_invite') }}" class="m-0">
+                                                <input type="hidden" name="team_id" value="{{ team.id }}">
+                                                <input type="hidden" name="player_id" value="{{ item.player.id }}">
+                                                <input type="hidden" name="reco_mode" value="{{ reco_mode }}">
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-sm btn-primary"
+                                                    {% if team.statut != 'approuvé' %}disabled{% endif %}
+                                                >
+                                                    <i class="fas fa-paper-plane"></i>
+                                                    {% if team.statut == 'approuvé' %}
+                                                        Inviter
+                                                    {% else %}
+                                                        En attente d'approbation
+                                                    {% endif %}
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
                 <!-- Players Section -->
                 {% if team.players|length > 0 %}
                     <hr>
@@ -114,6 +235,7 @@
                         <div class="card-body">
                             <form method="POST" action="{{ path('team_invite') }}" class="mb-3">
                                 <input type="hidden" name="team_id" value="{{ team.id }}">
+                                <input type="hidden" name="reco_mode" value="{{ reco_mode|default('manual') }}">
                                 <div class="row g-2">
                                     <div class="col-lg-9">
                                         <select name="player_id" class="form-select" required>
@@ -175,7 +297,35 @@
             </div>
         </div>
 
-        <div class="text-center">
+        <!-- Delete Team Action -->
+        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_MANAGER') %}
+            <div class="mt-4 pt-4" style="border-top: 2px solid rgba(255, 56, 96, 0.3); text-align: center;">
+                <button class="btn btn-danger btn-lg" id="deleteBtn" style="cursor: pointer; z-index: 1000; position: relative;">
+                    <i class="fas fa-trash"></i> Delete Team
+                </button>
+                <script>
+                    document.getElementById('deleteBtn').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (window.confirm('Are you sure you want to delete {{ team.name }}? This action cannot be undone.')) {
+                            var form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '{{ path('team_delete', { id: team.id }) }}';
+                            
+                            var token = document.createElement('input');
+                            token.type = 'hidden';
+                            token.name = '_token';
+                            token.value = '{{ csrf_token('delete' ~ team.id) }}';
+                            
+                            form.appendChild(token);
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                </script>
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-3">
             <a href="{{ path('team_index') }}" class="btn btn-outline-primary">← Back to Teams</a>
         </div>
     </div>

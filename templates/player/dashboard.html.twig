@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Player Dashboard - Dev Esports{% endblock %}
+{% block title %}Player Dashboard - Rankup{% endblock %}
 
 {% block body %}
 <div class="player-dashboard">
@@ -16,6 +16,22 @@
                     <i class="fas fa-user-circle"></i>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
+        <div class="action-card financial-chart-card">
+            <div class="action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="action-content">
+                <h3>Financial Dashboard</h3>
+                <p>View team budgets, expenses, and financial charts</p>
+            </div>
+            <a href="{{ path('budget_index') }}" class="action-btn">
+                <i class="fas fa-arrow-right"></i> View Full Dashboard
+            </a>
         </div>
     </div>
 
@@ -83,6 +99,78 @@
             <p class="no-team-message">You are not currently part of any team. Join one below to get started!</p>
         </div>
     {% endif %}
+
+    <!-- Player Statistics Section -->
+    <div class="team-section stats-section">
+        <div class="section-header">
+            <i class="fas fa-chart-bar"></i>
+            <h2>Your Performance Statistics</h2>
+        </div>
+
+        {% if playerStats is defined and (playerStats.totalScore > 0 or playerStats.matchCount > 0) %}
+            <div class="row">
+                <!-- Total Score Card -->
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card score-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{{ playerStats.totalScore|number_format(0, '.', ',') }}</div>
+                            <div class="stat-label">Total Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- K/D/A Ratio Card -->
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card kda-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-crosshairs"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{{ playerStats.avgKDA|number_format(2, '.', ',') }}</div>
+                            <div class="stat-label">Avg KDA</div>
+                            <div class="stat-breakdown">K: {{ playerStats.avgKillsPerMatch }} | A: {{ playerStats.avgAssistsPerMatch }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matches Played Card -->
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card matches-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{{ playerStats.matchCount }}</div>
+                            <div class="stat-label">Matches</div>
+                            <div class="stat-breakdown">Played</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Damage Card -->
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card damage-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{{ (playerStats.totalDamageDealt / 1000)|number_format(1, '.', ',') }}K</div>
+                            <div class="stat-label">Total Damage</div>
+                            <div class="stat-breakdown">Avg: {{ playerStats.avgDamagePerMatch|number_format(0, '.', ',') }}/match</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>No Match Statistics Yet</strong> - Play some matches to see your performance statistics here!
+            </div>
+        {% endif %}
+    </div>
 
     <!-- Team Invitations Section -->
     {% if pendingInvitations|length > 0 %}
@@ -173,6 +261,148 @@
                     </a>
                 </div>
             </div>
+            {# Beautiful Manager Financial Charts #}
+            {% if managerFinancialSummary is not null %}
+                <style>
+                    .manager-charts-section {
+                        margin-top: 2rem;
+                    }
+
+                    .chart-card {
+                        background: linear-gradient(135deg, rgba(26, 40, 71, 0.8) 0%, rgba(26, 40, 71, 0.6) 100%);
+                        backdrop-filter: blur(20px);
+                        border: 2px solid rgba(0, 242, 254, 0.2);
+                        border-radius: 20px;
+                        overflow: hidden;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 8px 32px rgba(0, 242, 254, 0.1), 0 0 20px rgba(37, 211, 102, 0.05);
+                    }
+
+                    .chart-card:hover {
+                        border-color: rgba(0, 242, 254, 0.4);
+                        box-shadow: 0 16px 48px rgba(0, 242, 254, 0.2), 0 0 40px rgba(37, 211, 102, 0.1);
+                        transform: translateY(-4px);
+                    }
+
+                    .chart-header {
+                        padding: 1.75rem;
+                        background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(37, 211, 102, 0.1) 100%);
+                        border-bottom: 2px solid rgba(0, 242, 254, 0.15);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .chart-header::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        right: -50px;
+                        width: 150px;
+                        height: 150px;
+                        background: radial-gradient(circle, rgba(0, 242, 254, 0.1), transparent);
+                        border-radius: 50%;
+                    }
+
+                    .chart-header h5 {
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        margin: 0;
+                        background: linear-gradient(135deg, #00f2fe, #25d366);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .chart-header i {
+                        font-size: 1.5rem;
+                        color: #00f2fe;
+                        filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.5));
+                    }
+
+                    .chart-body {
+                        padding: 2rem;
+                        position: relative;
+                        min-height: 350px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .chart-body::before {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                        background: radial-gradient(circle at 50% 50%, rgba(0, 242, 254, 0.03), transparent);
+                        pointer-events: none;
+                    }
+
+                    .chart-container {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                        min-height: 320px;
+                    }
+
+                    .charts-grid {
+                        display: grid;
+                        grid-template-columns: 2fr 1fr;
+                        gap: 2rem;
+                        animation: fadeInUp 0.8s ease-out;
+                    }
+
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    @media (max-width: 1024px) {
+                        .charts-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                </style>
+
+                <div class="manager-charts-section">
+                    <div class="charts-grid">
+                        <!-- Line Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5><i class="fas fa-chart-line"></i> Dépenses vs Budget</h5>
+                                <small class="text-muted d-block mt-2" style="position: relative; z-index: 1;">Evolution sur les 6 derniers mois</small>
+                            </div>
+                            <div class="chart-body">
+                                <div class="chart-container">
+                                    <canvas id="managerDepenseBudgetLineChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pie Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5><i class="fas fa-pie-chart"></i> Répartition</h5>
+                                <small class="text-muted d-block mt-2" style="position: relative; z-index: 1;">Par équipe</small>
+                            </div>
+                            <div class="chart-body">
+                                <div class="chart-container">
+                                    <canvas id="managerDepensePieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         {% else %}
             <div class="card">
                 <div class="card-body">
@@ -195,7 +425,242 @@
         {% endif %}
     </div>
 
-    <!-- Available Teams Section -->
+    {% if is_granted('ROLE_MANAGER') %}
+        {% block javascripts %}
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Beautiful color gradients
+                    const expenseColor = {
+                        main: 'rgb(255, 71, 87)',
+                        light: 'rgba(255, 71, 87, 0.1)',
+                        medium: 'rgba(255, 71, 87, 0.5)'
+                    };
+                    
+                    const budgetColor = {
+                        main: 'rgb(37, 211, 102)',
+                        light: 'rgba(37, 211, 102, 0.1)',
+                        medium: 'rgba(37, 211, 102, 0.5)'
+                    };
+
+                    const pieColors = [
+                        { bg: 'rgba(0, 242, 254, 0.9)', border: 'rgb(0, 242, 254)' },
+                        { bg: 'rgba(37, 211, 102, 0.9)', border: 'rgb(37, 211, 102)' },
+                        { bg: 'rgba(255, 71, 87, 0.9)', border: 'rgb(255, 71, 87)' },
+                        { bg: 'rgba(255, 159, 64, 0.9)', border: 'rgb(255, 159, 64)' },
+                        { bg: 'rgba(147, 112, 219, 0.9)', border: 'rgb(147, 112, 219)' },
+                        { bg: 'rgba(255, 193, 7, 0.9)', border: 'rgb(255, 193, 7)' },
+                        { bg: 'rgba(76, 175, 80, 0.9)', border: 'rgb(76, 175, 80)' },
+                        { bg: 'rgba(33, 150, 243, 0.9)', border: 'rgb(33, 150, 243)' }
+                    ];
+
+                    // Line chart: Evolution Dépenses vs Budget (6 derniers mois)
+                    const lineLabels = {{ managerDepenseBudgetLineLabels|json_encode()|raw }};
+                    const depenseLine = {{ managerDepenseBudgetLineDepenses|json_encode()|raw }};
+                    const budgetLine = {{ managerDepenseBudgetLineBudgets|json_encode()|raw }};
+                    const lineCtx = document.getElementById('managerDepenseBudgetLineChart') ? document.getElementById('managerDepenseBudgetLineChart').getContext('2d') : null;
+                    
+                    if (lineCtx) {
+                        // Create gradient for expenses line
+                        const expenseGradient = lineCtx.createLinearGradient(0, 0, 0, 400);
+                        expenseGradient.addColorStop(0, 'rgba(255, 71, 87, 0.4)');
+                        expenseGradient.addColorStop(1, 'rgba(255, 71, 87, 0)');
+
+                        // Create gradient for budget line
+                        const budgetGradient = lineCtx.createLinearGradient(0, 0, 0, 400);
+                        budgetGradient.addColorStop(0, 'rgba(37, 211, 102, 0.4)');
+                        budgetGradient.addColorStop(1, 'rgba(37, 211, 102, 0)');
+
+                        const lineChart = new Chart(lineCtx, {
+                            type: 'line',
+                            data: {
+                                labels: lineLabels,
+                                datasets: [
+                                    {
+                                        label: 'Dépenses validées',
+                                        data: depenseLine,
+                                        borderColor: expenseColor.main,
+                                        backgroundColor: expenseGradient,
+                                        borderWidth: 3,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: expenseColor.main,
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                        pointHoverBorderWidth: 3,
+                                        shadowOffsetX: 2,
+                                        shadowOffsetY: 2,
+                                        shadowBlur: 10,
+                                        shadowColor: 'rgba(255, 71, 87, 0.3)'
+                                    },
+                                    {
+                                        label: 'Budget alloué',
+                                        data: budgetLine,
+                                        borderColor: budgetColor.main,
+                                        backgroundColor: budgetGradient,
+                                        borderWidth: 3,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: budgetColor.main,
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                        pointHoverBorderWidth: 3,
+                                        shadowOffsetX: 2,
+                                        shadowOffsetY: 2,
+                                        shadowBlur: 10,
+                                        shadowColor: 'rgba(37, 211, 102, 0.3)'
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    duration: 1500,
+                                    easing: 'easeInOutQuart',
+                                    delay: (ctx) => {
+                                        let delay = 0;
+                                        if (ctx.type === 'data') {
+                                            delay = ctx.dataIndex * 50 + ctx.datasetIndex * 100;
+                                        }
+                                        return delay;
+                                    }
+                                },
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            usePointStyle: true,
+                                            padding: 20,
+                                            font: { size: 12, weight: '600' },
+                                            color: '#a0a0a0',
+                                            generateLabels: function(chart) {
+                                                const datasets = chart.data.datasets;
+                                                return datasets.map((dataset, i) => ({
+                                                    text: dataset.label,
+                                                    fillStyle: dataset.borderColor,
+                                                    hidden: !chart.isDatasetVisible(i),
+                                                    index: i,
+                                                    pointStyle: 'circle'
+                                                }));
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#fff',
+                                        bodyColor: '#fff',
+                                        borderColor: 'rgba(0, 242, 254, 0.5)',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        displayColors: true,
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString('fr-FR') + ' DT';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            color: '#a0a0a0',
+                                            font: { size: 11 },
+                                            callback: function(value) {
+                                                return (value / 1000).toLocaleString('fr-FR') + 'k';
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 242, 254, 0.05)',
+                                            drawBorder: false
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: '#a0a0a0',
+                                            font: { size: 11 }
+                                        },
+                                        grid: {
+                                            display: false,
+                                            drawBorder: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Pie chart: Répartition des dépenses par équipe
+                    const pieLabels = {{ managerDepensePieLabels|json_encode()|raw }};
+                    const pieData = {{ managerDepensePieValues|json_encode()|raw }};
+                    const pieCtx = document.getElementById('managerDepensePieChart') ? document.getElementById('managerDepensePieChart').getContext('2d') : null;
+                    
+                    if (pieCtx) {
+                        const pieBackgroundColors = pieColors.slice(0, pieLabels.length).map(c => c.bg);
+                        const pieBorderColors = pieColors.slice(0, pieLabels.length).map(c => c.border);
+
+                        const pieChart = new Chart(pieCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: pieLabels,
+                                datasets: [{
+                                    data: pieData,
+                                    backgroundColor: pieBackgroundColors,
+                                    borderColor: pieBorderColors,
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    animateRotate: true,
+                                    animateScale: false,
+                                    duration: 1500,
+                                    easing: 'easeInOutQuart'
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            usePointStyle: true,
+                                            padding: 15,
+                                            font: { size: 12, weight: '600' },
+                                            color: '#a0a0a0'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#fff',
+                                        bodyColor: '#fff',
+                                        borderColor: 'rgba(0, 242, 254, 0.5)',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                                return context.label + ': ' + context.parsed.toLocaleString('fr-FR') + ' DT (' + percentage + '%)';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            </script>
+        {% endblock %}
+    {% endif %}
     <div class="team-section">
         <div class="section-header">
             <i class="fas fa-search"></i>
@@ -293,8 +758,17 @@
 <style>
     .player-dashboard {
         max-width: 1200px;
-        margin: 2rem auto;
+        margin: 0 auto !important;
         padding: 0 1rem;
+    }
+    
+    /* Override main element padding */
+    main {
+        padding-top: 85px !important;
+        padding-right: 1rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 1rem !important;
+        margin: 0 !important;
     }
 
     /* Welcome Section */
@@ -334,15 +808,103 @@
     }
 
     .welcome-avatar {
-        display: flex;
-        justify-content: center;
+        flex-shrink: 0;
     }
 
     .avatar-circle {
         width: 120px;
         height: 120px;
-        background: linear-gradient(135deg, #00f2fe, #25d366);
         border-radius: 50%;
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(37, 211, 102, 0.2));
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        color: rgba(0, 242, 254, 0.6);
+    }
+
+    /* Quick Actions Section */
+    .quick-actions-section {
+        margin-bottom: 2rem;
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .action-card {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.05) 0%, rgba(37, 211, 102, 0.05) 100%);
+        border: 2px solid rgba(0, 242, 254, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .action-card:hover {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(37, 211, 102, 0.15) 100%);
+        border-color: rgba(0, 242, 254, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 242, 254, 0.1);
+    }
+
+    .action-icon {
+        font-size: 2.5rem;
+        color: #00f2fe;
+        min-width: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .financial-chart-card .action-icon {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(37, 211, 102, 0.1));
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+    }
+
+    .action-content {
+        flex: 1;
+    }
+
+    .action-content h3 {
+        font-size: 1.3rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .action-content p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(135deg, #00f2fe, #25d366);
+        color: #1a2847;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .action-btn:hover {
+        transform: translateX(3px);
+        box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+        color: #1a2847;
+        text-decoration: none;
+    }
         display: flex;
         align-items: center;
         justify-content: center;
@@ -481,6 +1043,121 @@
     .team-actions {
         display: flex;
         gap: 1rem;
+    }
+
+    /* Statistics Section */
+    .stats-section {
+        background: rgba(26, 40, 71, 0.6);
+        border: 1px solid rgba(0, 242, 254, 0.15);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(26, 40, 71, 0.6));
+        border: 1px solid rgba(0, 242, 254, 0.15);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(0, 242, 254, 0.3);
+        box-shadow: 0 8px 24px rgba(0, 242, 254, 0.1);
+        transform: translateY(-4px);
+    }
+
+    .stat-card.score-card {
+        border-left: 4px solid #ffc107;
+    }
+
+    .stat-card.score-card:hover {
+        border-left-color: #ffeb3b;
+        box-shadow: 0 8px 24px rgba(255, 193, 7, 0.2);
+    }
+
+    .stat-card.kda-card {
+        border-left: 4px solid #00f2fe;
+    }
+
+    .stat-card.kda-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 242, 254, 0.2);
+    }
+
+    .stat-card.matches-card {
+        border-left: 4px solid #25d366;
+    }
+
+    .stat-card.matches-card:hover {
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.2);
+    }
+
+    .stat-card.damage-card {
+        border-left: 4px solid #ff6b6b;
+    }
+
+    .stat-card.damage-card:hover {
+        box-shadow: 0 8px 24px rgba(255, 107, 107, 0.2);
+    }
+
+    .stat-card .stat-icon {
+        font-size: 2.5rem;
+        min-width: 60px;
+        text-align: center;
+        color: var(--primary);
+    }
+
+    .stat-card.score-card .stat-icon {
+        color: #ffc107;
+    }
+
+    .stat-card.matches-card .stat-icon {
+        color: #25d366;
+    }
+
+    .stat-card.damage-card .stat-icon {
+        color: #ff6b6b;
+    }
+
+    .stat-card .stat-content {
+        flex: 1;
+    }
+
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card.score-card .stat-value {
+        color: #ffc107;
+    }
+
+    .stat-card.matches-card .stat-value {
+        color: #25d366;
+    }
+
+    .stat-card.damage-card .stat-value {
+        color: #ff6b6b;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .stat-breakdown {
+        font-size: 0.85rem;
+        color: rgba(0, 242, 254, 0.6);
+        margin-top: 0.25rem;
     }
 
     /* Teams Grid */

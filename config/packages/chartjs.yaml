@@ -1,0 +1,9 @@
+# Chart.js Configuration (v4.4.1)
+# Charts are loaded from CDN: https://cdn.jsdelivr.net/npm/chart.js@4.4.1
+# No Symfony bundle needed - works directly in Twig templates
+#
+# Usage in Twig:
+# {% include 'partials/_chart_budget_expenses.html.twig' with {'budget': budget} %}
+# {% include 'partials/_chart_depenses_by_category.html.twig' with {'depenses': depenses} %}
+# {% include 'partials/_chart_depenses_evolution.html.twig' with {'depenses': depenses} %}
+# {% include 'partials/_chart_teams_budget_comparison.html.twig' with {'budgets': budgets} %}

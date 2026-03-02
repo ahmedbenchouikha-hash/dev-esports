@@ -5,8 +5,14 @@ namespace App\Controller;
 use App\Entity\Team;
 use App\Entity\Player;
 use App\Entity\Payment;
+use App\Entity\Budget;
+use App\Entity\Depense;
 use App\Repository\TeamInvitationRepository;
 use App\Repository\PaymentRepository;
+use App\Repository\DepenseRepository;
+use App\Repository\BudgetRepository;
+use App\Service\PlayerScoreService;
+use App\Service\BudgetAlertService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +25,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PlayerDashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'player_dashboard', methods: ['GET'])]
-    public function dashboard(EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+    public function dashboard(
+        EntityManagerInterface $em,
+        TeamInvitationRepository $invitationRepo,
+        PlayerScoreService $scoreService,
+        BudgetAlertService $budgetAlertService,
+        DepenseRepository $depenseRepo,
+        BudgetRepository $budgetRepo
+    ): Response
     {
         $user = $this->getUser();
         
@@ -43,12 +56,54 @@ class PlayerDashboardController extends AbstractController
         // Get pending invitations for this player
         $pendingInvitations = $invitationRepo->findPendingInvitationForPlayer($user);
 
+        // Get player statistics
+        $playerStats = $scoreService->getPlayerStats($user);
+
+        $budgets = [];
+        $depenses = [];
+
+        if ($this->isGranted('ROLE_MANAGER') || $this->isGranted('ROLE_ADMIN')) {
+            // Check budgets and alerts for teams where user is a manager
+            foreach ($currentTeams as $team) {
+                if ($team->getManager() && $team->getManager()->getId() === $user->getId()) {
+                    $budgetAlertService->checkBudgetAndAlert($team);
+                }
+            }
+
+            // Get budgets and expenses for manager dashboard
+            $budgets = $budgetRepo->findAll();
+            $depenses = $depenseRepo->findAll();
+        }
+
+        // Manager financial data (aggregate from their teams)
+        $managerFinancialSummary = null;
+        $managerDepenseLineLabels = [];
+        $managerDepenseLineDepenses = [];
+        $managerDepenseLineBudgets = [];
+        $managerDepensePieLabels = [];
+        $managerDepensePieValues = [];
+        $managerDepenseBudgetLineLabels = [];
+        $managerDepenseBudgetLineDepenses = [];
+        $managerDepenseBudgetLineBudgets = [];
+
         return $this->render('player/dashboard.html.twig', [
             'player' => $user,
-            'currentTeam' => $currentTeams->first() ?: null,  // For backward compatibility with template
+            'currentTeam' => $currentTeams->first() ?: null,
             'currentTeams' => $currentTeams,
             'availableTeams' => $availableTeams,
             'pendingInvitations' => $pendingInvitations,
+            'playerStats' => $playerStats,
+            'budgets' => $budgets,
+            'depenses' => $depenses,
+            'managerFinancialSummary' => $managerFinancialSummary,
+            'managerDepenseLineLabels' => $managerDepenseLineLabels,
+            'managerDepenseLineDepenses' => $managerDepenseLineDepenses,
+            'managerDepenseLineBudgets' => $managerDepenseLineBudgets,
+            'managerDepensePieLabels' => $managerDepensePieLabels,
+            'managerDepensePieValues' => $managerDepensePieValues,
+            'managerDepenseBudgetLineLabels' => $managerDepenseBudgetLineLabels,
+            'managerDepenseBudgetLineDepenses' => $managerDepenseBudgetLineDepenses,
+            'managerDepenseBudgetLineBudgets' => $managerDepenseBudgetLineBudgets,
         ]);
     }
 
@@ -140,14 +195,12 @@ class PlayerDashboardController extends AbstractController
     public function myTickets(PaymentRepository $paymentRepo): Response
     {
         $user = $this->getUser();
-        
-        // Check if user is a Player
+
         if (!$user instanceof Player) {
             $this->addFlash('error', 'You must be a player to access this page.');
             return $this->redirectToRoute('home');
         }
 
-        // Get payments linked to this player (ordered by newest first)
         $payments = $paymentRepo->findBy(
             ['player' => $user],
             ['createdAt' => 'DESC']
@@ -163,14 +216,12 @@ class PlayerDashboardController extends AbstractController
     public function viewQrCode(Payment $payment): Response
     {
         $user = $this->getUser();
-        
-        // Check if user is a Player
+
         if (!$user instanceof Player) {
             $this->addFlash('error', 'You must be a player to access this page.');
             return $this->redirectToRoute('home');
         }
 
-        // Check if payment belongs to this player
         if ($payment->getPlayer() !== $user) {
             $this->addFlash('error', 'You don\'t have access to this payment.');
             return $this->redirectToRoute('player_tickets');
@@ -181,4 +232,5 @@ class PlayerDashboardController extends AbstractController
         ]);
     }
 }
+
 

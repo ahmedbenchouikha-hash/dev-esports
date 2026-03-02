@@ -1,0 +1,17 @@
+vich_uploader:
+  db_driver: orm
+  mappings:
+    team_logo:
+      uri_prefix: /uploads/logos/teams
+      upload_destination: '%kernel.project_dir%/public/uploads/logos/teams'
+      namer: Vich\UploaderBundle\Naming\OrignameNamer
+
+    depense_documents:
+      uri_prefix: /uploads/documents/depenses
+      upload_destination: '%kernel.project_dir%/public/uploads/documents/depenses'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+
+    budget_justificatif:
+      uri_prefix: /uploads/documents/budgets
+      upload_destination: '%kernel.project_dir%/public/uploads/documents/budgets'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer

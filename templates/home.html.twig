@@ -1,76 +1,95 @@
-{% extends 'base.html.twig' %}
+﻿{% extends 'base.html.twig' %}
 
 {% block title %}RankUp - Home{% endblock %}
 
 {% block body %}
-<div class="row mb-5">
-    <div class="col-md-12 text-center">
-        <h1 style="font-size: 3rem; color: var(--highlight-color); margin-bottom: 1rem;">🎮 Welcome to RankUp</h1>
-        <p class="text-muted" style="font-size: 1.2rem;">Professional Esports Tournament Management System</p>
+<!-- Compact Hero -->
+<section class="hero-section">
+    <div class="hero-bg-effects">
+        <div class="hero-image-layer"></div>
+        <div class="hero-image-overlay"></div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
     </div>
-</div>
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to <span class="hero-highlight">RankUp</span></h1>
+        <p class="hero-subtitle">Organize tournaments, track matches, and manage your esports teams.</p>
+        <div class="hero-actions">
+            <a href="{{ path('match_index') }}" class="btn-hero-primary"><i class="fas fa-gamepad"></i> Matches</a>
+            <a href="{{ path('tournament_index') }}" class="btn-hero-secondary"><i class="fas fa-trophy"></i> Tournaments</a>
+            <a href="{{ path('team_index') }}" class="btn-hero-secondary"><i class="fas fa-users"></i> Teams</a>
+            <a href="{{ path('match_upcoming') }}" class="btn-hero-secondary"><i class="fas fa-clock"></i> Upcoming</a>
+        </div>
+    </div>
+</section>
 
-<!-- Quick Stats -->
-<div class="row mb-5">
-    <div class="col-md-3 mb-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ games_count ?? 0 }}</h3>
-                <p class="text-muted">🎮 Matches</p>
-            </div>
-        </div>
+<!-- Stats Strip -->
+<section class="stats-strip">
+    <div class="stat-chip">
+        <i class="fas fa-gamepad"></i>
+        <span class="stat-chip-num">{{ games_count ?? 0 }}</span>
+        <span class="stat-chip-label">Matches</span>
     </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ tournaments_count ?? 0 }}</h3>
-                <p class="text-muted">🏆 Tournaments</p>
-            </div>
-        </div>
+    <div class="stat-chip chip-tournaments">
+        <i class="fas fa-trophy"></i>
+        <span class="stat-chip-num">{{ tournaments_count ?? 0 }}</span>
+        <span class="stat-chip-label">Tournaments</span>
     </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ teams_count ?? 0 }}</h3>
-                <p class="text-muted">👥 Teams</p>
-            </div>
-        </div>
+    <div class="stat-chip chip-teams">
+        <i class="fas fa-users"></i>
+        <span class="stat-chip-num">{{ teams_count ?? 0 }}</span>
+        <span class="stat-chip-label">Teams</span>
     </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <h3 style="color: var(--highlight-color); font-size: 2rem;">{{ players_count ?? 0 }}</h3>
-                <p class="text-muted">🎯 Players</p>
-            </div>
-        </div>
+    <div class="stat-chip chip-players">
+        <i class="fas fa-user-astronaut"></i>
+        <span class="stat-chip-num">{{ players_count ?? 0 }}</span>
+        <span class="stat-chip-label">Players</span>
     </div>
-</div>
+    <div class="stat-divider"></div>
+    <div class="stat-chip chip-finished">
+        <span class="stat-chip-num">{{ completed_games ?? 0 }}</span>
+        <span class="stat-chip-label">Finished</span>
+    </div>
+    <div class="stat-chip chip-pending">
+        <span class="stat-chip-num">{{ scheduled_games ?? 0 }}</span>
+        <span class="stat-chip-label">Pending</span>
+    </div>
+    <div class="stat-chip chip-ongoing">
+        <span class="stat-chip-num">{{ in_progress_games ?? 0 }}</span>
+        <span class="stat-chip-label">Ongoing</span>
+    </div>
+</section>
 
-<!-- Recent Matches Section -->
-{% if recent_matches %}
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title mb-4">🎮 Recent Matches</h2>
-    </div>
-    <div class="col-md-12">
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Match</th>
-                            <th>Tournament</th>
-                            <th>Score</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for match in recent_matches %}
+<!-- Main Content: Two-Column Layout -->
+<div class="home-grid">
+    <!-- Left Column: Matches + Tournaments + Charts -->
+    <div class="home-col-main">
+        {% if recent_matches %}
+        <section class="content-section">
+            <div class="section-header-home">
+                <h2><i class="fas fa-gamepad"></i> Recent Matches</h2>
+                <a href="{{ path('match_index') }}" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 table-compact">
+                        <thead>
+                            <tr>
+                                <th>Match</th>
+                                <th>Tournament</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for match in recent_matches %}
                             <tr>
                                 <td>
                                     {% if match.team1 and match.team2 %}
-                                        <strong>{{ match.team1.name }}</strong> vs <strong>{{ match.team2.name }}</strong>
+                                        <strong style="color: var(--text-primary); font-size: 0.78rem;">{{ match.team1.name }}</strong>
+                                        <span style="color: var(--text-muted); margin: 0 0.2rem; font-size: 0.7rem;">vs</span>
+                                        <strong style="color: var(--text-primary); font-size: 0.78rem;">{{ match.team2.name }}</strong>
                                     {% else %}
                                         Match #{{ match.id }}
                                     {% endif %}
@@ -79,558 +98,503 @@
                                     {% if match.tournament %}
                                         <span class="badge bg-info">{{ match.tournament.name }}</span>
                                     {% else %}
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted">&mdash;</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if match.status == 'finished' %}
-                                        <strong style="color: #00ff88;">{{ match.score1 }} - {{ match.score2 }}</strong>
+                                        <span style="color: #00ff9d; font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">{{ match.score1 }} &mdash; {{ match.score2 }}</span>
                                     {% else %}
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted">&mdash;</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if match.status == 'finished' %}
-                                        <span class="badge bg-success" style="background-color: #00ff88 !important; color: #000;">Finished</span>
+                                        <span class="badge badge-success">Finished</span>
                                     {% elseif match.status == 'pending' %}
-                                        <span class="badge bg-warning" style="background-color: #ffaa00 !important; color: #000;">Pending</span>
+                                        <span class="badge badge-warning">Pending</span>
                                     {% elseif match.status == 'ongoing' %}
-                                        <span class="badge bg-info" style="background-color: #00d4ff !important; color: #000;">Ongoing</span>
+                                        <span class="badge badge-info">Ongoing</span>
                                     {% else %}
-                                        <span class="badge bg-danger">Cancelled</span>
+                                        <span class="badge badge-danger">Cancelled</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ path('match_show', {id: match.id}) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="{{ path('match_show', {id: match.id}) }}" class="btn btn-sm btn-outline-primary" style="font-size:0.7rem; padding:0.15rem 0.45rem;">View</a>
                                 </td>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="card-footer text-center">
-                <a href="{{ path('match_index') }}" class="btn btn-primary btn-sm">View All Matches →</a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+        </section>
+        {% endif %}
 
-<!-- Recent Tournaments Section -->
-{% if recent_tournaments %}
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title mb-4">🏆 Featured Tournaments</h2>
-    </div>
-    {% for tournament in recent_tournaments %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100" style="border-top: 3px solid var(--highlight-color);">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: var(--highlight-color);">{{ tournament.name }}</h5>
-                    <p class="card-text text-muted">{{ tournament.description|slice(0, 100) }}{% if tournament.description|length > 100 %}...{% endif %}</p>
-                    
-                    <div class="tournament-info mb-3">
-                        <p class="mb-2">
-                            <strong>Start Date:</strong><br>
-                            {% if tournament.startDate %}
-                                {{ tournament.startDate|date('d M Y') }}
-                            {% else %}
-                                <span class="text-muted">Not set</span>
-                            {% endif %}
-                        </p>
-                        <p class="mb-2">
-                            <strong>End Date:</strong><br>
-                            {% if tournament.endDate %}
-                                {{ tournament.endDate|date('d M Y') }}
-                            {% else %}
-                                <span class="text-muted">Not set</span>
-                            {% endif %}
-                        </p>
+        {% if recent_tournaments %}
+        <section class="content-section">
+            <div class="section-header-home">
+                <h2><i class="fas fa-trophy"></i> Featured Tournaments</h2>
+                <a href="{{ path('tournament_index') }}" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="tournament-grid">
+                {% for tournament in recent_tournaments %}
+                <a href="{{ path('tournament_show', {id: tournament.id}) }}" class="tournament-row-card">
+                    <div class="tournament-row-info">
+                        <h5>{{ tournament.name }}</h5>
+                        <span class="tournament-row-desc">{{ tournament.description|slice(0, 80) }}{% if tournament.description|length > 80 %}...{% endif %}</span>
+                    </div>
+                    <div class="tournament-row-dates">
+                        <span><i class="fas fa-calendar-alt"></i> {{ tournament.startDate ? tournament.startDate|date('d M') : 'TBD' }}</span>
+                        <span><i class="fas fa-flag-checkered"></i> {{ tournament.endDate ? tournament.endDate|date('d M') : 'TBD' }}</span>
+                    </div>
+                    <i class="fas fa-chevron-right tournament-row-arrow"></i>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Charts Row -->
+        <section class="content-section">
+            <div class="section-header-home">
+                <h2><i class="fas fa-chart-pie"></i> Analytics</h2>
+            </div>
+            <div class="charts-row">
+                <div class="card chart-card">
+                    <div class="card-body" style="padding: 1rem;">
+                        <span class="chart-label">Match Status</span>
+                        <div class="chart-wrapper"><canvas id="statusChart"></canvas></div>
                     </div>
                 </div>
-                <div class="card-footer bg-transparent border-top">
-                    <a href="{{ path('tournament_show', {id: tournament.id}) }}" class="btn btn-primary btn-sm w-100">View Tournament</a>
+                {% if top_teams %}
+                <div class="card chart-card">
+                    <div class="card-body" style="padding: 1rem;">
+                        <span class="chart-label">Top Teams</span>
+                        <div class="chart-wrapper"><canvas id="teamsChart"></canvas></div>
+                    </div>
                 </div>
+                {% endif %}
+                {% if matches_by_tournament %}
+                <div class="card chart-card">
+                    <div class="card-body" style="padding: 1rem;">
+                        <span class="chart-label">By Tournament</span>
+                        <div class="chart-wrapper"><canvas id="tournamentsChart"></canvas></div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-        </div>
-    {% endfor %}
-    <div class="col-md-12">
-        <div class="text-center">
-            <a href="{{ path('tournament_index') }}" class="btn btn-primary">View All Tournaments →</a>
-        </div>
+        </section>
     </div>
-</div>
-{% endif %}
 
-<!-- Match Status Statistics -->
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title mb-4">Match Statistics</h2>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center" style="border-left: 4px solid #00ff88;">
-            <div class="card-body">
-                <h3 style="color: #00ff88; font-size: 2rem;">{{ completed_games ?? 0 }}</h3>
-                <p class="text-muted">✓ Finished</p>
+    <!-- Right Column: Top Teams + Quick Browse -->
+    <div class="home-col-side">
+        {% if top_teams %}
+        <section class="content-section">
+            <div class="section-header-home">
+                <h2><i class="fas fa-medal"></i> Top Teams</h2>
             </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center" style="border-left: 4px solid #ffaa00;">
-            <div class="card-body">
-                <h3 style="color: #ffaa00; font-size: 2rem;">{{ scheduled_games ?? 0 }}</h3>
-                <p class="text-muted">📅 Pending</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center" style="border-left: 4px solid #00d4ff;">
-            <div class="card-body">
-                <h3 style="color: #00d4ff; font-size: 2rem;">{{ in_progress_games ?? 0 }}</h3>
-                <p class="text-muted">▶️ Ongoing</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card text-center" style="border-left: 4px solid #ff6b6b;">
-            <div class="card-body">
-                <h3 style="color: #ff6b6b; font-size: 2rem;">{{ games_count - completed_games - scheduled_games - in_progress_games ?? 0 }}</h3>
-                <p class="text-muted">⏸️ Cancelled</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Top Teams by Wins -->
-{% if top_teams %}
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title mb-4">🏆 Top Teams by Wins</h2>
-    </div>
-    <div class="col-md-12">
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th style="width: 10%;">Rank</th>
-                            <th style="width: 50%;">Team Name</th>
-                            <th style="width: 40%; text-align: center;">Wins</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for teamName, wins in top_teams %}
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table mb-0 table-compact">
+                        <thead>
                             <tr>
-                                <td>
-                                    <span style="background: linear-gradient(90deg, #00d4ff, #00ff88); padding: 4px 12px; border-radius: 50%; color: #000; font-weight: bold; display: inline-block; width: 30px; text-align: center;">
-                                        {{ loop.index }}
-                                    </span>
-                                </td>
-                                <td>{{ teamName }}</td>
-                                <td style="text-align: center;">
-                                    <span style="background: rgba(0, 255, 136, 0.2); color: #00ff88; padding: 6px 12px; border-radius: 20px; font-weight: bold;">
-                                        {{ wins }}
-                                    </span>
-                                </td>
+                                <th style="width: 15%;">#</th>
+                                <th>Team</th>
+                                <th style="text-align: center;">Wins</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Team Overview -->
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title mb-4">👥 Team Overview</h2>
-    </div>
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5 style="color: var(--highlight-color); margin-bottom: 1rem;">Total Teams: <span style="font-size: 1.5rem; color: #00ff88;">{{ teams_count }}</span></h5>
-                        <p class="text-muted">Active teams participating in tournaments and matches.</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5 style="color: var(--highlight-color); margin-bottom: 1rem;">Average Team Size: <span style="font-size: 1.5rem; color: #00d4ff;">
-                            {% if teams_count > 0 %}
-                                {{ (players_count / teams_count) | round(1) }}
-                            {% else %}
-                                0
-                            {% endif %}
-                        </span></h5>
-                        <p class="text-muted">Average number of players per team.</p>
-                    </div>
+                        </thead>
+                        <tbody>
+                            {% for teamName, wins in top_teams %}
+                            <tr>
+                                <td><span class="rank-badge rank-{{ loop.index }}">{{ loop.index }}</span></td>
+                                <td style="color: var(--text-primary); font-weight: 600; font-size: 0.85rem;">{{ teamName }}</td>
+                                <td style="text-align: center;"><span class="wins-badge">{{ wins }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
+        </section>
+        {% endif %}
+
+        <section class="content-section">
+            <div class="section-header-home">
+                <h2><i class="fas fa-compass"></i> Quick Browse</h2>
+            </div>
+            <div class="browse-list">
+                <a href="{{ path('match_index') }}" class="browse-item">
+                    <span class="browse-item-icon"><i class="fas fa-gamepad"></i></span>
+                    <span class="browse-item-text">All Matches</span>
+                    <i class="fas fa-arrow-right browse-item-arrow"></i>
+                </a>
+                <a href="{{ path('tournament_index') }}" class="browse-item">
+                    <span class="browse-item-icon tournaments"><i class="fas fa-trophy"></i></span>
+                    <span class="browse-item-text">Tournaments</span>
+                    <i class="fas fa-arrow-right browse-item-arrow"></i>
+                </a>
+                <a href="{{ path('team_index') }}" class="browse-item">
+                    <span class="browse-item-icon teams"><i class="fas fa-users"></i></span>
+                    <span class="browse-item-text">Teams</span>
+                    <i class="fas fa-arrow-right browse-item-arrow"></i>
+                </a>
+                <a href="{{ path('match_upcoming') }}" class="browse-item">
+                    <span class="browse-item-icon players"><i class="fas fa-clock"></i></span>
+                    <span class="browse-item-text">Upcoming Matches</span>
+                    <i class="fas fa-arrow-right browse-item-arrow"></i>
+                </a>
+            </div>
+        </section>
     </div>
 </div>
 
-<!-- Charts Section -->
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title mb-4">📊 Analytics & Insights</h2>
-    </div>
-    
-    <!-- Match Status Distribution -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header" style="background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 2px solid var(--primary);">
-                <h5 class="mb-0" style="color: var(--primary);">Match Status Distribution</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="statusChart" height="80"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Top Teams Performance -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header" style="background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 2px solid var(--primary);">
-                <h5 class="mb-0" style="color: var(--primary);">Top Teams Performance (Wins)</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="teamsChart" height="80"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+/* --- Hero (compact) --- */
+.hero-section {
+    position: relative;
+    padding: 3.25rem 1.5rem 2.75rem;
+    min-height: clamp(340px, 52vh, 520px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    margin-top: -1.5rem;
+}
+.hero-bg-effects { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.hero-image-layer {
+    position: absolute;
+    inset: 0;
+    background-image: url('{{ asset('uploads/hero/esports-hero.jpg') }}');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4;
+    transform: scale(1.06);
+    animation: heroCinematicMove 18s ease-in-out infinite alternate;
+}
+.hero-image-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(120deg, rgba(8, 11, 26, 0.84) 0%, rgba(8, 11, 26, 0.55) 45%, rgba(8, 11, 26, 0.72) 100%),
+        radial-gradient(circle at 20% 30%, rgba(0, 242, 254, 0.2), transparent 45%),
+        radial-gradient(circle at 80% 25%, rgba(0, 255, 157, 0.16), transparent 38%);
+    animation: heroOverlayPulse 10s ease-in-out infinite;
+}
+.hero-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; }
+.hero-orb-1 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,242,254,0.14), transparent 70%); top: -80px; left: 10%; animation: orbFloat 12s ease-in-out infinite; }
+.hero-orb-2 { width: 250px; height: 250px; background: radial-gradient(circle, rgba(0,255,157,0.10), transparent 70%); bottom: -60px; right: 10%; animation: orbFloat 15s ease-in-out infinite reverse; }
+@keyframes orbFloat { 0%,100%{transform:translate(0,0)} 33%{transform:translate(20px,-15px)} 66%{transform:translate(-15px,10px)} }
+@keyframes heroCinematicMove {
+    0% { transform: scale(1.06) translate3d(0, 0, 0); background-position: 50% 42%; }
+    50% { transform: scale(1.1) translate3d(-0.8%, -0.6%, 0); background-position: 52% 48%; }
+    100% { transform: scale(1.08) translate3d(0.8%, 0.6%, 0); background-position: 48% 54%; }
+}
+@keyframes heroOverlayPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
 
-<!-- Tournaments Overview -->
-{% if matches_by_tournament %}
-<div class="row mb-5">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header" style="background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 2px solid var(--primary);">
-                <h5 class="mb-0" style="color: var(--primary);">Matches by Tournament</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="tournamentsChart" height="60"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+.hero-content { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
 
-<!-- Main Navigation Section -->
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title">Browse</h2>
-    </div>
-    
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
-            <div class="card-body text-center">
-                <h3>🎮 Matches</h3>
-                <p class="text-muted">View all matches and tournaments</p>
-                <a href="{{ path('match_index') }}" class="btn btn-primary w-100">View Matches</a>
-            </div>
-        </div>
-    </div>
+.hero-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem) !important;
+    font-weight: 800; color: var(--text-primary); -webkit-text-fill-color: var(--text-primary);
+    background: none; margin-bottom: 0.5rem; line-height: 1.2;
+}
+.hero-title::after { display: none; }
+.hero-highlight { background: linear-gradient(135deg, #00f2fe, #00ff9d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
-            <div class="card-body text-center">
-                <h3>🏆 Tournaments</h3>
-                <p class="text-muted">Explore upcoming tournaments</p>
-                <a href="{{ path('tournament_index') }}" class="btn btn-primary w-100">View Tournaments</a>
-            </div>
-        </div>
-    </div>
+.hero-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5; }
 
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
-            <div class="card-body text-center">
-                <h3>👥 Teams</h3>
-                <p class="text-muted">Discover professional teams</p>
-                <a href="{{ path('team_index') }}" class="btn btn-primary w-100">View Teams</a>
-            </div>
-        </div>
-    </div>
+.hero-actions { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
 
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid var(--highlight-color);">
-            <div class="card-body text-center">
-                <h3>⏰ Upcoming</h3>
-                <p class="text-muted">See what's coming next</p>
-                <a href="{{ path('match_upcoming') }}" class="btn btn-primary w-100">Next Matches</a>
-            </div>
-        </div>
-    </div>
-</div>
+.btn-hero-primary {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 1.25rem; background: linear-gradient(135deg, #00f2fe, #00ff9d);
+    color: #080b1a !important; text-decoration: none; border-radius: 10px;
+    font-weight: 700; font-size: 0.85rem; transition: all 0.25s ease;
+    box-shadow: 0 3px 12px rgba(0,242,254,0.2);
+}
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,242,254,0.3); color: #080b1a !important; }
 
-<!-- Administration Section -->
-<div class="row mb-5">
-    <div class="col-md-12">
-        <h2 class="page-title">Administration</h2>
-    </div>
-    
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
-            <div class="card-body text-center">
-                <h3>⚙️ Manage Matches</h3>
-                <p class="text-muted">Create and edit matches</p>
-                <a href="{{ path('admin_match_index') }}" class="btn btn-outline-primary w-100">Admin</a>
-            </div>
-        </div>
-    </div>
+.btn-hero-secondary {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 1.25rem; background: transparent; color: var(--text-secondary) !important;
+    text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.85rem;
+    border: 1.5px solid rgba(0,242,254,0.15); transition: all 0.25s ease;
+}
+.btn-hero-secondary:hover { border-color: rgba(0,242,254,0.4); color: #00f2fe !important; background: rgba(0,242,254,0.04); transform: translateY(-1px); }
 
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
-            <div class="card-body text-center">
-                <h3>⚙️ Manage Teams</h3>
-                <p class="text-muted">Manage team information</p>
-                <a href="{{ path('admin_team_index') }}" class="btn btn-outline-primary w-100">Admin</a>
-            </div>
-        </div>
-    </div>
+/* --- Stats Strip --- */
+.stats-strip {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.5rem; flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    margin: 0 0 1.5rem;
+    background: rgba(22,27,53,0.4);
+    border-top: 1px solid rgba(0,242,254,0.04);
+    border-bottom: 1px solid rgba(0,242,254,0.04);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+}
+.stat-chip {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.3rem 0.65rem; border-radius: 8px;
+    font-size: 0.78rem; color: #00f2fe;
+    background: rgba(0,242,254,0.06);
+}
+.stat-chip i { font-size: 0.7rem; opacity: 0.7; }
+.stat-chip-num { font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-primary); }
+.stat-chip-label { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
+.stat-chip.chip-tournaments { color: #ffc107; background: rgba(255,193,7,0.06); }
+.stat-chip.chip-teams { color: #00ff9d; background: rgba(0,255,157,0.06); }
+.stat-chip.chip-players { color: #8b5cf6; background: rgba(139,92,246,0.06); }
+.stat-chip.chip-finished .stat-chip-num { color: #00ff9d; }
+.stat-chip.chip-pending .stat-chip-num { color: #ffc107; }
+.stat-chip.chip-ongoing .stat-chip-num { color: #00f2fe; }
+.stat-divider { width: 1px; height: 20px; background: rgba(0,242,254,0.1); margin: 0 0.35rem; }
 
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
-            <div class="card-body text-center">
-                <h3>⚙️ Manage Players</h3>
-                <p class="text-muted">Manage player profiles</p>
-                <a href="{{ path('admin_player_index') }}" class="btn btn-outline-primary w-100">Admin</a>
-            </div>
-        </div>
-    </div>
+/* --- Two-Column Grid --- */
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.5rem;
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.home-col-main { min-width: 0; max-width: 100%; }
+.home-col-side { min-width: 0; }
 
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card h-100" style="border-left: 3px solid #ff6b6b;">
-            <div class="card-body text-center">
-                <h3>⚙️ Manage Tournaments</h3>
-                <p class="text-muted">Create and organize tournaments</p>
-                <a href="{{ path('admin_tournament_index') }}" class="btn btn-outline-primary w-100">Admin</a>
-            </div>
-        </div>
-    </div>
-</div>
+/* --- Sections (compact) --- */
+.content-section { margin-bottom: 1.5rem; }
 
-<!-- Features Section -->
-<div class="row">
-    <div class="col-md-12">
-        <h2 class="page-title">Features</h2>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title" style="color: var(--highlight-color);">✓ Full CRUD Operations</h5>
-                <p class="card-text">Create, read, update, and delete matches, teams, players, and tournaments with ease.</p>
-            </div>
-        </div>
-    </div>
+.section-header-home {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.75rem;
+}
+.section-header-home h2 {
+    font-size: 1.05rem; margin: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.section-header-home h2::before { display: none; }
+.section-header-home h2::after { display: none; }
+.section-header-home h2 i { color: var(--primary); font-size: 0.9rem; }
 
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title" style="color: var(--highlight-color);">✓ Advanced Search & Filtering</h5>
-                <p class="card-text">Quickly find matches, tournaments, and teams using our powerful search functionality.</p>
-            </div>
-        </div>
-    </div>
+.section-link {
+    color: var(--text-muted) !important; text-decoration: none !important;
+    font-size: 0.78rem; font-weight: 500;
+    display: flex; align-items: center; gap: 0.3rem; transition: color 0.2s ease;
+}
+.section-link:hover { color: var(--primary) !important; }
 
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title" style="color: var(--highlight-color);">✓ Server-side Validation</h5>
-                <p class="card-text">Secure data validation ensures data integrity and prevents invalid entries.</p>
-            </div>
-        </div>
-    </div>
+/* --- Neutralize card hover on home page --- */
+.home-grid .card,
+.home-grid .card:hover {
+    transform: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.matches-card .table-responsive::-webkit-scrollbar { width: 4px; }
+.matches-card .table-responsive::-webkit-scrollbar-track { background: transparent; }
+.matches-card .table-responsive::-webkit-scrollbar-thumb { background: rgba(0,242,254,0.15); border-radius: 2px; }
 
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title" style="color: var(--highlight-color);">✓ Entity Relationships</h5>
-                <p class="card-text">Complex relationships between teams, players, games, and tournaments.</p>
-            </div>
-        </div>
-    </div>
+/* --- Compact Tables --- */
+.table-compact th { padding: 0.35rem 0.5rem; font-size: 0.7rem; }
+.table-compact td { padding: 0.35rem 0.5rem; font-size: 0.78rem; line-height: 1.3; }
+.table-compact .badge { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+.table-compact .btn-sm { font-size: 0.7rem; padding: 0.15rem 0.5rem; }
 
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title" style="color: var(--highlight-color);">✓ Responsive Design</h5>
-                <p class="card-text">Fully responsive interface that works seamlessly on desktop and mobile devices.</p>
-            </div>
-        </div>
-    </div>
+/* --- Tournament Row Cards --- */
+.tournament-grid { display: flex; flex-direction: column; gap: 0.5rem; }
 
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title" style="color: var(--highlight-color);">✓ Professional UI</h5>
-                <p class="card-text">Beautiful dark theme with intuitive navigation for administrators and users.</p>
-            </div>
-        </div>
-    </div>
-</div>
+.tournament-row-card {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(22,27,53,0.5);
+    border: 1px solid rgba(0,242,254,0.06);
+    border-radius: 10px; text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+.tournament-row-card:hover {
+    border-color: rgba(0,242,254,0.12);
+    background: rgba(22,27,53,0.7);
+    transform: translateX(3px);
+}
+.tournament-row-info { flex: 1; min-width: 0; }
+.tournament-row-info h5 {
+    margin: 0; font-size: 0.9rem; font-weight: 700;
+    color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    -webkit-text-fill-color: var(--primary);
+}
+.tournament-row-desc {
+    font-size: 0.78rem; color: var(--text-muted);
+    display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tournament-row-dates {
+    display: flex; gap: 0.75rem; flex-shrink: 0;
+    font-size: 0.75rem; color: var(--text-muted);
+}
+.tournament-row-dates i { color: rgba(0,242,254,0.4); margin-right: 0.25rem; }
+.tournament-row-arrow { color: var(--text-muted); font-size: 0.7rem; opacity: 0; transition: all 0.2s ease; }
+.tournament-row-card:hover .tournament-row-arrow { opacity: 1; color: var(--primary); }
+
+/* --- Charts --- */
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.chart-card { overflow: hidden; }
+.chart-label {
+    display: block; font-size: 0.75rem; font-weight: 600; color: var(--primary);
+    margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.chart-wrapper {
+    position: relative;
+    height: 160px;
+    width: 100%;
+}
+
+/* --- Rank & Wins --- */
+.rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 6px; font-weight: 700; font-size: 0.7rem;
+    background: rgba(0,242,254,0.1); color: #00f2fe;
+}
+.rank-badge.rank-1 { background: rgba(255,215,0,0.12); color: #ffd700; }
+.rank-badge.rank-2 { background: rgba(192,192,192,0.12); color: #c0c0c0; }
+.rank-badge.rank-3 { background: rgba(205,127,50,0.12); color: #cd7f32; }
+
+.wins-badge {
+    display: inline-flex; padding: 0.2rem 0.55rem;
+    background: rgba(0,255,157,0.1); color: #00ff9d; border-radius: 6px;
+    font-weight: 700; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace;
+}
+
+/* --- Browse List (sidebar) --- */
+.browse-list { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.browse-item {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(22,27,53,0.5); border: 1px solid rgba(0,242,254,0.06);
+    border-radius: 10px; text-decoration: none !important; transition: all 0.2s ease;
+}
+.browse-item:hover {
+    border-color: rgba(0,242,254,0.12); background: rgba(22,27,53,0.7);
+    transform: translateX(3px);
+}
+.browse-item-icon {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 0.85rem; flex-shrink: 0;
+    background: rgba(0,242,254,0.08); color: #00f2fe;
+}
+.browse-item-icon.tournaments { background: rgba(255,193,7,0.08); color: #ffc107; }
+.browse-item-icon.teams { background: rgba(0,255,157,0.08); color: #00ff9d; }
+.browse-item-icon.players { background: rgba(139,92,246,0.08); color: #8b5cf6; }
+
+.browse-item-text { flex: 1; color: var(--text-primary); font-size: 0.85rem; font-weight: 600; }
+.browse-item-arrow { color: var(--text-muted); font-size: 0.7rem; opacity: 0; transition: all 0.2s ease; }
+.browse-item:hover .browse-item-arrow { opacity: 1; color: var(--primary); }
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .home-grid { grid-template-columns: 1fr; }
+    .home-col-side { order: -1; }
+    .stats-strip { gap: 0.4rem; }
+}
+@media (max-width: 576px) {
+    .hero-section { padding: 2rem 1rem 1.6rem; min-height: 300px; }
+    .hero-image-layer { opacity: 0.32; }
+    .hero-title { font-size: 1.5rem !important; }
+    .hero-actions { gap: 0.4rem; }
+    .btn-hero-primary, .btn-hero-secondary { padding: 0.45rem 0.9rem; font-size: 0.8rem; }
+    .stats-strip { padding: 0.5rem; }
+    .stat-chip { padding: 0.2rem 0.5rem; font-size: 0.72rem; }
+    .tournament-row-dates { display: none; }
+    .charts-row { grid-template-columns: 1fr; }
+}
+</style>
 
 <script>
-    // Wait for DOM and Chart.js to be fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Chart.js configuration
-        Chart.defaults.color = '#b0b8cc';
-        Chart.defaults.borderColor = '#1a1f3a';
-        Chart.defaults.font.family = 'sans-serif';
-        
-        // Match Status Distribution (Pie Chart)
-        const statusCtx = document.getElementById('statusChart');
-        if (statusCtx) {
-            const statusChart = new Chart(statusCtx, {
-                type: 'doughnut',
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.color = '#7b84a8';
+    Chart.defaults.borderColor = 'rgba(0,242,254,0.04)';
+    Chart.defaults.font.family = 'Inter, sans-serif';
+    Chart.defaults.font.size = 11;
+
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Finished', 'Pending', 'Ongoing', 'Cancelled'],
+                datasets: [{
+                    data: [{{ completed_games }}, {{ scheduled_games }}, {{ in_progress_games }}, {{ games_count - completed_games - scheduled_games - in_progress_games }}],
+                    backgroundColor: ['#00ff9d', '#ffc107', '#00f2fe', '#ff4757'],
+                    borderColor: '#080b1a', borderWidth: 2, borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '60%',
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    const teamsCtx = document.getElementById('teamsChart');
+    if (teamsCtx) {
+        const teamNames = {{ team_names_chart|raw }};
+        const winsData = {{ wins_chart|raw }};
+        if (teamNames && teamNames.length > 0) {
+            new Chart(teamsCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['Finished', 'Pending', 'Ongoing', 'Cancelled'],
-                    datasets: [{
-                        data: [{{ completed_games }}, {{ scheduled_games }}, {{ in_progress_games }}, {{ games_count - completed_games - scheduled_games - in_progress_games }}],
-                        backgroundColor: [
-                            '#00ff88',
-                            '#ffaa00',
-                            '#00d4ff',
-                            '#ff6b6b'
-                        ],
-                        borderColor: '#0a0e27',
-                        borderWidth: 2
-                    }]
+                    labels: teamNames,
+                    datasets: [{ label: 'Wins', data: winsData,
+                        backgroundColor: ['rgba(0,242,254,0.6)','rgba(0,255,157,0.6)','rgba(255,193,7,0.6)','rgba(139,92,246,0.6)','rgba(0,242,254,0.4)'],
+                        borderRadius: 4, borderSkipped: false }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
-                        }
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: 'rgba(0,242,254,0.04)' }, ticks: { stepSize: 1, font: { size: 10 } } },
+                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                     }
                 }
             });
         }
-        
-        // Top Teams Performance (Bar Chart)
-        const teamsCtx = document.getElementById('teamsChart');
-        if (teamsCtx) {
-            const teamNamesData = {{ team_names_chart|raw }};
-            const winsData = {{ wins_chart|raw }};
-            
-            if (teamNamesData && teamNamesData.length > 0) {
-                const teamsChart = new Chart(teamsCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: teamNamesData,
-                        datasets: [{
-                            label: 'Wins',
-                            data: winsData,
-                            backgroundColor: [
-                                '#00d4ff',
-                                '#00ff88',
-                                '#ffaa00',
-                                '#ff6b6b',
-                                '#00d4ff',
-                                '#00ff88',
-                                '#ffaa00',
-                                '#ff6b6b'
-                            ],
-                            borderRadius: 5,
-                            borderSkipped: false,
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0, 212, 255, 0.05)',
-                                    drawBorder: true,
-                                    borderColor: '#1a1f3a'
-                                },
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            },
-                            y: {
-                                grid: {
-                                    drawBorder: true,
-                                    borderColor: '#1a1f3a'
-                                }
-                            }
-                        }
+    }
+
+    const tourCtx = document.getElementById('tournamentsChart');
+    if (tourCtx) {
+        const tData = {{ matches_by_tournament|json_encode|raw }};
+        if (tData && Object.keys(tData).length > 0) {
+            new Chart(tourCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(tData),
+                    datasets: [{ label: 'Matches', data: Object.values(tData),
+                        backgroundColor: 'rgba(0,242,254,0.5)', borderRadius: 4, borderSkipped: false }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,242,254,0.04)' }, ticks: { stepSize: 1, font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
                     }
-                });
-            }
+                }
+            });
         }
-        
-        // Tournaments Chart
-        const tournamentsCtx = document.getElementById('tournamentsChart');
-        if (tournamentsCtx) {
-            const tournamentsData = {{ matches_by_tournament|json_encode|raw }};
-            
-            if (tournamentsData && Object.keys(tournamentsData).length > 0) {
-                const tournamentsChart = new Chart(tournamentsCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: Object.keys(tournamentsData),
-                        datasets: [{
-                            label: 'Matches',
-                            data: Object.values(tournamentsData),
-                            backgroundColor: 'rgba(0, 212, 255, 0.8)',
-                            borderColor: '#00d4ff',
-                            borderWidth: 2,
-                            borderRadius: 5,
-                            borderSkipped: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0, 212, 255, 0.05)',
-                                    drawBorder: true,
-                                    borderColor: '#1a1f3a'
-                                },
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    drawBorder: true,
-                                    borderColor: '#1a1f3a',
-                                    display: false
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    });
+    }
+});
 </script>
 {% endblock %}

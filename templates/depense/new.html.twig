@@ -79,6 +79,20 @@
                         {% endif %}
                     </div>
 
+                    <!-- Invoice/Receipt Upload -->
+                    <div class="mb-3">
+                        {{ form_label(form.factureFile, 'Upload Invoice/Receipt (optional)') }}
+                        {{ form_widget(form.factureFile, {'attr': {'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png,.gif'}}) }}
+                        <small class="form-text text-muted">
+                            Max 5MB. Accepted formats: PDF, JPG, PNG, GIF
+                        </small>
+                        {% if form.factureFile.vars.errors|length > 0 %}
+                            <div class="text-danger small mt-1">
+                                {{ form_errors(form.factureFile) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
                     <!-- Submit Buttons -->
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success">

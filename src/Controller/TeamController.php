@@ -8,7 +8,9 @@ use App\Entity\TeamInvitation;
 use App\Form\TeamType;
 use App\Repository\PlayerRepository;
 use App\Repository\TeamInvitationRepository;
+use App\Repository\ManagerRequestRepository;
 use App\Repository\TeamRepository;
+use App\Service\PlayerRecommendationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,17 +24,22 @@ class TeamController extends AbstractController
 {
     private PlayerRepository $playerRepository;
     private TeamInvitationRepository $invitationRepository;
+    private PlayerRecommendationService $playerRecommendationService;
 
     public function __construct(
         PlayerRepository $playerRepository,
-        TeamInvitationRepository $invitationRepository
+        TeamInvitationRepository $invitationRepository,
+        PlayerRecommendationService $playerRecommendationService
     ) {
         $this->playerRepository = $playerRepository;
         $this->invitationRepository = $invitationRepository;
+        $this->playerRecommendationService = $playerRecommendationService;
     }
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(TeamRepository $teamRepository, Request $request): Response
+    public function index(TeamRepository $teamRepository, Request $request, EntityManagerInterface $em): Response
     {
+        $this->syncLegacyEquipeToTeam($em);
+
         $search = $request->query->get('search', '');
         $game = $request->query->get('game', '');
         $level = $request->query->get('level', '');
@@ -119,11 +126,52 @@ class TeamController extends AbstractController
             'availableLevels' => $availableLevels,
         ]);
     }
+
+    #[Route('/my-teams', name: 'my_teams', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function myTeams(TeamRepository $teamRepository): Response
+    {
+        $user = $this->getUser();
+        
+        // Ensure user is a Player
+        if (!$user instanceof Player) {
+            $this->addFlash('error', 'You must be a player to view this page.');
+            return $this->redirectToRoute('home');
+        }
+
+        // Get only teams that the current player belongs to
+        $teams = $user->getTeams()->toArray();
+
+        // Sort teams by name
+        usort($teams, function($a, $b) {
+            return strcmp($a->getName(), $b->getName());
+        });
+
+        return $this->render('team/my_teams.html.twig', [
+            'teams' => $teams,
+            'totalTeams' => count($teams),
+        ]);
+    }
     
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
+    public function new(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, ManagerRequestRepository $managerRequestRepo): Response
     {
         $team = new Team();
+
+        // If the current player previously submitted a manager request with a team name,
+        // pre-fill the Team name in the creation form to save them time.
+        $creator = $this->getUser();
+        if ($creator instanceof Player) {
+            $requests = $managerRequestRepo->findByPlayer($creator);
+            if (count($requests) > 0) {
+                $latest = $requests[0];
+                $name = $latest->getTeamName();
+                if (!empty($name)) {
+                    $team->setName($name);
+                }
+            }
+        }
+
         $form = $this->createForm(TeamType::class, $team);
         $form->handleRequest($request);
 
@@ -147,24 +195,18 @@ class TeamController extends AbstractController
                         $team->addPlayer($creator);
                     }
 
-                    // Add selected players to team
-                    $selectedPlayerIds = $request->request->all()['team_players'] ?? [];
-                    if (!empty($selectedPlayerIds)) {
-                        foreach ($selectedPlayerIds as $playerId) {
-                            $player = $this->playerRepository->find((int)$playerId);
-                            if ($player) {
-                                $team->addPlayer($player);
-                            }
-                        }
-                    }
-
                     // Set team status and save
                     $team->setStatut('en attente');
                     $em->persist($team);
                     $em->flush();
 
                     $this->addFlash('success', '✅ Team created successfully! Your team is pending admin approval.');
-                    return $this->redirectToRoute('team_index');
+
+                    return $this->redirectToRoute('team_show', [
+                        'id' => $team->getId(),
+                        'reco_mode' => 'choose',
+                        'post_create' => 1,
+                    ]);
 
                 } catch (\Exception $e) {
                     $errorMsg = 'Error creating team: ' . $e->getMessage();
@@ -186,6 +228,9 @@ class TeamController extends AbstractController
         return $this->render('team/new.html.twig', [
             'form' => $form->createView(),
             'available_players' => $allPlayers,
+            'team_created' => false,
+            'suggested_players' => [],
+            'created_team' => null,
         ]);
     }
 
@@ -194,8 +239,29 @@ class TeamController extends AbstractController
         return $this->getParameter('kernel.debug');
     }
 
+    private function syncLegacyEquipeToTeam(EntityManagerInterface $em): void
+    {
+        $connection = $em->getConnection();
+
+        try {
+            $legacyExists = (int) $connection->fetchOne("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'equipe'");
+            if ($legacyExists === 0) {
+                return;
+            }
+
+            $connection->executeStatement(
+                "INSERT INTO team (name, country, description, created_at, updated_at, logo, jeu, niveau, couleur_equipe, statut, date_validation, score, detailed_description)
+                 SELECT e.nom, NULL, e.description, COALESCE(e.date_creation, NOW()), NOW(), e.logo, e.jeu, e.niveau, e.couleur_equipe, COALESCE(e.statut, 'en attente'), e.date_validation, COALESCE(e.score, 0), NULL
+                 FROM equipe e
+                 WHERE NOT EXISTS (SELECT 1 FROM team t WHERE t.name = e.nom)"
+            );
+        } catch (\Throwable) {
+            // Keep teams page functional even if legacy sync fails
+        }
+    }
+
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(int $id, TeamRepository $teamRepository): Response
+    public function show(Request $request, int $id, TeamRepository $teamRepository): Response
     {
         $team = $teamRepository->find($id);
 
@@ -221,6 +287,12 @@ class TeamController extends AbstractController
 
         $availablePlayers = [];
         $pendingInvitations = [];
+        $aiRecommendations = [];
+        $perfectTeamPlan = null;
+        $recoMode = (string) $request->query->get('reco_mode', 'choose');
+        if (!in_array($recoMode, ['choose', 'manual', 'auto'], true)) {
+            $recoMode = 'choose';
+        }
         
         // Get available players for invitation (only if team is approved and user is a team member who is a manager)
         if ($team->getStatut() === 'approuvé' && $this->isGranted('ROLE_MANAGER')) {
@@ -236,10 +308,27 @@ class TeamController extends AbstractController
             }
         }
 
+        $isManagerMember = $this->isGranted('ROLE_MANAGER') && $currentPlayer && $team->getPlayers()->contains($currentPlayer);
+
+        if ($isManagerMember) {
+            if ($recoMode === 'manual') {
+                $aiRecommendations = $this->playerRecommendationService->recommendForTeam($team, 5);
+            } elseif ($recoMode === 'auto') {
+        $recoMode = (string) $request->request->get('reco_mode', 'manual');
+        if (!in_array($recoMode, ['choose', 'manual', 'auto'], true)) {
+            $recoMode = 'manual';
+        }
+                $perfectTeamPlan = $this->playerRecommendationService->recommendPerfectTeamPlan($team, 5);
+            }
+        }
+
         return $this->render('team/show.html.twig', [
             'team' => $team,
             'available_players' => $availablePlayers,
             'pending_invitations' => $pendingInvitations,
+            'ai_recommendations' => $aiRecommendations,
+            'perfect_team_plan' => $perfectTeamPlan,
+            'reco_mode' => $recoMode,
         ]);
     }
 

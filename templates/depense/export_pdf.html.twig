@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Export</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: white;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #0099cc;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            color: #0099cc;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .export-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .export-info-item {
+            flex: 1;
+        }
+        
+        .export-info-item strong {
+            color: #0099cc;
+        }
+        
+        .filters {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            border-left: 4px solid #0099cc;
+        }
+        
+        .stats-summary {
+            background: #f0f8ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            gap: 40px;
+            border-left: 4px solid #00ff9d;
+        }
+        
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff9d;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 11px;
+        }
+        
+        thead {
+            background: #0099cc;
+            color: white;
+        }
+        
+        th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #0099cc;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border: 1px solid #ddd;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tbody tr:hover {
+            background: #f0f8ff;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        
+        .status-en_attente {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        
+        .status-validee {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #00ff9d;
+        }
+        
+        .status-refusee {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .amount {
+            text-align: right;
+            font-weight: 600;
+            color: #0099cc;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+        
+        .total-row {
+            background: #e8f4f8 !important;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        
+        .total-row td {
+            border: 2px solid #0099cc;
+            padding: 12px 8px;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Expenses Export Report</h1>
+        <p style="color: #666; margin-top: 5px;">Generated from RankUp Management System</p>
+    </div>
+    
+    <div class="export-info">
+        <div class="export-info-item">
+            <strong>Export Date:</strong> {{ export_date|date('d/m/Y H:i:s') }}
+        </div>
+        <div class="export-info-item">
+            <strong>Total Records:</strong> {{ depenses|length }}
+        </div>
+    </div>
+    
+    {% if search or statut != 'all' or categorie != 'all' or min_amount or max_amount %}
+    <div class="filters">
+        <strong>Applied Filters:</strong>
+        {% if search %} Search: "{{ search }}" {% endif %}
+        {% if statut != 'all' %} | Status: {{ statut }} {% endif %}
+        {% if categorie != 'all' %} | Category: {{ categorie }} {% endif %}
+        {% if min_amount %} | Min Amount: {{ min_amount }}€ {% endif %}
+        {% if max_amount %} | Max Amount: {{ max_amount }}€ {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if depenses %}
+        {% set total_montant = 0 %}
+        {% for depense in depenses %}
+            {% set total_montant = total_montant + depense.montant %}
+        {% endfor %}
+        
+        <div class="stats-summary">
+            <div class="stat-item">
+                <div class="stat-value">{{ depenses|length }}</div>
+                <div class="stat-label">Total Expenses</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ total_montant|number_format(2, '.', ',') }}€</div>
+                <div class="stat-label">Total Amount</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ (total_montant / (depenses|length))|number_format(2, '.', ',') }}€</div>
+                <div class="stat-label">Average Amount</div>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Title</th>
+                    <th style="width: 12%;">Date</th>
+                    <th style="width: 10%;">Category</th>
+                    <th style="width: 15%;">Team</th>
+                    <th style="width: 12%;">Amount</th>
+                    <th style="width: 15%;">Status</th>
+                    <th style="width: 16%;">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for depense in depenses %}
+                <tr>
+                    <td><strong>{{ depense.titre }}</strong></td>
+                    <td>{{ depense.dateCreation|date('d/m/Y') }}</td>
+                    <td>
+                        {% if depense.categorie %}
+                            <strong>{{ depense.categorie }}</strong>
+                        {% else %}
+                            <em>—</em>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if depense.team %}
+                            {{ depense.team.name }}
+                        {% else %}
+                            <em>Personal</em>
+                        {% endif %}
+                    </td>
+                    <td class="amount">{{ depense.montant|number_format(2, '.', ',') }}€</td>
+                    <td>
+                        <span class="status-badge status-{{ depense.statut }}">
+                            {% if depense.statut == 'en_attente' %}
+                                Pending
+                            {% elseif depense.statut == 'validee' %}
+                                Validated
+                            {% elseif depense.statut == 'refusee' %}
+                                Refused
+                            {% else %}
+                                {{ depense.statut }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if depense.description %}
+                            {{ depense.description|slice(0, 40) }}{% if depense.description|length > 40 %}...{% endif %}
+                        {% else %}
+                            <em>—</em>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                <tr class="total-row">
+                    <td colspan="4" style="text-align: right;">TOTAL</td>
+                    <td class="amount">{{ total_montant|number_format(2, '.', ',') }}€</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-message">
+            <p>❌ No expenses found matching the selected criteria.</p>
+        </div>
+    {% endif %}
+    
+    <div class="footer">
+        <p>This is an automatically generated report. For more information, visit the RankUp Management System.</p>
+        <p style="margin-top: 10px; color: #999;">© 2026 RankUp. All rights reserved.</p>
+    </div>
+</body>
+</html>

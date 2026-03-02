@@ -1,0 +1,646 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Admin Dashboard | RankUp{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/apexcharts/dist/apexcharts.css" rel="stylesheet" />
+    <script>
+    // Monkey-patch ResizeObserver to prevent ApexCharts resize loops
+    (function() {
+        var OriginalRO = window.ResizeObserver;
+        if (!OriginalRO) return;
+        var dashboardObservers = [];
+        window.ResizeObserver = function(callback) {
+            var blocked = false;
+            var wrappedCallback = function(entries, observer) {
+                // Only allow the first call, block subsequent resize triggers inside dashboard
+                if (blocked) return;
+                blocked = true;
+                callback(entries, observer);
+                // Unblock after a generous delay to prevent chain reactions
+                setTimeout(function() { blocked = false; }, 1000);
+            };
+            var obs = new OriginalRO(wrappedCallback);
+            dashboardObservers.push(obs);
+            return obs;
+        };
+        window.ResizeObserver.prototype = OriginalRO.prototype;
+        // Expose for cleanup
+        window.__dashboardResizeObservers = dashboardObservers;
+    })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        /* NUCLEAR: Kill ALL transitions inside dashboard to prevent resize loops */
+        .dashboard-container,
+        .dashboard-container *,
+        .dashboard-container *::before,
+        .dashboard-container *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+
+        /* Dashboard specific styles */
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .dashboard-header h1 {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+
+        .stat-card {
+            background: var(--gradient-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            height: auto;
+            max-height: 200px;
+        }
+
+        .stat-card::before {
+            display: none;
+        }
+
+        .stat-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0.75rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .dashboard-card {
+            background: var(--gradient-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Override global .card hover transform inside dashboard */
+        .dashboard-container .card:hover,
+        .dashboard-container .dashboard-card:hover,
+        .dashboard-container .stat-card:hover {
+            transform: none !important;
+        }
+
+        .dashboard-card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-card-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+        }
+
+        .dashboard-card-body {
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dashboard-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .dashboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .dashboard-table tbody tr:hover {
+            background: rgba(0, 242, 254, 0.05);
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .badge-ongoing {
+            background: rgba(0, 202, 240, 0.15);
+            color: #00caf0;
+            border: 1px solid rgba(0, 202, 240, 0.3);
+        }
+
+        .badge-finished,
+        .badge-completed {
+            background: rgba(0, 255, 157, 0.15);
+            color: #00ff9d;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+
+        .badge-cancelled {
+            background: rgba(255, 77, 77, 0.15);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 77, 77, 0.3);
+        }
+
+        .apex-charts {
+            width: 100%;
+            height: 300px;
+            max-height: 300px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Lock apexcharts internals */
+        .apex-charts * {
+            max-height: 300px !important;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+
+        .charts-grid > .dashboard-card {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .tables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .tables-grid > .dashboard-card {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .dashboard-table {
+            table-layout: fixed;
+        }
+
+        .dashboard-table td,
+        .dashboard-table th {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-dashboard {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: none;
+        }
+
+        .btn-dashboard-primary {
+            background: var(--gradient-primary);
+            color: var(--bg-dark);
+        }
+
+        .btn-dashboard-primary:hover {
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-dashboard-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-dashboard-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body.admin-layout {
+                margin-left: 0;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="dashboard-grid">
+        <!-- Total Matches -->
+        <div class="stat-card">
+            <div class="stat-label">Total Matches</div>
+            <div class="stat-number">{{ totalMatches|default(0) }}</div>
+            <div class="stat-change">
+                <span style="color: var(--accent);">↑ +12%</span>
+                <span style="color: var(--text-muted);">This month</span>
+            </div>
+            <div class="stat-icon">🎮</div>
+        </div>
+
+        <!-- Total Tournaments -->
+        <div class="stat-card">
+            <div class="stat-label">Tournaments</div>
+            <div class="stat-number">{{ totalTournaments|default(0) }}</div>
+            <div class="stat-change">
+                <span style="color: var(--accent);">↑ +8%</span>
+                <span style="color: var(--text-muted);">This month</span>
+            </div>
+            <div class="stat-icon">🏆</div>
+        </div>
+
+        <!-- Total Teams -->
+        <div class="stat-card">
+            <div class="stat-label">Teams</div>
+            <div class="stat-number">{{ totalTeams|default(0) }}</div>
+            <div class="stat-change">
+                <span style="color: var(--accent);">↑ +5%</span>
+                <span style="color: var(--text-muted);">This month</span>
+            </div>
+            <div class="stat-icon">👥</div>
+        </div>
+
+        <!-- Total Players -->
+        <div class="stat-card">
+            <div class="stat-label">Players</div>
+            <div class="stat-number">{{ totalPlayers|default(0) }}</div>
+            <div class="stat-change">
+                <span style="color: var(--accent);">↑ +15%</span>
+                <span style="color: var(--text-muted);">This month</span>
+            </div>
+            <div class="stat-icon">⭐</div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+        <!-- Matches Overview Chart -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3>Matches Overview</h3>
+                <button class="btn-dashboard btn-dashboard-secondary">Export</button>
+            </div>
+            <div class="dashboard-card-body">
+                <div id="matchChart" class="apex-charts"></div>
+            </div>
+        </div>
+
+        <!-- Status Distribution Chart -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3>Status Distribution</h3>
+                <button class="btn-dashboard btn-dashboard-secondary">Export</button>
+            </div>
+            <div class="dashboard-card-body">
+                <div id="statusChart" class="apex-charts"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Section -->
+    <div class="tables-grid">
+        <!-- Recent Matches Table -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3>Recent Matches</h3>
+                <a href="#" class="btn-dashboard btn-dashboard-secondary">View All</a>
+            </div>
+            <div class="dashboard-card-body">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Team 1</th>
+                            <th>Team 2</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if matches %}
+                            {% for match in matches %}
+                                <tr>
+                                    <td><strong>{{ match.team1.name|default('N/A') }}</strong></td>
+                                    <td>{{ match.team2.name|default('N/A') }}</td>
+                                    <td>{{ match.matchdate|date('M d, Y')|default('N/A') }}</td>
+                                    <td>
+                                        {% if match.status == 'pending' %}
+                                            <span class="badge-status badge-pending">{{ match.status }}</span>
+                                        {% elseif match.status == 'ongoing' %}
+                                            <span class="badge-status badge-ongoing">{{ match.status }}</span>
+                                        {% elseif match.status == 'finished' %}
+                                            <span class="badge-status badge-finished">{{ match.status }}</span>
+                                        {% else %}
+                                            <span class="badge-status badge-cancelled">{{ match.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No matches found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Tournaments Table -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3>Recent Tournaments</h3>
+                <a href="#" class="btn-dashboard btn-dashboard-secondary">View All</a>
+            </div>
+            <div class="dashboard-card-body">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Tournament</th>
+                            <th>Games</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if tournaments %}
+                            {% for tournament in tournaments %}
+                                <tr>
+                                    <td><strong>{{ tournament.name|default('N/A') }}</strong></td>
+                                    <td>{{ tournament.games|length|default(0) }}</td>
+                                    <td>
+                                        {% if tournament.status == 'pending' %}
+                                            <span class="badge-status badge-pending">{{ tournament.status }}</span>
+                                        {% elseif tournament.status == 'ongoing' %}
+                                            <span class="badge-status badge-ongoing">{{ tournament.status }}</span>
+                                        {% elseif tournament.status == 'completed' %}
+                                            <span class="badge-status badge-finished">{{ tournament.status }}</span>
+                                        {% else %}
+                                            <span class="badge-status badge-cancelled">{{ tournament.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ tournament.startDate|date('M d, Y')|default('N/A') }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No tournaments found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ApexCharts Initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Matches Overview Chart
+    const matchChartOptions = {
+        chart: {
+            type: 'area',
+            height: 300,
+            fontFamily: 'inherit',
+            toolbar: {
+                show: false
+            },
+            sparkline: {
+                enabled: false
+            },
+            redrawOnParentResize: false,
+            redrawOnWindowResize: false,
+            animations: {
+                enabled: true,
+                dynamicAnimation: { enabled: false }
+            }
+        },
+        series: [{
+            name: 'Matches',
+            data: [30, 40, 35, 50, 49, 60, 70, 85, 75, 80, 90, 95]
+        }],
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            axisBorder: {
+                show: false
+            }
+        },
+        yaxis: {
+            labels: {
+                show: true,
+                style: {
+                    colors: 'var(--text-muted)'
+                }
+            }
+        },
+        colors: ['var(--primary)'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.5,
+                opacityTo: 0.1
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        grid: {
+            borderColor: 'var(--border-color)'
+        },
+        tooltip: {
+            theme: 'dark'
+        }
+    };
+
+    const matchChart = new ApexCharts(document.querySelector('#matchChart'), matchChartOptions);
+    matchChart.render();
+
+    // Status Distribution Chart
+    const statusChartOptions = {
+        chart: {
+            type: 'donut',
+            height: 300,
+            fontFamily: 'inherit',
+            redrawOnParentResize: false,
+            redrawOnWindowResize: false,
+            animations: {
+                enabled: true,
+                dynamicAnimation: { enabled: false }
+            }
+        },
+        series: [{{ totalMatches|default(0) }}, 25, 20, 15],
+        labels: ['Pending', 'Ongoing', 'Finished', 'Cancelled'],
+        colors: ['#ffc107', '#00caf0', '#00ff9d', '#ff4d4d'],
+        legend: {
+            position: 'bottom',
+            labels: {
+                colors: 'var(--text-secondary)'
+            }
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%'
+                }
+            }
+        },
+        tooltip: {
+            theme: 'dark'
+        }
+    };
+
+    const statusChart = new ApexCharts(document.querySelector('#statusChart'), statusChartOptions);
+    statusChart.render();
+
+    // After both charts render, disconnect ALL ResizeObservers to stop any loops
+    setTimeout(function() {
+        if (window.__dashboardResizeObservers) {
+            window.__dashboardResizeObservers.forEach(function(obs) {
+                try { obs.disconnect(); } catch(e) {}
+            });
+        }
+        // Also lock all chart SVGs to their current size
+        document.querySelectorAll('.apex-charts').forEach(function(el) {
+            el.style.height = '300px';
+            el.style.maxHeight = '300px';
+            el.style.overflow = 'hidden';
+            var svg = el.querySelector('svg');
+            if (svg) {
+                svg.setAttribute('height', '300');
+                svg.style.height = '300px';
+                svg.style.maxHeight = '300px';
+            }
+        });
+    }, 2000);
+
+    // Flatpickr Date Picker
+    if (typeof flatpickr !== 'undefined') {
+        const dateElements = document.querySelectorAll('[data-date-picker]');
+        dateElements.forEach(el => {
+            flatpickr(el, {
+                mode: 'range',
+                dateFormat: 'M d, Y'
+            });
+        });
+    }
+});
+</script>
+
+{% endblock %}

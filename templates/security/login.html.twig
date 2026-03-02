@@ -110,10 +110,43 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #0f172a 0%, #1a2847 50%, #1e3a5f 100%);
+        background:
+            radial-gradient(ellipse at 16% 22%, rgba(0, 242, 254, 0.12), transparent 52%),
+            radial-gradient(ellipse at 82% 18%, rgba(0, 255, 157, 0.1), transparent 48%),
+            linear-gradient(180deg, #070b19 0%, #080b1a 45%, #0b1030 100%);
+        background-size: 160% 160%, 140% 140%, 100% 100%;
+        animation: loginBgShift 20s ease-in-out infinite alternate;
         position: relative;
         overflow: hidden;
         padding: 2rem;
+    }
+
+    .login-container::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 25% 75%, rgba(0, 242, 254, 0.14), transparent 38%),
+            radial-gradient(circle at 74% 30%, rgba(0, 255, 157, 0.12), transparent 36%);
+        filter: blur(26px);
+        opacity: 0.75;
+        animation: loginOrbsFloat 16s ease-in-out infinite alternate;
+    }
+
+    .login-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 242, 254, 0.05) 1px, transparent 1px);
+        background-size: 44px 44px;
+        opacity: 0.22;
+        mask-image: radial-gradient(circle at center, black 22%, transparent 82%);
+        -webkit-mask-image: radial-gradient(circle at center, black 22%, transparent 82%);
+        animation: loginGridDrift 24s linear infinite;
     }
 
     .login-wrapper {
@@ -125,12 +158,12 @@
 
     /* Login Card */
     .login-card {
-        background: rgba(26, 40, 71, 0.85);
-        border: 1px solid rgba(0, 242, 254, 0.2);
-        border-radius: 16px;
+        background: rgba(22, 27, 53, 0.7);
+        border: 1px solid rgba(0, 242, 254, 0.08);
+        border-radius: 20px;
         padding: 2.5rem;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         z-index: 10;
     }
 
@@ -141,25 +174,25 @@
     }
 
     .login-logo {
-        width: 80px;
-        height: 80px;
+        width: 72px;
+        height: 72px;
         margin: 0 auto 1rem;
-        background: linear-gradient(135deg, #00f2fe, #25d366);
-        border-radius: 50%;
+        background: linear-gradient(135deg, #00f2fe, #00ff9d);
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5rem;
-        color: var(--bg-dark);
-        box-shadow: 0 10px 30px rgba(0, 242, 254, 0.3);
+        font-size: 2rem;
+        color: #080b1a;
+        box-shadow: 0 8px 24px rgba(0, 242, 254, 0.2);
     }
 
     .login-header h1 {
-        font-size: 2rem;
-        margin: 1rem 0 0.5rem;
+        font-size: 1.75rem;
+        margin: 1rem 0 0.25rem;
         color: var(--text-primary);
         font-weight: 800;
-        background: linear-gradient(135deg, #00f2fe, #25d366);
+        background: linear-gradient(135deg, #00f2fe, #00ff9d);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -180,6 +213,21 @@
         align-items: center;
         gap: 0.75rem;
         animation: slideDown 0.3s ease;
+    }
+
+    @keyframes loginBgShift {
+        0% { background-position: 0% 0%, 100% 100%, 0% 0%; }
+        100% { background-position: 18% 16%, 80% 84%, 0% 0%; }
+    }
+
+    @keyframes loginOrbsFloat {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        100% { transform: translate3d(2%, -2%, 0) scale(1.05); }
+    }
+
+    @keyframes loginGridDrift {
+        0% { background-position: 0 0, 0 0; }
+        100% { background-position: 0 44px, 44px 0; }
     }
 
     @keyframes slideDown {
@@ -229,12 +277,12 @@
     .form-control {
         width: 100%;
         padding: 0.75rem 1rem;
-        background: rgba(0, 242, 254, 0.05);
-        border: 1px solid rgba(0, 242, 254, 0.2);
-        border-radius: 8px;
+        background: rgba(0, 242, 254, 0.04);
+        border: 1.5px solid rgba(0, 242, 254, 0.1);
+        border-radius: 12px;
         color: var(--text-primary);
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         cursor: text;
     }
 
@@ -283,13 +331,13 @@
     /* Button */
     .btn-login {
         width: 100%;
-        padding: 1rem;
-        font-size: 1rem;
+        padding: 0.875rem;
+        font-size: 0.95rem;
         font-weight: 700;
         border: none;
-        border-radius: 8px;
+        border-radius: 12px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -298,8 +346,8 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #00f2fe, #00a8cc);
-        color: var(--bg-dark);
+        background: linear-gradient(135deg, #00f2fe, #00ff9d);
+        color: #080b1a;
         box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
     }
 
@@ -332,7 +380,7 @@
 
     .divider span {
         position: relative;
-        background: rgba(26, 40, 71, 0.85);
+        background: rgba(22, 27, 53, 0.9);
         color: var(--text-secondary);
         padding: 0 1rem;
         font-size: 0.85rem;
@@ -398,7 +446,8 @@
     .element {
         position: absolute;
         border-radius: 50%;
-        opacity: 0.05;
+        filter: blur(60px);
+        opacity: 0.3;
     }
 
     .element-1 {
@@ -406,7 +455,8 @@
         height: 300px;
         top: -100px;
         left: -100px;
-        background: linear-gradient(135deg, #00f2fe, #25d366);
+        background: radial-gradient(circle, rgba(0, 242, 254, 0.12), transparent 70%);
+        animation: orbFloat 12s ease-in-out infinite;
     }
 
     .element-2 {
@@ -414,7 +464,8 @@
         height: 200px;
         bottom: -50px;
         right: -50px;
-        background: linear-gradient(135deg, #00f2fe, #25d366);
+        background: radial-gradient(circle, rgba(0, 255, 157, 0.1), transparent 70%);
+        animation: orbFloat 15s ease-in-out infinite reverse;
     }
 
     .element-3 {
@@ -422,7 +473,14 @@
         height: 150px;
         top: 50%;
         right: -75px;
-        background: linear-gradient(135deg, #25d366, #00a853);
+        background: radial-gradient(circle, rgba(0, 242, 254, 0.08), transparent 70%);
+        animation: orbFloat 10s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat {
+        0%, 100% { transform: translate(0, 0); }
+        33% { transform: translate(30px, -20px); }
+        66% { transform: translate(-20px, 15px); }
     }
 
     /* Responsive */
