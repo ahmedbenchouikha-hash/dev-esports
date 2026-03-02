@@ -49,38 +49,11 @@
                 {{ form_errors(registrationForm.username) }}
             </div>
 
-            <!-- First Name Field -->
-            <div class="form-row">
-                <div class="form-group">
-                    {{ form_label(registrationForm.firstName, 'First Name', { label_attr: { class: 'form-label' } }) }}
-                    {{ form_widget(registrationForm.firstName, {
-                        attr: { class: 'form-control', placeholder: 'John' }
-                    }) }}
-                </div>
-
-                <!-- Last Name Field -->
-                <div class="form-group">
-                    {{ form_label(registrationForm.lastName, 'Last Name', { label_attr: { class: 'form-label' } }) }}
-                    {{ form_widget(registrationForm.lastName, {
-                        attr: { class: 'form-control', placeholder: 'Doe' }
-                    }) }}
-                </div>
-            </div>
-
-            <!-- Birth Date Field -->
+            <!-- User Type Selection Field -->
             <div class="form-group">
-                {{ form_label(registrationForm.birthDate, 'Birth Date (Optional)', { label_attr: { class: 'form-label' } }) }}
-                {{ form_widget(registrationForm.birthDate, {
-                    attr: { class: 'form-control' }
-                }) }}
-                {{ form_errors(registrationForm.birthDate) }}
-            </div>
-
-            <!-- Role Selection Field -->
-            <div class="form-group">
-                {{ form_label(registrationForm.userRole, 'Select Your Role', { label_attr: { class: 'form-label' } }) }}
+                {{ form_label(registrationForm.typeuser, 'Select Your Role', { label_attr: { class: 'form-label' } }) }}
                 <div class="role-options">
-                    {% for child in registrationForm.userRole %}
+                    {% for child in registrationForm.typeuser %}
                         <div class="role-option">
                             {{ form_widget(child, {
                                 attr: { 
@@ -90,7 +63,7 @@
                                 }
                             }) }}
                             <label for="{{ child.vars.id }}" class="role-label">
-                                {% if child.vars.value == 'ROLE_USER' %}
+                                {% if child.vars.value == 'USER' %}
                                     <i class="fas fa-gamepad"></i>
                                     <span>Player</span>
                                     <small>Compete and join teams</small>
@@ -103,14 +76,14 @@
                         </div>
                     {% endfor %}
                 </div>
-                {{ form_errors(registrationForm.userRole) }}
+                {{ form_errors(registrationForm.typeuser) }}
             </div>
 
-            <!-- Verification File Field (Players Only) -->
-            <div class="form-group verification-file-group" style="display: none;" id="verificationFileGroup">
-                {{ form_label(registrationForm.verificationFile, 'Verification Document (Players Only)', { label_attr: { class: 'form-label' } }) }}
+            <!-- Confirmation File Field -->
+            <div class="form-group confirmation-file-group">
+                {{ form_label(registrationForm.confirmationFile, 'Confirmation Document (Optional)', { label_attr: { class: 'form-label' } }) }}
                 <div class="file-input-wrapper">
-                    {{ form_widget(registrationForm.verificationFile, {
+                    {{ form_widget(registrationForm.confirmationFile, {
                         attr: { class: 'form-control', accept: '.pdf,.jpg,.jpeg,.png' }
                     }) }}
                     <div class="file-hint">
@@ -118,13 +91,13 @@
                         Upload ID, passport, or gaming license (PDF, JPG, PNG - max 5MB)
                     </div>
                 </div>
-                {{ form_errors(registrationForm.verificationFile) }}
+                {{ form_errors(registrationForm.confirmationFile) }}
             </div>
 
             <!-- Password Field -->
             <div class="form-group">
-                {{ form_label(registrationForm.password.first, 'Password', { label_attr: { class: 'form-label' } }) }}
-                {{ form_widget(registrationForm.password.first, {
+                {{ form_label(registrationForm.plainPassword.first, 'Password', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.plainPassword.first, {
                     attr: { class: 'form-control', placeholder: 'Create a strong password', autocomplete: 'new-password' }
                 }) }}
                 <div class="password-requirements">
@@ -138,16 +111,16 @@
                         <i class="fas fa-check-circle"></i> One number
                     </span>
                 </div>
-                {{ form_errors(registrationForm.password.first) }}
+                {{ form_errors(registrationForm.plainPassword.first) }}
             </div>
 
             <!-- Confirm Password Field -->
             <div class="form-group">
-                {{ form_label(registrationForm.password.second, 'Confirm Password', { label_attr: { class: 'form-label' } }) }}
-                {{ form_widget(registrationForm.password.second, {
+                {{ form_label(registrationForm.plainPassword.second, 'Confirm Password', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(registrationForm.plainPassword.second, {
                     attr: { class: 'form-control', placeholder: 'Repeat your password', autocomplete: 'new-password' }
                 }) }}
-                {{ form_errors(registrationForm.password.second) }}
+                {{ form_errors(registrationForm.plainPassword.second) }}
             </div>
 
             <!-- Agreement Checkbox -->
@@ -580,34 +553,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Role selection and verification file toggle
-        const roleRadios = document.querySelectorAll('input[name*="user_role"]');
-        const verificationFileGroup = document.getElementById('verificationFileGroup');
-        
-        // Handle role selection change
-        roleRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if(this.checked) {
-                    // Show verification file only if ROLE_USER is selected
-                    if(this.value === 'ROLE_USER') {
-                        verificationFileGroup.style.display = 'block';
-                    } else {
-                        verificationFileGroup.style.display = 'none';
-                    }
-                }
-            });
-        });
-
-        // Check initial state
-        const checkedRadio = document.querySelector('input[name*="user_role"]:checked');
-        if(checkedRadio && checkedRadio.value === 'ROLE_USER') {
-            verificationFileGroup.style.display = 'block';
-        } else {
-            verificationFileGroup.style.display = 'none';
-        }
-
         // Password validation
-        const passwordInput = document.getElementById('registration_form_password_first');
+        const passwordInput = document.getElementById('registration_form_plainPassword_first');
         if (passwordInput) {
             passwordInput.addEventListener('input', function() {
                 const password = this.value;
