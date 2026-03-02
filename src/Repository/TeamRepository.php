@@ -176,4 +176,18 @@ class TeamRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find teams with available slots
+     */
+    public function findTeamsWithAvailableSlots()
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.members', 'm')
+            ->groupBy('t.id')
+            ->having('COUNT(m) < 5')
+            ->orderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

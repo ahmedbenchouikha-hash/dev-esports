@@ -84,6 +84,10 @@ class Team
     #[Assert\LessThanOrEqual(value: 1000000, message: 'Score is too high')]
     private ?int $score = 0;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $creator = null;
+
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
 
@@ -100,9 +104,13 @@ class Team
     #[ORM\JoinTable(name: 'player_team')]
     private Collection $players;
 
+    #[ORM\OneToMany(mappedBy: 'team', targetEntity: TeamMember::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $members;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
+        $this->members = new ArrayCollection();
         $this->gamesAsTeam1 = new ArrayCollection();
         $this->gamesAsTeam2 = new ArrayCollection();
         $this->createdAt = new \DateTime();
@@ -260,6 +268,17 @@ class Team
         return $this;
     }
 
+    public function getCreator(): ?User
+    {
+        return $this->creator;
+    }
+
+    public function setCreator(?User $creator): static
+    {
+        $this->creator = $creator;
+        return $this;
+    }
+
     public function getDetailedDescription(): ?string
     {
         return $this->detailedDescription;
@@ -296,6 +315,48 @@ class Team
             $player->removeTeam($this);
         }
         return $this;
+    }
+
+    /**
+     * @return Collection<int, TeamMember>
+     */
+    public function getMembers(): Collection
+    {
+        return $this->members;
+    }
+
+    public function addMember(TeamMember $member): static
+    {
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->setTeam($this);
+        }
+        return $this;
+    }
+
+    public function removeMember(TeamMember $member): static
+    {
+        if ($this->members->removeElement($member)) {
+            if ($member->getTeam() === $this) {
+                $member->setTeam(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getMemberCount(): int
+    {
+        return $this->members->count();
+    }
+
+    public function getAvailableSlots(): int
+    {
+        return 5 - $this->getMemberCount();
+    }
+
+    public function isFull(): bool
+    {
+        return $this->getMemberCount() >= 5;
     }
 
     /**

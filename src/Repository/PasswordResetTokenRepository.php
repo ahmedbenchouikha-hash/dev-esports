@@ -16,14 +16,33 @@ class PasswordResetTokenRepository extends ServiceEntityRepository
         parent::__construct($registry, PasswordResetToken::class);
     }
 
+    /**
+     * Find unused tokens by user
+     */
+    public function findUnusedByUser($user): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.user = :user')
+            ->andWhere('p.isUsed = false')
+            ->andWhere('p.expiresAt > :now')
+            ->setParameter('user', $user)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find a valid token (unused and not expired)
+     */
     public function findValidToken(string $token): ?PasswordResetToken
     {
-        $tokenEntity = $this->findOneBy(['token' => $token]);
-        
-        if ($tokenEntity && !$tokenEntity->isExpired()) {
-            return $tokenEntity;
-        }
-
-        return null;
+        return $this->createQueryBuilder('p')
+            ->where('p.token = :token')
+            ->andWhere('p.isUsed = false')
+            ->andWhere('p.expiresAt > :now')
+            ->setParameter('token', $token)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }
