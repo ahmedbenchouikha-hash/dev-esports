@@ -723,7 +723,7 @@ class TeamController extends AbstractController
     public function join(Request $request, Team $team, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('join' . $team->getId(), $request->request->get('_token'))) {
-            $player = $this->getUser();
+            $user = $this->getUser();
 
             try {
                 // Check if team is approved (can only join approved teams)
@@ -732,20 +732,32 @@ class TeamController extends AbstractController
                     return $this->redirectToRoute('team_index');
                 }
 
-                // Check if team is full
-                if ($team->getPlayers()->count() >= 5) {
-                    $this->addFlash('error', '❌ This team is full (maximum 5 players).');
+                // Check if team is full (max 5 members via TeamMember)
+                if ($team->getMembers()->count() >= 5) {
+                    $this->addFlash('error', '❌ This team is full (maximum 5 members).');
                     return $this->redirectToRoute('team_index');
                 }
 
-                // Check if player is already in the team
-                if ($team->getPlayers()->contains($player)) {
+                // Check if user is already in the team
+                $isMember = false;
+                foreach ($team->getMembers() as $member) {
+                    if ($member->getUser()->getId() === $user->getId()) {
+                        $isMember = true;
+                        break;
+                    }
+                }
+                
+                if ($isMember) {
                     $this->addFlash('warning', '⚠️ You are already a member of this team.');
                     return $this->redirectToRoute('team_index');
                 }
 
-                // Add player to team
-                $team->addPlayer($player);
+                // Add user to team via TeamMember
+                $teamMember = new \App\Entity\TeamMember();
+                $teamMember->setTeam($team);
+                $teamMember->setUser($user);
+                
+                $em->persist($teamMember);
                 $em->flush();
 
                 $this->addFlash('success', '✅ You have successfully joined ' . $team->getName() . '!');
