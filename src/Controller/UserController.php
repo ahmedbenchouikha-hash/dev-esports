@@ -27,106 +27,70 @@ class UserController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
-        // Determine the user class based on selection
-        $selectedRole = $this->getSelectedRole($request);
-        $user = ($selectedRole === 'ROLE_ADMIN' || !$selectedRole) ? new User() : new Player();
-        
+        $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 // Encode the plain password
+                $plainPassword = $form->get('plainPassword')->getData();
                 $user->setPassword(
-                    $userPasswordHasher->hashPassword(
-                        $user,
-                        $form->get('password')->getData()
-                    )
+                    $userPasswordHasher->hashPassword($user, $plainPassword)
                 );
 
-                // Set role based on user selection
-                $selectedRole = $form->get('userRole')->getData();
-                $user->setRoles([$selectedRole]);
+                // Set typeuser from form
+                $typeuser = $form->get('typeuser')->getData();
+                $user->setTypeuser($typeuser ?? 'USER');
                 
-                // Set typeuser based on role
-                if ($selectedRole === 'ROLE_ADMIN') {
-                    $user->setTypeuser('admin');
-                    // Admins are auto-approved
-                    $user->setApprovalStatus('approved');
-                } else {
-                    $user->setTypeuser('user');
-                    // Players need approval
-                    $user->setApprovalStatus('pending');
+                // Set default approval status
+                $user->setApprovalStatus('pending');
+
+                // Handle file upload
+                $confirmationFile = $form->get('confirmationFile')->getData();
+                if ($confirmationFile) {
+                    $originalFilename = pathinfo($confirmationFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $confirmationFile->guessExtension();
                     
-                    // Set required Player fields
-                    if ($user instanceof Player) {
-                        $user->setNickname($user->getUsername());
-                    }
-                    
-                    // Handle file upload for players
-                    $verificationFile = $form->get('verificationFile')->getData();
-                    if ($verificationFile) {
-                        $originalFilename = pathinfo($verificationFile->getClientOriginalName(), PATHINFO_FILENAME);
-                        $safeFilename = $slugger->slug($originalFilename);
-                        $newFilename = $safeFilename . '-' . uniqid() . '.' . $verificationFile->guessExtension();
-                        
-                        try {
-                            // Create directory if it doesn't exist
-                            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/verification';
-                            if (!is_dir($uploadDir)) {
-                                mkdir($uploadDir, 0755, true);
-                            }
-                            
-                            $verificationFile->move(
-                                $uploadDir,
-                                $newFilename
-                            );
-                            $user->setConfirmationFile('/uploads/verification/' . $newFilename);
-                        } catch (\Exception $e) {
-                            $this->addFlash('danger', 'File upload failed: ' . $e->getMessage());
-                            return $this->render('security/register.html.twig', [
-                                'registrationForm' => $form,
-                            ]);
+                    try {
+                        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0755, true);
                         }
+                        
+                        $confirmationFile->move($uploadDir, $newFilename);
+                        $user->setConfirmationFile($newFilename);
+                    } catch (\Exception $e) {
+                        $this->addFlash('error', 'File upload failed: ' . $e->getMessage());
+                        return $this->render('security/register.html.twig', [
+                            'registrationForm' => $form->createView(),
+                        ]);
                     }
                 }
 
                 $entityManager->persist($user);
                 $entityManager->flush();
 
-                // Different success messages based on role
-                if ($selectedRole === 'ROLE_ADMIN') {
-                    $this->addFlash('success', 'Admin account created! Please log in.');
-                } else {
-                    $this->addFlash('success', 'Registration successful! Your account is pending admin approval. Please check back soon.');
-                }
+                $this->addFlash('success', 'Registration successful! You can now log in.');
                 return $this->redirectToRoute('app_login');
             } catch (\Exception $e) {
-                $this->addFlash('danger', 'Registration failed: ' . $e->getMessage());
+                $this->addFlash('error', 'Registration failed: ' . $e->getMessage());
                 return $this->render('security/register.html.twig', [
-                    'registrationForm' => $form,
+                    'registrationForm' => $form->createView(),
                 ]);
             }
         } elseif ($form->isSubmitted() && !$form->isValid()) {
             // Show form errors
             $errors = $form->getErrors(true);
             foreach ($errors as $error) {
-                $this->addFlash('danger', $error->getMessage());
+                $this->addFlash('error', $error->getMessage());
             }
         }
 
         return $this->render('security/register.html.twig', [
-            'registrationForm' => $form,
+            'registrationForm' => $form->createView(),
         ]);
-    }
-    
-    private function getSelectedRole(Request $request)
-    {
-        if ($request->isMethod('POST')) {
-            $data = $request->request->all();
-            return $data['registration_form']['userRole'] ?? null;
-        }
-        return null;
     }
 }
 
