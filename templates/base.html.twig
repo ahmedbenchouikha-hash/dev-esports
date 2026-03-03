@@ -892,6 +892,12 @@
                                     {{ app.user.nickname|default(app.user.email|slice(0, 20)) }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-custom">
+                                    <a class="dropdown-item" href="{{ path('app_profile') }}">
+                                        <i class="fas fa-user"></i> View Profile
+                                    </a>
+                                    <a class="dropdown-item" href="{{ path('app_profile_edit') }}">
+                                        <i class="fas fa-edit"></i> Edit Profile
+                                    </a>
                                     <a class="dropdown-item" href="{{ path('player_dashboard') }}">
                                         <i class="fas fa-user-circle"></i> My Dashboard
                                     </a>

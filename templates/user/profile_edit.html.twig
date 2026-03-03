@@ -1,0 +1,239 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Edit Profile - RankUp{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-card">
+        <!-- Header -->
+        <div class="profile-header">
+            <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" style="margin: 1.5rem; margin-bottom: 0;">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+
+        <!-- Profile Edit Form -->
+        <div class="profile-content">
+            {{ form_start(form, { attr: { class: 'profile-form', enctype: 'multipart/form-data', novalidate: true } }) }}
+
+            <!-- Email Field -->
+            <div class="form-group">
+                {{ form_label(form.email, 'Email Address', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form.email, {
+                    attr: { class: 'form-control', placeholder: 'your@example.com' }
+                }) }}
+                {% if form_errors(form.email) %}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.email) }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Username Field -->
+            <div class="form-group">
+                {{ form_label(form.username, 'Username', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form.username, {
+                    attr: { class: 'form-control', placeholder: 'Your username' }
+                }) }}
+                {% if form_errors(form.username) %}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.username) }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                {{ form_label(form.plainPassword.first, 'New Password (optional)', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form.plainPassword.first, {
+                    attr: { class: 'form-control', placeholder: 'Leave blank to keep current password', autocomplete: 'new-password' }
+                }) }}
+                {% if form_errors(form.plainPassword.first) %}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.plainPassword.first) }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="form-group">
+                {{ form_label(form.plainPassword.second, 'Confirm New Password', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form.plainPassword.second, {
+                    attr: { class: 'form-control', placeholder: 'Confirm new password', autocomplete: 'new-password' }
+                }) }}
+                {% if form_errors(form.plainPassword.second) %}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.plainPassword.second) }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Confirmation File Field -->
+            <div class="form-group">
+                {{ form_label(form.confirmationFile, 'Upload Document (optional)', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form.confirmationFile, {
+                    attr: { class: 'form-control', accept: '.pdf,.jpg,.jpeg,.png' }
+                }) }}
+                <div class="form-text">Upload ID, passport, or gaming license (PDF, JPG, PNG - max 5MB)</div>
+                {% if form_errors(form.confirmationFile) %}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.confirmationFile) }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Submit & Cancel Buttons -->
+            <div class="profile-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{{ path('app_profile') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        min-height: 100vh;
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.05) 0%, rgba(0, 255, 157, 0.05) 100%);
+    }
+
+    .profile-card {
+        max-width: 600px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #00f2fe 0%, #00ff9d 100%);
+        color: #1a1a2e;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .profile-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .profile-content {
+        padding: 2rem;
+    }
+
+    .profile-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #00f2fe;
+        box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.1);
+        outline: none;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-actions .btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #00f2fe 0%, #00ff9d 100%);
+        color: #1a1a2e;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        color: #666;
+        border: 2px solid #e0e0e0;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #f5f5f5;
+        border-color: #999;
+    }
+
+    .alert {
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        border: none;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    @media (max-width: 768px) {
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .profile-actions .btn {
+            width: 100%;
+        }
+
+        .profile-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}

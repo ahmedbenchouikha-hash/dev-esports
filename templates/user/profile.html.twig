@@ -1,0 +1,217 @@
+{% extends "base.html.twig" %}
+
+{% block title %}My Profile - RankUp{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-card">
+        <!-- Header -->
+        <div class="profile-header">
+            <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+
+        <!-- Profile Information -->
+        <div class="profile-content">
+            <div class="profile-section">
+                <h3>Account Information</h3>
+                <div class="profile-row">
+                    <div class="profile-label">Email</div>
+                    <div class="profile-value">{{ user.email }}</div>
+                </div>
+
+                <div class="profile-row">
+                    <div class="profile-label">Username</div>
+                    <div class="profile-value">{{ user.username }}</div>
+                </div>
+
+                <div class="profile-row">
+                    <div class="profile-label">Account Type</div>
+                    <div class="profile-value">
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <span class="badge bg-danger"><i class="fas fa-crown"></i> Admin</span>
+                        {% else %}
+                            <span class="badge bg-info"><i class="fas fa-gamepad"></i> Player</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="profile-row">
+                    <div class="profile-label">Status</div>
+                    <div class="profile-value">
+                        {% if user.isApproved() %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Approved</span>
+                        {% elseif user.isPending() %}
+                            <span class="badge bg-warning"><i class="fas fa-hourglass-half"></i> Pending</span>
+                        {% else %}
+                            <span class="badge bg-secondary"><i class="fas fa-times-circle"></i> Rejected</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            {% if user.confirmationFile %}
+                <div class="profile-section">
+                    <h3>Uploaded Documents</h3>
+                    <div class="profile-row">
+                        <div class="profile-label">Confirmation File</div>
+                        <div class="profile-value">
+                            <a href="/uploads/profiles/{{ user.confirmationFile }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="profile-actions">
+                <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+                <a href="{{ path('player_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        min-height: 100vh;
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.05) 0%, rgba(0, 255, 157, 0.05) 100%);
+    }
+
+    .profile-card {
+        max-width: 600px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #00f2fe 0%, #00ff9d 100%);
+        color: #1a1a2e;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .profile-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .profile-content {
+        padding: 2rem;
+    }
+
+    .profile-section {
+        margin-bottom: 2rem;
+    }
+
+    .profile-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .profile-section h3 {
+        margin: 0 0 1.5rem 0;
+        color: #333;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-bottom: 2px solid rgba(0, 242, 254, 0.2);
+        padding-bottom: 0.75rem;
+    }
+
+    .profile-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-row:last-child {
+        border-bottom: none;
+    }
+
+    .profile-label {
+        font-weight: 600;
+        color: #666;
+        min-width: 150px;
+    }
+
+    .profile-value {
+        color: #333;
+        text-align: right;
+        flex: 1;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-actions .btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .alert {
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        border: none;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .profile-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .profile-value {
+            text-align: left;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .profile-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
