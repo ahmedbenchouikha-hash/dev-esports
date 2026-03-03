@@ -131,7 +131,6 @@ class PlayerRecommendationService
             $this->playerRepository->findAll(),
             fn (Player $player) =>
                 !in_array($player->getId(), $teamPlayerIds, true)
-                && $player->isApproved()
                 && strtoupper((string) $player->getPlayerStatus()) !== 'BANNED'
         ));
     }

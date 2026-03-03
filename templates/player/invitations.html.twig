@@ -1,0 +1,43 @@
+{% extends "base.html.twig" %}
+
+{% block title %}My Invitations - Rankup{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title mb-0">My Invitations</h1>
+        <a href="{{ path('player_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+
+    {% if pendingInvitations|length > 0 %}
+        <div class="row">
+            {% for invitation in pendingInvitations %}
+                <div class="col-md-6 mb-3">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            Invitation from {{ invitation.team.name }}
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2"><strong>Invited on:</strong> {{ invitation.createdAt|date('d M Y H:i') }}</p>
+                            <p class="mb-3"><strong>Team members:</strong> {{ invitation.team.players|length }}/5</p>
+
+                            <div class="d-flex gap-2">
+                                <form method="POST" action="{{ path('team_invitation_accept', { id: invitation.id }) }}" style="flex:1;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('team_invitation_' ~ invitation.id) }}">
+                                    <button type="submit" class="btn btn-success w-100 btn-sm">Accept</button>
+                                </form>
+                                <form method="POST" action="{{ path('team_invitation_reject', { id: invitation.id }) }}" style="flex:1;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('team_invitation_' ~ invitation.id) }}">
+                                    <button type="submit" class="btn btn-danger w-100 btn-sm">Decline</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mb-0">No pending invitations.</div>
+    {% endif %}
+</div>
+{% endblock %}

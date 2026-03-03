@@ -45,9 +45,12 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/finance/stats', name: 'finance_stats', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
     public function financeStats(DepenseRepository $depenseRepository, EntityManagerInterface $em): Response
     {
+        if (!$this->isGranted('ROLE_MANAGER') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Only managers/admins can access finance statistics.');
+        }
+
         // Get all budgets and expenses
         $budgetRepo = $em->getRepository(\App\Entity\Budget::class);
         $teamRepo = $em->getRepository(Team::class);

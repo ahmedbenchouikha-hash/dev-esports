@@ -1,0 +1,42 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Invitation Requests - Rankup{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title mb-0">Join Requests</h1>
+        <a href="{{ path('player_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+
+    {% if pendingRequests|length > 0 %}
+        <div class="row">
+            {% for request in pendingRequests %}
+                <div class="col-md-6 mb-3">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">Request for {{ request.team.name }}</div>
+                        <div class="card-body">
+                            <p class="mb-2"><strong>Player:</strong> {{ request.player.nickname }}</p>
+                            <p class="mb-2"><strong>Requested on:</strong> {{ request.createdAt|date('d M Y H:i') }}</p>
+                            <p class="mb-3"><strong>Team members:</strong> {{ request.team.players|length }}/5</p>
+
+                            <div class="d-flex gap-2">
+                                <form method="POST" action="{{ path('team_request_accept', { id: request.id }) }}" style="flex:1;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('team_request_' ~ request.id) }}">
+                                    <button type="submit" class="btn btn-success w-100 btn-sm">Accept</button>
+                                </form>
+                                <form method="POST" action="{{ path('team_request_reject', { id: request.id }) }}" style="flex:1;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('team_request_' ~ request.id) }}">
+                                    <button type="submit" class="btn btn-danger w-100 btn-sm">Decline</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mb-0">No pending join requests.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -279,6 +279,16 @@ class Team
         return $this;
     }
 
+    public function getManager(): ?User
+    {
+        return $this->getCreator();
+    }
+
+    public function setManager(?User $manager): static
+    {
+        return $this->setCreator($manager);
+    }
+
     public function getDetailedDescription(): ?string
     {
         return $this->detailedDescription;
