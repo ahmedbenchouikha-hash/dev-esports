@@ -33,29 +33,126 @@ class DashboardAdminController extends AbstractController
         $tournamentRepository = $em->getRepository(\App\Entity\Tournament::class);
         $teamRepository = $em->getRepository(\App\Entity\Team::class);
         $playerRepository = $em->getRepository(\App\Entity\Player::class);
+        $userRepository = $em->getRepository(\App\Entity\User::class);
         
-        // Fetch data for dashboard
+        // Fetch current data for dashboard
         $totalMatches = $gameRepository->count([]);
         $totalTournaments = $tournamentRepository->count([]);
         $totalTeams = $teamRepository->count([]);
         $totalPlayers = $playerRepository->count([]);
+        $totalUsers = $userRepository->count([]);
+        
+        // Calculate month-over-month statistics
+        $thisMonthStart = new \DateTime('first day of this month');
+        $thisMonthEnd = new \DateTime('last day of this month');
+        $lastMonthStart = (clone $thisMonthStart)->modify('-1 month');
+        $lastMonthEnd = (clone $thisMonthStart)->modify('-1 day');
+        
+        // Get matches this month vs last month
+        $matchesThisMonth = $gameRepository->createQueryBuilder('g')
+            ->where('g.matchdate >= :start')
+            ->andWhere('g.matchdate <= :end')
+            ->setParameter('start', $thisMonthStart)
+            ->setParameter('end', $thisMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $matchesThisMonthCount = count($matchesThisMonth);
+        
+        $matchesLastMonth = $gameRepository->createQueryBuilder('g')
+            ->where('g.matchdate >= :start')
+            ->andWhere('g.matchdate <= :end')
+            ->setParameter('start', $lastMonthStart)
+            ->setParameter('end', $lastMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $matchesLastMonthCount = count($matchesLastMonth);
+        $matchesChange = $matchesLastMonthCount > 0 ? round((($matchesThisMonthCount - $matchesLastMonthCount) / $matchesLastMonthCount) * 100) : 0;
+        
+        // Get tournaments this month vs last month
+        $tournamentsThisMonth = $tournamentRepository->createQueryBuilder('t')
+            ->where('t.startDate >= :start')
+            ->andWhere('t.startDate <= :end')
+            ->setParameter('start', $thisMonthStart)
+            ->setParameter('end', $thisMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $tournamentsThisMonthCount = count($tournamentsThisMonth);
+        
+        $tournamentsLastMonth = $tournamentRepository->createQueryBuilder('t')
+            ->where('t.startDate >= :start')
+            ->andWhere('t.startDate <= :end')
+            ->setParameter('start', $lastMonthStart)
+            ->setParameter('end', $lastMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $tournamentsLastMonthCount = count($tournamentsLastMonth);
+        $tournamentsChange = $tournamentsLastMonthCount > 0 ? round((($tournamentsThisMonthCount - $tournamentsLastMonthCount) / $tournamentsLastMonthCount) * 100) : 0;
+        
+        // Get teams this month vs last month
+        $teamsThisMonth = $teamRepository->createQueryBuilder('t')
+            ->where('t.createdAt >= :start')
+            ->andWhere('t.createdAt <= :end')
+            ->setParameter('start', $thisMonthStart)
+            ->setParameter('end', $thisMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $teamsThisMonthCount = count($teamsThisMonth);
+        
+        $teamsLastMonth = $teamRepository->createQueryBuilder('t')
+            ->where('t.createdAt >= :start')
+            ->andWhere('t.createdAt <= :end')
+            ->setParameter('start', $lastMonthStart)
+            ->setParameter('end', $lastMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $teamsLastMonthCount = count($teamsLastMonth);
+        $teamsChange = $teamsLastMonthCount > 0 ? round((($teamsThisMonthCount - $teamsLastMonthCount) / $teamsLastMonthCount) * 100) : 0;
+        
+        // Get players this month (new registrations)
+        $playersThisMonth = $userRepository->createQueryBuilder('u')
+            ->where('u.createdAt >= :start')
+            ->andWhere('u.createdAt <= :end')
+            ->setParameter('start', $thisMonthStart)
+            ->setParameter('end', $thisMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $playersThisMonthCount = count($playersThisMonth);
+        
+        $playersLastMonth = $userRepository->createQueryBuilder('u')
+            ->where('u.createdAt >= :start')
+            ->andWhere('u.createdAt <= :end')
+            ->setParameter('start', $lastMonthStart)
+            ->setParameter('end', $lastMonthEnd)
+            ->getQuery()
+            ->getResult();
+        $playersLastMonthCount = count($playersLastMonth);
+        $playersChange = $playersLastMonthCount > 0 ? round((($playersThisMonthCount - $playersLastMonthCount) / $playersLastMonthCount) * 100) : 0;
         
         // Get recent matches (last 6)
         $matches = $gameRepository->findBy([], ['matchdate' => 'DESC'], 6);
         
         // Get recent tournaments (last 6)
         $tournaments = $tournamentRepository->findBy([], ['startDate' => 'DESC'], 6);
+        
+        // Get recent users (last 5 registrations)
+        $recentUsers = $userRepository->findBy([], ['id' => 'DESC'], 5);
 
         return $this->render('dashboard/admin.html.twig', [
             'totalMatches' => $totalMatches,
             'totalTournaments' => $totalTournaments,
             'totalTeams' => $totalTeams,
             'totalPlayers' => $totalPlayers,
+            'totalUsers' => $totalUsers,
             'matches' => $matches,
             'tournaments' => $tournaments,
+            'recentUsers' => $recentUsers,
             'total_pending_expenses' => $totalPendingExpenses,
             'total_pending_amount' => $totalPendingAmount,
             'pending_expenses' => $pendingExpenses,
+            'matchesChange' => $matchesChange,
+            'tournamentsChange' => $tournamentsChange,
+            'teamsChange' => $teamsChange,
+            'playersChange' => $playersChange,
         ]);
     }
 
