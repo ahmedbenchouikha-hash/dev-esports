@@ -1,0 +1,244 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Check Your Email - RankUp{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Check Email Card -->
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h1>Check Your Email</h1>
+                <p class="login-subtitle">Password reset link has been sent</p>
+            </div>
+
+            <!-- Message -->
+            <div class="check-email-content">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <p>
+                        We've sent a password reset link to your email address. 
+                        <strong>The link will expire in 1 hour.</strong>
+                    </p>
+                    <p class="small mt-2">
+                        If you don't see the email, check your spam or junk folder.
+                    </p>
+                </div>
+
+                <!-- Instructions -->
+                <div class="instructions-box">
+                    <h5>What to do next:</h5>
+                    <ol>
+                        <li>Check your email inbox</li>
+                        <li>Click on the password reset link</li>
+                        <li>Enter your new password</li>
+                        <li>Log in with your new password</li>
+                    </ol>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                    <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Back to Login
+                    </a>
+                    <a href="{{ path('app_forgot_password_request') }}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-redo"></i>
+                        Send Another Link
+                    </a>
+                </div>
+
+                <!-- Help Text -->
+                <div class="text-center help-text mt-4">
+                    <p class="small">
+                        <i class="fas fa-question-circle"></i>
+                        Still need help? 
+                        <a href="mailto:support@rankup.com">Contact Support</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+    }
+
+    .login-wrapper {
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .login-logo {
+        font-size: 48px;
+        color: #667eea;
+        margin-bottom: 15px;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .login-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+    .login-subtitle {
+        color: #666;
+        font-size: 14px;
+        margin: 8px 0 0 0;
+    }
+
+    .check-email-content {
+        margin-top: 20px;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 16px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .alert p {
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .instructions-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .instructions-box h5 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .instructions-box ol {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .instructions-box li {
+        margin-bottom: 8px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 12px 24px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        background: transparent;
+        color: #6c757d;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+    }
+
+    .d-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .help-text {
+        color: #666;
+        font-size: 13px;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 15px;
+    }
+
+    .help-text a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .help-text a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    .small {
+        font-size: 12px !important;
+    }
+
+    .mt-2 {
+        margin-top: 8px;
+    }
+
+    .mt-4 {
+        margin-top: 24px;
+    }
+</style>
+{% endblock %}
