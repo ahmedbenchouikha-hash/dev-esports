@@ -25,10 +25,22 @@ class TournamentController extends AbstractController
             $tournaments = $tournamentRepository->findAllOrdered('startDate');
         }
 
+        // Get chart data for tournament status distribution
+        $all_tournaments = $tournamentRepository->findAll();
+        $chart_labels = ['Pending', 'Ongoing', 'Completed', 'Cancelled'];
+        $chart_data = [
+            count(array_filter($all_tournaments, fn($t) => $t->getStatus() === 'pending')),
+            count(array_filter($all_tournaments, fn($t) => $t->getStatus() === 'ongoing')),
+            count(array_filter($all_tournaments, fn($t) => $t->getStatus() === 'completed')),
+            count(array_filter($all_tournaments, fn($t) => $t->getStatus() === 'cancelled')),
+        ];
+
         return $this->render('tournament/index.html.twig', [
             'tournaments' => $tournaments,
             'search' => $search,
             'status' => $status,
+            'chart_labels' => $chart_labels,
+            'chart_data' => $chart_data,
         ]);
     }
 
@@ -52,6 +64,22 @@ class TournamentController extends AbstractController
         }
 
         return $this->render('tournament/show.html.twig', [
+            'tournament' => $tournament,
+        ]);
+    }
+
+    #[Route('/{id}/join-form', name: 'join_form', methods: ['GET'])]
+    public function joinForm(int $id, TournamentRepository $tournamentRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PLAYER');
+
+        $tournament = $tournamentRepository->find($id);
+
+        if (!$tournament) {
+            throw $this->createNotFoundException('Tournament not found');
+        }
+
+        return $this->render('tournament/join_form.html.twig', [
             'tournament' => $tournament,
         ]);
     }
