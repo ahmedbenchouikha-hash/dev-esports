@@ -29,7 +29,7 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             margin-bottom: 1.25rem;
         }
@@ -69,19 +69,19 @@
         }
 
         .stat-number {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 800;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin: 0.5rem 0;
+            margin: 0.25rem 0;
         }
 
         .stat-label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: var(--text-muted);
             font-weight: 600;
         }
@@ -96,8 +96,9 @@
         }
 
         .stat-icon {
-            font-size: 2rem;
+            font-size: 1.5rem;
             opacity: 0.8;
+            margin-top: 0.25rem;
         }
 
         .dashboard-card {
@@ -198,12 +199,12 @@
         }
 
         .apex-charts {
-            min-height: 250px;
+            min-height: 220px;
         }
 
         .charts-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 1rem;
             margin-bottom: 1.25rem;
         }
@@ -249,11 +250,21 @@
             color: var(--primary);
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
             .charts-grid {
                 grid-template-columns: 1fr;
             }
-
+            
             .tables-grid {
                 grid-template-columns: 1fr;
             }
@@ -375,7 +386,7 @@
                     </thead>
                     <tbody>
                         {% if matches %}
-                            {% for match in matches %}
+                            {% for match in matches|slice(0, 4) %}
                                 <tr>
                                     <td><strong>{{ match.team1.name|default('N/A') }}</strong></td>
                                     <td>{{ match.team2.name|default('N/A') }}</td>
@@ -395,7 +406,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No matches found</td>
+                                <td colspan="4" style="text-align: center; padding: 1rem; color: var(--text-muted);">No matches found</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -421,7 +432,7 @@
                     </thead>
                     <tbody>
                         {% if tournaments %}
-                            {% for tournament in tournaments %}
+                            {% for tournament in tournaments|slice(0, 4) %}
                                 <tr>
                                     <td><strong>{{ tournament.name|default('N/A') }}</strong></td>
                                     <td>{{ tournament.games|length|default(0) }}</td>
@@ -441,7 +452,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No tournaments found</td>
+                                <td colspan="4" style="text-align: center; padding: 1rem; color: var(--text-muted);">No tournaments found</td>
                             </tr>
                         {% endif %}
                     </tbody>
