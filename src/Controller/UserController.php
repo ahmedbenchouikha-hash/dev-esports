@@ -39,9 +39,8 @@ class UserController extends AbstractController
                     $userPasswordHasher->hashPassword($user, $plainPassword)
                 );
 
-                // Set typeuser from form
-                $typeuser = $form->get('typeuser')->getData();
-                $user->setTypeuser($typeuser ?? 'USER');
+                // Set typeuser to USER (regular user account, no admin selection)
+                $user->setTypeuser('USER');
                 
                 // Set default approval status
                 $user->setApprovalStatus('pending');

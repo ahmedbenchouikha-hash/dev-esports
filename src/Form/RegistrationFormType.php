@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -42,13 +41,6 @@ class RegistrationFormType extends AbstractType
                     new Assert\NotBlank(['message' => 'Please enter a password.']),
                     new Assert\Length(['min' => 8, 'minMessage' => 'Password must be at least {{ limit }} characters.']),
                 ],
-            ])
-            ->add('typeuser', ChoiceType::class, [
-                'choices' => [
-                    'ADMIN' => 'ADMIN',
-                    'USER' => 'USER',
-                ],
-                'constraints' => [new Assert\NotBlank(['message' => 'Please choose a user type.']), new Assert\Choice(['choices' => ['ADMIN', 'USER'], 'message' => 'Choose a valid user type.'])],
             ])
             ->add('confirmationFile', FileType::class, [
                 'label' => 'Player Confirmation (Send document to admin for verification)',

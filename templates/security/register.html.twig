@@ -58,36 +58,6 @@
                 {{ form_errors(registrationForm.username) }}
             </div>
 
-            <!-- User Type Selection Field -->
-            <div class="form-group">
-                {{ form_label(registrationForm.typeuser, 'Select Your Role', { label_attr: { class: 'form-label' } }) }}
-                <div class="role-options">
-                    {% for child in registrationForm.typeuser %}
-                        <div class="role-option">
-                            {{ form_widget(child, {
-                                attr: { 
-                                    id: child.vars.id, 
-                                    class: 'form-check-input role-radio',
-                                    'data-role-value': child.vars.value
-                                }
-                            }) }}
-                            <label for="{{ child.vars.id }}" class="role-label">
-                                {% if child.vars.value == 'USER' %}
-                                    <i class="fas fa-gamepad"></i>
-                                    <span>Player</span>
-                                    <small>Compete and join teams</small>
-                                {% else %}
-                                    <i class="fas fa-crown"></i>
-                                    <span>Admin</span>
-                                    <small>Manage tournaments and teams</small>
-                                {% endif %}
-                            </label>
-                        </div>
-                    {% endfor %}
-                </div>
-                {{ form_errors(registrationForm.typeuser) }}
-            </div>
-
             <!-- Confirmation File Field -->
             <div class="form-group confirmation-file-group">
                 {{ form_label(registrationForm.confirmationFile, 'Confirmation Document (Optional)', { label_attr: { class: 'form-label' } }) }}
