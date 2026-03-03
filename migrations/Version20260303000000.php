@@ -11,16 +11,16 @@ final class Version20260303000000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add createdAt column to user table';
+        return 'Empty migration - createdAt already exists on player table';
     }
 
     public function up(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE user ADD created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL');
+        // Player entity already has created_at column
+        // This migration is a placeholder for now
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE user DROP COLUMN created_at');
     }
 }

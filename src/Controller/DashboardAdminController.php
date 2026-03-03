@@ -109,18 +109,18 @@ class DashboardAdminController extends AbstractController
         $teamsChange = $teamsLastMonthCount > 0 ? round((($teamsThisMonthCount - $teamsLastMonthCount) / $teamsLastMonthCount) * 100) : 0;
         
         // Get players this month (new registrations)
-        $playersThisMonth = $userRepository->createQueryBuilder('u')
-            ->where('u.createdAt >= :start')
-            ->andWhere('u.createdAt <= :end')
+        $playersThisMonth = $playerRepository->createQueryBuilder('p')
+            ->where('p.createdAt >= :start')
+            ->andWhere('p.createdAt <= :end')
             ->setParameter('start', $thisMonthStart)
             ->setParameter('end', $thisMonthEnd)
             ->getQuery()
             ->getResult();
         $playersThisMonthCount = count($playersThisMonth);
         
-        $playersLastMonth = $userRepository->createQueryBuilder('u')
-            ->where('u.createdAt >= :start')
-            ->andWhere('u.createdAt <= :end')
+        $playersLastMonth = $playerRepository->createQueryBuilder('p')
+            ->where('p.createdAt >= :start')
+            ->andWhere('p.createdAt <= :end')
             ->setParameter('start', $lastMonthStart)
             ->setParameter('end', $lastMonthEnd)
             ->getQuery()
