@@ -22,7 +22,7 @@ class EmailService
     /**
      * Send generic email
      */
-    public function send(string $to, string $subject, string $htmlContent): void
+    public function send(string $to, string $subject, string $htmlContent): bool
     {
         try {
             $email = new Mail();
@@ -36,14 +36,17 @@ class EmailService
 
             if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
                 $this->logger->info('Email sent successfully', ['to' => $to, 'status' => $response->statusCode()]);
+                return true;
             } else {
                 $this->logger->error('SendGrid returned non-success status', [
                     'status' => $response->statusCode(),
                     'body' => $response->body(),
                 ]);
+                return false;
             }
         } catch (\Exception $e) {
             $this->logger->error('Failed to send email', ['error' => $e->getMessage(), 'to' => $to]);
+            return false;
         }
     }
 

@@ -11,11 +11,13 @@ use App\Repository\TeamInvitationRepository;
 use App\Repository\ManagerRequestRepository;
 use App\Repository\TeamRepository;
 use App\Service\PlayerRecommendationService;
+use App\Service\TeamInvitationEmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -25,15 +27,18 @@ class TeamController extends AbstractController
     private PlayerRepository $playerRepository;
     private TeamInvitationRepository $invitationRepository;
     private PlayerRecommendationService $playerRecommendationService;
+    private TeamInvitationEmailService $teamInvitationEmailService;
 
     public function __construct(
         PlayerRepository $playerRepository,
         TeamInvitationRepository $invitationRepository,
-        PlayerRecommendationService $playerRecommendationService
+        PlayerRecommendationService $playerRecommendationService,
+        TeamInvitationEmailService $teamInvitationEmailService
     ) {
         $this->playerRepository = $playerRepository;
         $this->invitationRepository = $invitationRepository;
         $this->playerRecommendationService = $playerRecommendationService;
+        $this->teamInvitationEmailService = $teamInvitationEmailService;
     }
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(TeamRepository $teamRepository, Request $request, EntityManagerInterface $em): Response
@@ -184,15 +189,27 @@ class TeamController extends AbstractController
                     // Handle logo upload
                     $file = $form->get('logo')->getData();
                     if ($file) {
-                        $filename = uniqid('logo_') . '.' . $file->guessExtension();
-                        $file->move($this->getParameter('logos_directory'), $filename);
-                        $team->setLogo($filename);
+                        try {
+                            $uploadDir = (string) $this->getParameter('logos_directory');
+                            if (!is_dir($uploadDir)) {
+                                @mkdir($uploadDir, 0777, true);
+                            }
+
+                            $extension = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'jpg';
+                            $filename = uniqid('logo_', true) . '.' . strtolower($extension);
+                            $file->move($uploadDir, $filename);
+                            $team->setLogo($filename);
+                        } catch (\Throwable $uploadException) {
+                            $this->addFlash('warning', '⚠️ Team created without logo (upload failed).');
+                            \error_log('Team logo upload error: ' . $uploadException->getMessage());
+                        }
                     }
 
                     // Add creator (current user) to team
                     $creator = $this->getUser();
                     if ($creator instanceof Player) {
                         $team->addPlayer($creator);
+                        $team->setCreator($creator);
                     }
 
                     // Set team status and save
@@ -220,7 +237,9 @@ class TeamController extends AbstractController
                 // Form submission failed validation
                 $errors = $form->getErrors(true);
                 foreach ($errors as $error) {
-                    $this->addFlash('warning', 'Validation error: ' . $error->getMessage());
+                    $origin = $error->getOrigin();
+                    $fieldName = $origin ? $origin->getName() : 'form';
+                    $this->addFlash('warning', sprintf('Validation error (%s): %s', $fieldName, $error->getMessage()));
                 }
             }
         }
@@ -294,30 +313,26 @@ class TeamController extends AbstractController
             $recoMode = 'choose';
         }
         
-        // Get available players for invitation (only if team is approved and user is a team member who is a manager)
-        if ($team->getStatut() === 'approuvé' && $this->isGranted('ROLE_MANAGER')) {
-            $isMember = $currentPlayer && $team->getPlayers()->contains($currentPlayer);
-            if ($isMember) {
-                // Get all players except current team members
-                $allPlayers = $this->playerRepository->findAll();
-                $teamPlayerIds = $team->getPlayers()->map(fn($p) => $p->getId())->toArray();
-                $availablePlayers = array_filter($allPlayers, fn($p) => !in_array($p->getId(), $teamPlayerIds));
-                
-                // Get pending invitations
-                $pendingInvitations = $this->invitationRepository->findTeamInvitations($team, 'pending');
-            }
+        $isTeamMember = $currentPlayer && $team->getPlayers()->contains($currentPlayer);
+        $isTeamCreator = $currentPlayer && $team->getCreator() && $team->getCreator()->getId() === $currentPlayer->getId();
+        $hasOpenSlots = $team->getPlayers()->count() < 5;
+        $canManageRecruitment = $this->isGranted('ROLE_MANAGER')
+            && ($isTeamMember || $isTeamCreator || $team->getCreator() === null);
+
+        if ($canManageRecruitment && $hasOpenSlots) {
+            // Get all players except current team members
+            $allPlayers = $this->playerRepository->findAll();
+            $teamPlayerIds = $team->getPlayers()->map(fn($p) => $p->getId())->toArray();
+            $availablePlayers = array_filter($allPlayers, fn($p) => !in_array($p->getId(), $teamPlayerIds));
+
+            // Get pending invitations
+            $pendingInvitations = $this->invitationRepository->findTeamInvitations($team, 'pending');
         }
 
-        $isManagerMember = $this->isGranted('ROLE_MANAGER') && $currentPlayer && $team->getPlayers()->contains($currentPlayer);
-
-        if ($isManagerMember) {
+        if ($canManageRecruitment && $hasOpenSlots) {
             if ($recoMode === 'manual') {
                 $aiRecommendations = $this->playerRecommendationService->recommendForTeam($team, 5);
             } elseif ($recoMode === 'auto') {
-        $recoMode = (string) $request->request->get('reco_mode', 'manual');
-        if (!in_array($recoMode, ['choose', 'manual', 'auto'], true)) {
-            $recoMode = 'manual';
-        }
                 $perfectTeamPlan = $this->playerRecommendationService->recommendPerfectTeamPlan($team, 5);
             }
         }
@@ -329,32 +344,61 @@ class TeamController extends AbstractController
             'ai_recommendations' => $aiRecommendations,
             'perfect_team_plan' => $perfectTeamPlan,
             'reco_mode' => $recoMode,
+            'can_manage_recruitment' => $canManageRecruitment,
+            'has_open_slots' => $hasOpenSlots,
         ]);
     }
 
     #[Route('/invite', name: 'invite', methods: ['POST'])]
     public function invite(Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('team_invite', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('team_show', ['id' => $request->request->get('team_id')]);
+        }
+
         $teamId = $request->request->get('team_id');
         $playerId = $request->request->get('player_id');
+        $recoMode = (string) $request->request->get('reco_mode', 'manual');
+        if (!in_array($recoMode, ['choose', 'manual', 'auto'], true)) {
+            $recoMode = 'manual';
+        }
 
         $team = $em->getRepository(Team::class)->find($teamId);
         $player = $em->getRepository(Player::class)->find($playerId);
         $manager = $this->getUser();
+
+        if (!$manager instanceof Player) {
+            $this->addFlash('error', 'Only a manager player can send invitations');
+            return $this->redirectToRoute('team_show', ['id' => $teamId]);
+        }
 
         if (!$team || !$player) {
             $this->addFlash('error', 'Team or player not found');
             return $this->redirectToRoute('team_show', ['id' => $teamId]);
         }
 
-        // Check if manager is a member of the team
-        if (!$team->getPlayers()->contains($manager)) {
-            $this->addFlash('error', 'You can only invite players to teams you are a member of');
+        if (!$this->isGranted('ROLE_MANAGER')) {
+            $this->addFlash('error', 'Only managers can send invitations');
+            return $this->redirectToRoute('team_show', ['id' => $teamId]);
+        }
+
+        $isTeamMember = $team->getPlayers()->contains($manager);
+        $isTeamCreator = $team->getCreator() && $team->getCreator()->getId() === $manager->getId();
+        $canManageRecruitment = $isTeamMember || $isTeamCreator || $team->getCreator() === null;
+
+        if (!$canManageRecruitment) {
+            $this->addFlash('error', 'You can only invite players for teams you manage.');
             return $this->redirectToRoute('team_show', ['id' => $teamId]);
         }
 
         if ($team->getStatut() !== 'approuvé') {
             $this->addFlash('error', 'Can only invite players to approved teams');
+            return $this->redirectToRoute('team_show', ['id' => $teamId]);
+        }
+
+        if ($team->getPlayers()->count() >= 5) {
+            $this->addFlash('error', '❌ Team is full (maximum 5 players).');
             return $this->redirectToRoute('team_show', ['id' => $teamId]);
         }
 
@@ -370,21 +414,39 @@ class TeamController extends AbstractController
         $invitation->setTeam($team);
         $invitation->setPlayer($player);
         $invitation->setStatus('pending');
+        $invitation->setType('invitation');
         $invitation->setCreatedAt(new \DateTime());
 
         $em->persist($invitation);
         $em->flush();
 
+        $dashboardUrl = $this->generateUrl('player_dashboard', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $emailSent = $this->teamInvitationEmailService->sendInvitationEmail($player, $team, $manager, $dashboardUrl);
+
+        if (!$emailSent) {
+            $this->addFlash('warning', 'Invitation created, but email delivery failed. Check MAILER_DSN/BREVO configuration.');
+        }
+
         $this->addFlash('success', '✅ Invitation sent to ' . $player->getNickname() . '!');
-        return $this->redirectToRoute('team_show', ['id' => $teamId]);
+        return $this->redirectToRoute('team_show', [
+            'id' => $teamId,
+            'reco_mode' => $recoMode,
+            'invite_success' => 1,
+            'invitee' => $player->getNickname(),
+        ]);
     }
 
     #[Route('/invitation/{id}/accept', name: 'invitation_accept', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function acceptInvitation(int $id, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+    public function acceptInvitation(int $id, Request $request, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
     {
         $invitation = $invitationRepo->find($id);
         $player = $this->getUser();
+
+        if (!$this->isCsrfTokenValid('team_invitation_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', '❌ Invalid CSRF token');
+            return $this->redirectToRoute('player_dashboard');
+        }
 
         if (!$invitation) {
             $this->addFlash('error', '❌ Invitation not found');
@@ -436,10 +498,15 @@ class TeamController extends AbstractController
 
     #[Route('/invitation/{id}/reject', name: 'invitation_reject', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function rejectInvitation(int $id, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+    public function rejectInvitation(int $id, Request $request, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
     {
         $invitation = $invitationRepo->find($id);
         $player = $this->getUser();
+
+        if (!$this->isCsrfTokenValid('team_invitation_' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', '❌ Invalid CSRF token');
+            return $this->redirectToRoute('player_dashboard');
+        }
 
         if (!$invitation) {
             $this->addFlash('error', '❌ Invitation not found');
@@ -469,6 +536,167 @@ class TeamController extends AbstractController
         }
 
         return $this->redirectToRoute('player_dashboard');
+    }
+
+    #[Route('/{id}/request-join', name: 'request_join', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function requestJoin(Request $request, Team $team, EntityManagerInterface $em): Response
+    {
+        if (!$this->isCsrfTokenValid('join' . $team->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', '❌ Invalid CSRF token');
+            return $this->redirectToRoute('team_show', ['id' => $team->getId()]);
+        }
+
+        $player = $this->getUser();
+        if (!$player instanceof Player) {
+            $this->addFlash('error', 'You must be a player to request joining a team.');
+            return $this->redirectToRoute('team_show', ['id' => $team->getId()]);
+        }
+
+        if ($team->getPlayers()->contains($player)) {
+            $this->addFlash('warning', '⚠️ You are already a member of this team.');
+            return $this->redirectToRoute('team_show', ['id' => $team->getId()]);
+        }
+
+        if ($team->getPlayers()->count() >= 5) {
+            $this->addFlash('error', '❌ This team is full (maximum 5 players).');
+            return $this->redirectToRoute('team_show', ['id' => $team->getId()]);
+        }
+
+        $existing = $this->invitationRepository->findByTeamAndPlayer($team, $player);
+        if ($existing && $existing->getStatus() === 'pending') {
+            $this->addFlash('warning', '⚠️ You already have a pending request/invitation for this team.');
+            return $this->redirectToRoute('team_show', ['id' => $team->getId()]);
+        }
+
+        $requestJoin = new TeamInvitation();
+        $requestJoin->setTeam($team);
+        $requestJoin->setPlayer($player);
+        $requestJoin->setStatus('pending');
+        $requestJoin->setType('request');
+        $requestJoin->setCreatedAt(new \DateTime());
+
+        $em->persist($requestJoin);
+        $em->flush();
+
+        $this->addFlash('success', '✅ Join request sent to team managers.');
+        return $this->redirectToRoute('team_show', ['id' => $team->getId()]);
+    }
+
+    #[Route('/manager/invitation-requests', name: 'manager_invitation_requests', methods: ['GET'])]
+    #[IsGranted('ROLE_MANAGER')]
+    public function managerInvitationRequests(TeamInvitationRepository $invitationRepo): Response
+    {
+        $manager = $this->getUser();
+        if (!$manager instanceof Player) {
+            $this->addFlash('error', 'Only managers can access this page.');
+            return $this->redirectToRoute('player_dashboard');
+        }
+
+        $pendingRequests = $invitationRepo->findPendingRequestsForManager($manager);
+
+        return $this->render('team/invitation_requests.html.twig', [
+            'pendingRequests' => $pendingRequests,
+        ]);
+    }
+
+    #[Route('/manager/invitation/{id}/accept-request', name: 'request_accept', methods: ['POST'])]
+    #[IsGranted('ROLE_MANAGER')]
+    public function acceptRequest(int $id, Request $request, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+    {
+        $invitation = $invitationRepo->find($id);
+        $manager = $this->getUser();
+
+        if (!$invitation || !$manager instanceof Player) {
+            $this->addFlash('error', '❌ Request not found');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        if (!$this->isCsrfTokenValid('team_request_' . $invitation->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', '❌ Invalid CSRF token');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        $team = $invitation->getTeam();
+        if (!$team->getPlayers()->contains($manager)) {
+            $this->addFlash('error', '❌ You cannot manage requests for this team.');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        if ($invitation->getStatus() !== 'pending' || $invitation->getType() !== 'request') {
+            $this->addFlash('warning', '⚠️ This request has already been processed.');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        if ($team->getPlayers()->count() >= 5) {
+            $this->addFlash('error', '❌ This team is full (maximum 5 players).');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        $player = $invitation->getPlayer();
+        if (!$team->getPlayers()->contains($player)) {
+            $team->addPlayer($player);
+        }
+
+        $invitation->setStatus('accepted');
+        $invitation->setRespondedAt(new \DateTime());
+        $em->flush();
+
+        $this->addFlash('success', '✅ Request accepted. Player added to team.');
+        return $this->redirectToRoute('team_manager_invitation_requests');
+    }
+
+    #[Route('/manager/invitation/{id}/reject-request', name: 'request_reject', methods: ['POST'])]
+    #[IsGranted('ROLE_MANAGER')]
+    public function rejectRequest(int $id, Request $request, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
+    {
+        $invitation = $invitationRepo->find($id);
+        $manager = $this->getUser();
+
+        if (!$invitation || !$manager instanceof Player) {
+            $this->addFlash('error', '❌ Request not found');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        if (!$this->isCsrfTokenValid('team_request_' . $invitation->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', '❌ Invalid CSRF token');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        $team = $invitation->getTeam();
+        if (!$team->getPlayers()->contains($manager)) {
+            $this->addFlash('error', '❌ You cannot manage requests for this team.');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        if ($invitation->getStatus() !== 'pending' || $invitation->getType() !== 'request') {
+            $this->addFlash('warning', '⚠️ This request has already been processed.');
+            return $this->redirectToRoute('team_manager_invitation_requests');
+        }
+
+        $invitation->setStatus('rejected');
+        $invitation->setRespondedAt(new \DateTime());
+        $em->flush();
+
+        $this->addFlash('success', '✅ Request rejected.');
+        return $this->redirectToRoute('team_manager_invitation_requests');
+    }
+
+    #[Route('/manager/sent-invitations', name: 'manager_sent_invitations', methods: ['GET'])]
+    #[IsGranted('ROLE_MANAGER')]
+    public function managerSentInvitations(TeamInvitationRepository $invitationRepo): Response
+    {
+        $manager = $this->getUser();
+        if (!$manager instanceof Player) {
+            $this->addFlash('error', 'Only managers can access this page.');
+            return $this->redirectToRoute('player_dashboard');
+        }
+
+        $sentInvitations = $invitationRepo->findSentInvitationsForManager($manager);
+
+        return $this->render('team/sent_invitations.html.twig', [
+            'sentInvitations' => $sentInvitations,
+        ]);
     }
 
     #[Route('/edit/{id}', name: 'edit', methods: ['GET', 'POST'])]

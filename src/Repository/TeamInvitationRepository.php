@@ -28,6 +28,7 @@ class TeamInvitationRepository extends ServiceEntityRepository
         return $this->findBy([
             'player' => $player,
             'status' => 'pending',
+            'type' => 'invitation',
         ], ['createdAt' => 'DESC']);
     }
 
@@ -44,5 +45,35 @@ class TeamInvitationRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function findPendingRequestsForManager(Player $manager): array
+    {
+        return $this->createQueryBuilder('ti')
+            ->join('ti.team', 't')
+            ->join('t.players', 'tp')
+            ->where('tp = :manager')
+            ->andWhere('ti.status = :status')
+            ->andWhere('ti.type = :type')
+            ->setParameter('manager', $manager)
+            ->setParameter('status', 'pending')
+            ->setParameter('type', 'request')
+            ->orderBy('ti.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findSentInvitationsForManager(Player $manager): array
+    {
+        return $this->createQueryBuilder('ti')
+            ->join('ti.team', 't')
+            ->join('t.players', 'tp')
+            ->where('tp = :manager')
+            ->andWhere('ti.type = :type')
+            ->setParameter('manager', $manager)
+            ->setParameter('type', 'invitation')
+            ->orderBy('ti.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -3,6 +3,16 @@
 {% block title %}{{ team.name }} - Rankup{% endblock %}
 
 {% block body %}
+{% if app.request.query.get('invite_success') %}
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            window.alert('✅ Invitation envoyée avec succès à {{ app.request.query.get('invitee')|default('ce joueur')|e('js') }} !');
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        });
+    </script>
+{% endif %}
+
 <div class="row mb-4">
     <div class="col-md-12">
         <a href="{{ path('team_index') }}" class="btn btn-outline-primary btn-sm">← Back to Teams</a>
@@ -70,7 +80,7 @@
                     </div>
                 </div>
 
-                {% if is_granted('ROLE_MANAGER') and team.players is defined and app.user and team.players.contains(app.user) %}
+                {% if can_manage_recruitment and has_open_slots %}
                     <hr>
                     <h3>🤖 Assistant IA - Composition d'équipe</h3>
                     {% if app.request.query.get('post_create') and reco_mode == 'choose' %}
@@ -96,7 +106,14 @@
                     {% endif %}
                 {% endif %}
 
-                {% if reco_mode == 'auto' and perfect_team_plan is defined and perfect_team_plan %}
+                {% if can_manage_recruitment and not has_open_slots %}
+                    <hr>
+                    <div class="alert alert-info" role="alert">
+                        L'équipe est complète (5/5). Les recommandations IA et invitations sont désactivées.
+                    </div>
+                {% endif %}
+
+                {% if can_manage_recruitment and has_open_slots and reco_mode == 'auto' and perfect_team_plan is defined and perfect_team_plan %}
                     <div class="alert alert-success" role="alert">
                         <strong>Pourquoi cette équipe ?</strong><br>
                         {{ perfect_team_plan.summary }}
@@ -130,6 +147,7 @@
                                                     <input type="hidden" name="team_id" value="{{ team.id }}">
                                                     <input type="hidden" name="player_id" value="{{ item.player.id }}">
                                                     <input type="hidden" name="reco_mode" value="{{ reco_mode }}">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('team_invite') }}">
                                                     <button type="submit" class="btn btn-sm btn-primary" {% if team.statut != 'approuvé' %}disabled{% endif %}>
                                                         <i class="fas fa-paper-plane"></i>
                                                         {% if team.statut == 'approuvé' %}Inviter{% else %}En attente d'approbation{% endif %}
@@ -141,54 +159,65 @@
                                 </tbody>
                             </table>
                         </div>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            Aucune recommandation IA trouvée pour le moment.
+                        </div>
                     {% endif %}
                 {% endif %}
 
-                {% if reco_mode == 'manual' and ai_recommendations is defined and ai_recommendations|length > 0 %}
+                {% if can_manage_recruitment and has_open_slots and reco_mode == 'manual' %}
                     <h5>👥 Joueurs recommandés (choix manuel)</h5>
                     <div class="alert alert-info" role="alert">
                         L'IA te propose des profils; tu choisis qui inviter.
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Joueur</th>
-                                    <th>Score IA</th>
-                                    <th>Raison</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in ai_recommendations %}
+                    {% if ai_recommendations is defined and ai_recommendations|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
                                     <tr>
-                                        <td>{{ item.player.nickname ?? item.player.username }}</td>
-                                        <td><span class="badge bg-success">{{ item.aiScore }}</span></td>
-                                        <td>{{ item.reason }}</td>
-                                        <td>
-                                            <form method="POST" action="{{ path('team_invite') }}" class="m-0">
-                                                <input type="hidden" name="team_id" value="{{ team.id }}">
-                                                <input type="hidden" name="player_id" value="{{ item.player.id }}">
-                                                <input type="hidden" name="reco_mode" value="{{ reco_mode }}">
-                                                <button
-                                                    type="submit"
-                                                    class="btn btn-sm btn-primary"
-                                                    {% if team.statut != 'approuvé' %}disabled{% endif %}
-                                                >
-                                                    <i class="fas fa-paper-plane"></i>
-                                                    {% if team.statut == 'approuvé' %}
-                                                        Inviter
-                                                    {% else %}
-                                                        En attente d'approbation
-                                                    {% endif %}
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <th>Joueur</th>
+                                        <th>Score IA</th>
+                                        <th>Raison</th>
+                                        <th>Action</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {% for item in ai_recommendations %}
+                                        <tr>
+                                            <td>{{ item.player.nickname ?? item.player.username }}</td>
+                                            <td><span class="badge bg-success">{{ item.aiScore }}</span></td>
+                                            <td>{{ item.reason }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ path('team_invite') }}" class="m-0">
+                                                    <input type="hidden" name="team_id" value="{{ team.id }}">
+                                                    <input type="hidden" name="player_id" value="{{ item.player.id }}">
+                                                    <input type="hidden" name="reco_mode" value="{{ reco_mode }}">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('team_invite') }}">
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-sm btn-primary"
+                                                        {% if team.statut != 'approuvé' %}disabled{% endif %}
+                                                    >
+                                                        <i class="fas fa-paper-plane"></i>
+                                                        {% if team.statut == 'approuvé' %}
+                                                            Inviter
+                                                        {% else %}
+                                                            En attente d'approbation
+                                                        {% endif %}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            Aucune recommandation IA trouvée. Utilise la liste d'invitation ci-dessous.
+                        </div>
+                    {% endif %}
                 {% endif %}
 
                 <!-- Players Section -->
@@ -227,8 +256,21 @@
                     </div>
                 {% endif %}
 
+                <!-- Request to Join Section (for non-members) -->
+                {% if app.user and not team.players.contains(app.user) and team.statut == 'approuvé' and team.players|length < 5 %}
+                    <hr>
+                    <div class="text-center">
+                        <form method="POST" action="{{ path('team_request_join', { id: team.id }) }}" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('join' ~ team.id) }}">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus"></i> Request to Join Team
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
                 <!-- Invite Players Section (for team managers) -->
-                {% if is_granted('ROLE_MANAGER') and team.statut == 'approuvé' %}
+                {% if can_manage_recruitment and team.statut == 'approuvé' and has_open_slots %}
                     <hr>
                     <h3>📤 Invite Players</h3>
                     <div class="card shadow-sm">
@@ -236,6 +278,7 @@
                             <form method="POST" action="{{ path('team_invite') }}" class="mb-3">
                                 <input type="hidden" name="team_id" value="{{ team.id }}">
                                 <input type="hidden" name="reco_mode" value="{{ reco_mode|default('manual') }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('team_invite') }}">
                                 <div class="row g-2">
                                     <div class="col-lg-9">
                                         <select name="player_id" class="form-select" required>

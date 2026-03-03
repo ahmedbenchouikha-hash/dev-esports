@@ -26,6 +26,10 @@ class TeamInvitation
     #[Assert\Choice(choices: ['pending', 'accepted', 'rejected'])]
     private ?string $status = 'pending';
 
+    #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: ['invitation', 'request'])]
+    private ?string $type = 'invitation';
+
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
 
@@ -72,6 +76,17 @@ class TeamInvitation
     public function setStatus(string $status): static
     {
         $this->status = $status;
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
         return $this;
     }
 

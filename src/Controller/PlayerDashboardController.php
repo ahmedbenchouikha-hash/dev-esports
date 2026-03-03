@@ -231,6 +231,23 @@ class PlayerDashboardController extends AbstractController
             'payment' => $payment,
         ]);
     }
+
+    #[Route('/invitations', name: 'player_invitations', methods: ['GET'])]
+    public function invitations(TeamInvitationRepository $invitationRepo): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof Player) {
+            $this->addFlash('error', 'You must be a player to access this page.');
+            return $this->redirectToRoute('home');
+        }
+
+        $pendingInvitations = $invitationRepo->findPendingInvitationForPlayer($user);
+
+        return $this->render('player/invitations.html.twig', [
+            'pendingInvitations' => $pendingInvitations,
+        ]);
+    }
 }
 
 

@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AI Finance Chatbot - RankUp{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1 class="page-title mb-0"><i class="fas fa-robot"></i> AI Finance Chatbot</h1>
+        <a href="{{ path('depense_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Expenses
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Total Budget</h6>
+                <h4 class="mb-0">{{ (snapshot.global.budgetTotal ?? 0)|number_format(2, '.', ' ') }} TND</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Spent</h6>
+                <h4 class="mb-0">{{ (snapshot.global.spent ?? 0)|number_format(2, '.', ' ') }} TND</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Remaining</h6>
+                <h4 class="mb-0">{{ (snapshot.global.remaining ?? 0)|number_format(2, '.', ' ') }} TND</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong><i class="fas fa-comments"></i> Assistant</strong>
+                <button id="loadHistoryBtn" class="btn btn-sm btn-outline-secondary" type="button">
+                    <i class="fas fa-history"></i> Load History
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="chatMessages" class="border rounded p-3 mb-3" style="height: 420px; overflow-y: auto;">
+                    <div class="alert alert-info mb-0">
+                        Ask questions like: <strong>budget overview</strong>, <strong>latest expenses</strong>, <strong>category analysis</strong>, <strong>risk alerts</strong>.
+                    </div>
+                </div>
+
+                <form id="chatForm" class="d-flex gap-2">
+                    <input id="messageInput" type="text" class="form-control" maxlength="1000" placeholder="Type your financial question..." required>
+                    <button id="sendBtn" type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong><i class="fas fa-users"></i> Teams in Snapshot</strong>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for budget in snapshot.budgets|default([])|slice(0, 8) %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ budget.teamName }}</span>
+                        <span class="badge bg-secondary">{{ budget.remaining|number_format(0, '.', ' ') }} TND</span>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">No team budgets available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <strong><i class="fas fa-lightbulb"></i> Quick Prompts</strong>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <button type="button" class="btn btn-outline-primary quick-prompt" data-prompt="Donne-moi un aperçu global du budget.">Global budget overview</button>
+                <button type="button" class="btn btn-outline-primary quick-prompt" data-prompt="Montre les dernières dépenses validées.">Latest validated expenses</button>
+                <button type="button" class="btn btn-outline-primary quick-prompt" data-prompt="Analyse les dépenses par catégorie.">Category analysis</button>
+                <button type="button" class="btn btn-outline-primary quick-prompt" data-prompt="Y a-t-il des alertes de dépassement budgetaire ?">Risk alerts</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const messages = document.getElementById('chatMessages');
+    const loadHistoryBtn = document.getElementById('loadHistoryBtn');
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function formatMessage(text) {
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    function addMessage(author, text, type) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-3';
+
+        const badgeClass = type === 'user' ? 'bg-primary' : (type === 'error' ? 'bg-danger' : 'bg-success');
+        wrapper.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge ${badgeClass}">${author}</span>
+            </div>
+            <div class="border rounded p-2">${formatMessage(text)}</div>
+        `;
+
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function askQuestion(message) {
+        addMessage('You', message, 'user');
+        sendBtn.disabled = true;
+
+        const body = new URLSearchParams();
+        body.set('message', message);
+
+        try {
+            const response = await fetch('{{ path('depense_chatbot_ask') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: body.toString()
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.reply) {
+                addMessage('Assistant', data.error || 'Unable to process request.', 'error');
+                return;
+            }
+
+            addMessage('Assistant', data.reply, 'assistant');
+        } catch (e) {
+            addMessage('Assistant', 'Network error while contacting assistant.', 'error');
+        } finally {
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const message = input.value.trim();
+        if (!message) return;
+        input.value = '';
+        askQuestion(message);
+    });
+
+    loadHistoryBtn.addEventListener('click', async function () {
+        loadHistoryBtn.disabled = true;
+        try {
+            const response = await fetch('{{ path('depense_chatbot_history') }}');
+            const data = await response.json();
+
+            if (!response.ok || !Array.isArray(data.history)) {
+                addMessage('Assistant', data.error || 'Unable to load history.', 'error');
+                return;
+            }
+
+            if (data.history.length === 0) {
+                addMessage('Assistant', 'No conversation history found.', 'assistant');
+                return;
+            }
+
+            data.history.forEach(function (item) {
+                addMessage('You', item.userMessage || '', 'user');
+                addMessage('Assistant', item.aiResponse || '', 'assistant');
+            });
+        } catch (e) {
+            addMessage('Assistant', 'Network error while loading history.', 'error');
+        } finally {
+            loadHistoryBtn.disabled = false;
+        }
+    });
+
+    document.querySelectorAll('.quick-prompt').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            input.value = btn.dataset.prompt || '';
+            input.focus();
+        });
+    });
+})();
+</script>
+{% endblock %}
