@@ -404,4 +404,90 @@ class TournamentController extends AbstractController
             'registrationsByTournament' => $registrationsByTournament,
         ]);
     }
+
+    #[Route('/admin/registrations/{id}', name: 'admin_registration_show', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminRegistrationShow(
+        int $id,
+        TournamentRegistrationRepository $registrationRepository
+    ): Response
+    {
+        $registration = $registrationRepository->find($id);
+
+        if (!$registration) {
+            throw $this->createNotFoundException('Registration not found');
+        }
+
+        return $this->render('tournament/admin_registration_show.html.twig', [
+            'registration' => $registration,
+        ]);
+    }
+
+    #[Route('/admin/registrations/{id}/approve', name: 'admin_registration_approve', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminRegistrationApprove(
+        int $id,
+        Request $request,
+        TournamentRegistrationRepository $registrationRepository,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        $registration = $registrationRepository->find($id);
+
+        if (!$registration) {
+            throw $this->createNotFoundException('Registration not found');
+        }
+
+        if (!$this->isCsrfTokenValid('approve' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token');
+        }
+
+        $registration->setStatus('approved');
+        $registration->setReviewedBy($this->getUser());
+        $registration->setReviewedAt(new \DateTime());
+        
+        $adminNotes = $request->request->get('admin_notes', '');
+        if ($adminNotes) {
+            $registration->setAdminNotes($adminNotes);
+        }
+
+        $entityManager->flush();
+        $this->addFlash('success', 'Registration approved successfully!');
+
+        return $this->redirectToRoute('tournament_admin_registration_show', ['id' => $registration->getId()]);
+    }
+
+    #[Route('/admin/registrations/{id}/reject', name: 'admin_registration_reject', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminRegistrationReject(
+        int $id,
+        Request $request,
+        TournamentRegistrationRepository $registrationRepository,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        $registration = $registrationRepository->find($id);
+
+        if (!$registration) {
+            throw $this->createNotFoundException('Registration not found');
+        }
+
+        if (!$this->isCsrfTokenValid('reject' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token');
+        }
+
+        $registration->setStatus('rejected');
+        $registration->setReviewedBy($this->getUser());
+        $registration->setReviewedAt(new \DateTime());
+        
+        $rejectionReason = $request->request->get('rejection_reason', '');
+        if ($rejectionReason) {
+            $registration->setAdminNotes($rejectionReason);
+        }
+
+        $entityManager->flush();
+        $this->addFlash('warning', 'Registration rejected successfully!');
+
+        return $this->redirectToRoute('tournament_admin_registration_show', ['id' => $registration->getId()]);
+    }
 }
