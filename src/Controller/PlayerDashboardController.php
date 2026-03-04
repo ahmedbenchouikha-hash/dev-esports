@@ -71,7 +71,7 @@ class PlayerDashboardController extends AbstractController
             // OPTIMIZATION: Query for teams where user is manager directly instead of looping
             if ($this->isGranted('ROLE_MANAGER')) {
                 $managedTeams = $em->getRepository(Team::class)->createQueryBuilder('t')
-                    ->where('t.manager = :manager')
+                    ->where('t.creator = :manager')
                     ->setParameter('manager', $user)
                     ->getQuery()
                     ->getResult();
