@@ -378,4 +378,30 @@ class TournamentController extends AbstractController
             'registrations' => $registrations,
         ]);
     }
+
+    #[Route('/admin/registrations', name: 'admin_registration_list', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminRegistrationList(
+        TournamentRegistrationRepository $registrationRepository
+    ): Response
+    {
+        $allRegistrations = $registrationRepository->findAll();
+
+        // Group registrations by tournament
+        $registrationsByTournament = [];
+        foreach ($allRegistrations as $registration) {
+            $tournamentId = $registration->getTournament()->getId();
+            if (!isset($registrationsByTournament[$tournamentId])) {
+                $registrationsByTournament[$tournamentId] = [
+                    'tournament' => $registration->getTournament(),
+                    'registrations' => []
+                ];
+            }
+            $registrationsByTournament[$tournamentId]['registrations'][] = $registration;
+        }
+
+        return $this->render('tournament/admin_registrations.html.twig', [
+            'registrationsByTournament' => $registrationsByTournament,
+        ]);
+    }
 }

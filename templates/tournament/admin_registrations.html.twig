@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournament Registrations - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">
+                    <i class="fas fa-clipboard-list"></i> All Tournament Registrations
+                </h1>
+                <a href="{{ path('tournament_index') }}" class="btn btn-outline-primary btn-sm">
+                    ← Back to Tournaments
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if registrationsByTournament|length > 0 %}
+        {% for tournamentId, data in registrationsByTournament %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy"></i>
+                        {{ data.tournament.name }}
+                        <span class="badge bg-info ms-2">{{ data.registrations|length }} registrations</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if data.registrations|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Team Name</th>
+                                        <th>Contact Email</th>
+                                        <th>Contact Phone</th>
+                                        <th>Status</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for registration in data.registrations %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ registration.teamName }}</strong>
+                                            </td>
+                                            <td>{{ registration.contactEmail }}</td>
+                                            <td>{{ registration.contactPhone ?? 'N/A' }}</td>
+                                            <td>
+                                                {% if registration.isPending() %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% elseif registration.isApproved() %}
+                                                    <span class="badge bg-success">Approved</span>
+                                                {% elseif registration.isRejected() %}
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    {{ registration.createdAt|date('M d, Y H:i')|default('Unknown') }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {% if registration.isPending() %}
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <form action="{{ path('tournament_registrations', {id: data.tournament.id}) }}" method="POST" class="d-inline">
+                                                            <input type="hidden" name="action" value="approve">
+                                                            <input type="hidden" name="registration_id" value="{{ registration.id }}">
+                                                            <button type="submit" class="btn btn-success btn-sm" title="Approve">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="{{ path('tournament_registrations', {id: data.tournament.id}) }}" method="POST" class="d-inline">
+                                                            <input type="hidden" name="action" value="reject">
+                                                            <input type="hidden" name="registration_id" value="{{ registration.id }}">
+                                                            <button type="submit" class="btn btn-danger btn-sm" title="Reject">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted small">Reviewed</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No registrations for this tournament.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle"></i>
+            No tournament registrations yet.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 242, 254, 0.05);
+    }
+
+    .card {
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-bottom: 2px solid rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}
