@@ -19,10 +19,15 @@ class TournamentRepository extends ServiceEntityRepository
     public function findBySearchTerm(string $searchTerm): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.games', 'g')
+            ->addSelect('g')
+            ->leftJoin('t.registrations', 'r')
+            ->addSelect('r')
             ->where('t.name LIKE :searchTerm')
             ->orWhere('t.description LIKE :searchTerm')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
             ->orderBy('t.name', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -30,9 +35,14 @@ class TournamentRepository extends ServiceEntityRepository
     public function findByStatus(string $status): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.games', 'g')
+            ->addSelect('g')
+            ->leftJoin('t.registrations', 'r')
+            ->addSelect('r')
             ->where('t.status = :status')
             ->setParameter('status', $status)
             ->orderBy('t.startDate', 'DESC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -40,9 +50,14 @@ class TournamentRepository extends ServiceEntityRepository
     public function findUpcoming(): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.games', 'g')
+            ->addSelect('g')
+            ->leftJoin('t.registrations', 'r')
+            ->addSelect('r')
             ->where('t.status IN (:statuses)')
             ->setParameter('statuses', ['pending', 'ongoing'])
             ->orderBy('t.startDate', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -53,7 +68,12 @@ class TournamentRepository extends ServiceEntityRepository
         $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'startDate';
 
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.games', 'g')
+            ->addSelect('g')
+            ->leftJoin('t.registrations', 'r')
+            ->addSelect('r')
             ->orderBy('t.' . $orderBy, 'DESC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -64,7 +84,11 @@ class TournamentRepository extends ServiceEntityRepository
         $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'startDate';
         $direction = strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC';
 
-        $qb = $this->createQueryBuilder('t');
+        $qb = $this->createQueryBuilder('t')
+            ->leftJoin('t.games', 'g')
+            ->addSelect('g')
+            ->leftJoin('t.registrations', 'r')
+            ->addSelect('r');
 
         // Apply search filter
         if (!empty($search)) {
@@ -78,7 +102,8 @@ class TournamentRepository extends ServiceEntityRepository
                ->setParameter('status', $status);
         }
 
-        $qb->orderBy('t.' . $orderBy, $direction);
+        $qb->orderBy('t.' . $orderBy, $direction)
+            ->distinct();
 
         return $qb;
     }

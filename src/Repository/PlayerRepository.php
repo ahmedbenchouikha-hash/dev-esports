@@ -19,7 +19,9 @@ class PlayerRepository extends ServiceEntityRepository
 
     public function findByFilters(string $searchTerm = '', ?int $teamId = null, ?string $role = null, string $orderBy = 'nickname'): array
     {
-        $qb = $this->createQueryBuilder('p');
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.teams', 't')
+            ->addSelect('t');
 
         if ($searchTerm) {
             $qb->where('p.nickname LIKE :searchTerm')
@@ -41,7 +43,8 @@ class PlayerRepository extends ServiceEntityRepository
         $validOrderBy = ['nickname', 'firstName', 'lastName', 'createdAt', 'role'];
         $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'nickname';
 
-        $qb->orderBy('p.' . $orderBy, 'ASC');
+        $qb->orderBy('p.' . $orderBy, 'ASC')
+            ->distinct();
 
         return $qb->getQuery()->getResult();
     }
@@ -49,9 +52,12 @@ class PlayerRepository extends ServiceEntityRepository
     public function findByTeam(Team $team): array
     {
         return $this->createQueryBuilder('p')
+            ->leftJoin('p.teams', 't')
+            ->addSelect('t')
             ->where('p.team = :team')
             ->setParameter('team', $team)
             ->orderBy('p.nickname', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -62,7 +68,10 @@ class PlayerRepository extends ServiceEntityRepository
         $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'nickname';
 
         return $this->createQueryBuilder('p')
+            ->leftJoin('p.teams', 't')
+            ->addSelect('t')
             ->orderBy('p.' . $orderBy, 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }

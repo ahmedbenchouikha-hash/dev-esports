@@ -23,11 +23,16 @@ class TeamRepository extends ServiceEntityRepository
     public function findBySearchTerm(string $searchTerm): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->where('t.name LIKE :searchTerm')
             ->orWhere('t.country LIKE :searchTerm')
             ->orWhere('t.jeu LIKE :searchTerm')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
             ->orderBy('t.name', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -42,7 +47,12 @@ class TeamRepository extends ServiceEntityRepository
         $direction = in_array(strtoupper($direction), ['ASC', 'DESC']) ? strtoupper($direction) : 'ASC';
 
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->orderBy('t.' . $orderBy, $direction)
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -59,7 +69,11 @@ class TeamRepository extends ServiceEntityRepository
         string $orderBy = 'name',
         string $direction = 'ASC'
     ): array {
-        $qb = $this->createQueryBuilder('t');
+        $qb = $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c');
 
         if ($searchTerm) {
             $qb->andWhere('t.name LIKE :searchTerm OR t.description LIKE :searchTerm OR t.country LIKE :searchTerm')
@@ -90,7 +104,8 @@ class TeamRepository extends ServiceEntityRepository
         $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'name';
         $direction = in_array(strtoupper($direction), ['ASC', 'DESC']) ? strtoupper($direction) : 'ASC';
 
-        $qb->orderBy('t.' . $orderBy, $direction);
+        $qb->orderBy('t.' . $orderBy, $direction)
+            ->distinct();
 
         return $qb->getQuery()->getResult();
     }
@@ -101,9 +116,14 @@ class TeamRepository extends ServiceEntityRepository
     public function findByStatus(string $status): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->where('t.statut = :status')
             ->setParameter('status', $status)
             ->orderBy('t.name', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -114,9 +134,14 @@ class TeamRepository extends ServiceEntityRepository
     public function findByGame(string $game): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->where('t.jeu = :game')
             ->setParameter('game', $game)
             ->orderBy('t.name', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -127,9 +152,14 @@ class TeamRepository extends ServiceEntityRepository
     public function findByLevel(string $level): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->where('t.niveau = :level')
             ->setParameter('level', $level)
             ->orderBy('t.name', 'ASC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -140,8 +170,13 @@ class TeamRepository extends ServiceEntityRepository
     public function findTopByScore(int $limit = 10): array
     {
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->orderBy('t.score', 'DESC')
             ->setMaxResults($limit)
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
@@ -170,9 +205,14 @@ class TeamRepository extends ServiceEntityRepository
         $direction = in_array(strtoupper($direction), ['ASC', 'DESC']) ? strtoupper($direction) : 'ASC';
 
         return $this->createQueryBuilder('t')
+            ->leftJoin('t.players', 'p')
+            ->addSelect('p')
+            ->leftJoin('t.creator', 'c')
+            ->addSelect('c')
             ->orderBy('t.' . $orderBy, $direction)
             ->setFirstResult($offset)
             ->setMaxResults($limit)
+            ->distinct()
             ->getQuery()
             ->getResult();
     }

@@ -89,8 +89,8 @@
                         {% else %}
                             <a href="{{ path('team_show', { id: team.id }) }}" class="btn btn-primary w-100 btn-sm mb-2">View Team</a>
                             {% if app.user and not team.players.contains(app.user) and not is_granted('ROLE_MANAGER') %}
-                                <form method="POST" action="{{ path('team_join', { id: team.id }) }}" style="display: inline-block; width: 100%;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('join' ~ team.id) }}">
+                                <form method="POST" action="{{ path('player_join_team', { id: team.id }) }}" style="display: inline-block; width: 100%;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('join_team_' ~ team.id) }}">
                                     <button type="submit" class="btn btn-success w-100 btn-sm">
                                         <i class="fas fa-plus"></i> Join Team
                                     </button>
