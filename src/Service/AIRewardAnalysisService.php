@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * AI-powered reward analysis service using Groq API
+ * AI-powered reward analysis service using Groq API and Panda Score API
  * Analyzes reward requests for legitimacy, fraud detection, and suggestions
  */
 class AIRewardAnalysisService
@@ -21,7 +21,8 @@ class AIRewardAnalysisService
     public function __construct(
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
-        private string $groqApiKey
+        private string $groqApiKey,
+        private ?PandaScorePlayerService $pandaScoreService = null
     ) {
     }
 
@@ -91,6 +92,7 @@ PROMPT;
 
     /**
      * Analyze a reward request for legitimacy, fraud detection, and AI insights
+     * Incorporates Panda Score player reputation data
      * 
      * @param DemandeRecompense $demande The reward request to analyze
      * @return RewardAnalysisDTO Analysis results
@@ -110,13 +112,35 @@ PROMPT;
                 return $this->buildDefaultAnalysis($dto);
             }
 
-            $prompt = $this->buildAnalysisPrompt($requesterName, $email, $motif, $recompense);
+            // Get Panda Score reputation data
+            $pandaScoreReputation = 50; // Default neutral score
+            if ($this->pandaScoreService) {
+                $pandaScoreReputation = $this->pandaScoreService->getPlayerReputationScore($requesterName);
+                $this->logger->info('Panda Score reputation retrieved', [
+                    'player' => $requesterName,
+                    'score' => $pandaScoreReputation,
+                ]);
+            }
+
+            $prompt = $this->buildAnalysisPrompt($requesterName, $email, $motif, $recompense, $pandaScoreReputation);
             $request = $this->buildGroqRequest($prompt, 1000);
             $response = $this->sendGroqRequest($request);
 
             if ($response['success'] && isset($response['content'])) {
                 $analysis = $this->parseAnalysisResponse($response['content']);
                 $dto = $this->hydrateDTOFromAnalysis($dto, $analysis);
+                
+                // Boost legitimacy score based on Panda Score reputation
+                if ($pandaScoreReputation > 50 && $dto->getLegitimacyScore() !== null) {
+                    $reputationBoost = ($pandaScoreReputation - 50) * 0.2; // Up to +10 boost
+                    $boostedScore = min(100, $dto->getLegitimacyScore() + intval($reputationBoost));
+                    $dto->setLegitimacyScore($boostedScore);
+                    $this->logger->info('Legitimacy score boosted by Panda Score', [
+                        'original' => $dto->getLegitimacyScore() - intval($reputationBoost),
+                        'boosted' => $boostedScore,
+                        'reputation' => $pandaScoreReputation,
+                    ]);
+                }
             } else {
                 $this->logger->warning('AI analysis failed, using default values');
                 $dto = $this->buildDefaultAnalysis($dto);
@@ -139,11 +163,20 @@ PROMPT;
     /**
      * Build the analysis prompt for AI
      */
-    private function buildAnalysisPrompt(string $requesterName, string $email, string $motif, $recompense): string
+    private function buildAnalysisPrompt(string $requesterName, string $email, string $motif, $recompense, int $pandaScoreReputation = 50): string
     {
         $rewardName = $recompense->getRecompense();
         $rewardType = $recompense->getType();
         $classement = $recompense->getClassement();
+
+        $reputationContext = '';
+        if ($pandaScoreReputation >= 70) {
+            $reputationContext = "\n- Panda Score Player Reputation: {$pandaScoreReputation}/100 (STRONG - Established player with good history)";
+        } elseif ($pandaScoreReputation >= 50) {
+            $reputationContext = "\n- Panda Score Player Reputation: {$pandaScoreReputation}/100 (NEUTRAL - Limited or average history)";
+        } else {
+            $reputationContext = "\n- Panda Score Player Reputation: {$pandaScoreReputation}/100 (CAUTION - Low history or suspicious activity)";
+        }
 
         return <<<PROMPT
 Analyze this reward request and provide a JSON response with the following fields:
@@ -160,14 +193,17 @@ Reward Request Details:
 - Requester Name: {$requesterName}
 - Email: {$email}
 - Reward: {$rewardName} (Rank #{$classement}, Type: {$rewardType})
-- Request Reason: {$motif}
+- Request Reason: {$motif}{$reputationContext}
 
 Evaluation Criteria:
 1. Email validity (check for suspicious patterns)
 2. Name credibility (check for spam patterns)
 3. Motif quality (professional and specific vs generic/copy-paste)
 4. Reward tier appropriateness
-5. Overall legitimacy indicators
+5. Player reputation from Panda Score (established players are more trustworthy)
+6. Overall legitimacy indicators
+
+IMPORTANT: Factor the player's Panda Score reputation into your analysis. High reputation players are more likely to be legitimate.
 
 Respond ONLY with valid JSON, no additional text.
 PROMPT;
