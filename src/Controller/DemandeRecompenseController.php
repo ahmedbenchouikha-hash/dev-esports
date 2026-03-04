@@ -474,6 +474,7 @@ class DemandeRecompenseController extends AbstractController
 
         return $this->render('demande_recompense/new.html.twig', [
             'form' => $form->createView(),
+            'recompense' => $demande->getRecompense(),
         ]);
     }
 
