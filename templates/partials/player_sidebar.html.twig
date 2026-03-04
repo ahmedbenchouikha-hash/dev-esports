@@ -70,8 +70,8 @@
                 <a href="{{ path('demande_recompense_index') }}" class="menu-subitem {% if 'demande_recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> My Requests
                 </a>
-                <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
-                    <i class="fas fa-shopping-bag"></i> Available Rewards
+                <a href="{{ path('demande_recompense_new') }}" class="menu-subitem {% if 'demande_recompense_new' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-shopping-bag"></i> New Request
                 </a>
             </div>
         </div>
