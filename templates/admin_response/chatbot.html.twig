@@ -1,0 +1,82 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Admin Chatbot - RankUp{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Admin Chatbot</h1>
+        <a href="{{ path('app_admin_response_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Responses
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2 text-muted" id="adminChatbotStatus">Prêt.</div>
+            <div class="input-group mb-3">
+                <input id="adminChatbotMessage" type="text" class="form-control" placeholder="Pose une question...">
+                <button id="adminChatbotSend" type="button" class="btn btn-primary">Envoyer</button>
+            </div>
+            <div>
+                <small class="text-muted d-block mb-1">Réponse</small>
+                <div id="adminChatbotAnswer" class="form-control" style="min-height: 120px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const sendBtn = document.getElementById('adminChatbotSend');
+        const input = document.getElementById('adminChatbotMessage');
+        const answer = document.getElementById('adminChatbotAnswer');
+        const status = document.getElementById('adminChatbotStatus');
+
+        if (!sendBtn || !input || !answer || !status) {
+            return;
+        }
+
+        const send = async () => {
+            const message = (input.value || '').trim();
+            if (!message) {
+                status.textContent = 'Écris un message.';
+                return;
+            }
+
+            status.textContent = 'Analyse...';
+            try {
+                const response = await fetch('{{ path('app_admin_response_chatbot_ask') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    answer.textContent = data.error || 'Erreur assistant.';
+                    status.textContent = 'Erreur.';
+                    return;
+                }
+
+                answer.textContent = data.answer || '';
+                status.textContent = 'Prêt.';
+            } catch (e) {
+                answer.textContent = 'Erreur réseau.';
+                status.textContent = 'Erreur réseau.';
+            }
+        };
+
+        sendBtn.addEventListener('click', send);
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                send();
+            }
+        });
+    })();
+</script>
+{% endblock %}

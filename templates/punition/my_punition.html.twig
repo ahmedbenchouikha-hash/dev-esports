@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma punition{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="mb-4">Ma punition</h1>
+
+    {% if punitions is empty %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> Aucune punition active pour le moment.
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Réclamation</th>
+                        <th>Début</th>
+                        <th>Fin</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for punition in punitions %}
+                        <tr>
+                            <td>{{ punition.id }}</td>
+                            <td>#{{ punition.reclamation.id }} - {{ punition.reclamation.titre }}</td>
+                            <td>{{ punition.startAt|date('d/m/Y H:i') }}</td>
+                            <td>{{ punition.endAt|date('d/m/Y H:i') }}</td>
+                            <td><span class="badge bg-danger">{{ punition.playerStatus }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

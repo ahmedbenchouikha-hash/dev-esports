@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Player;
 use App\Entity\Reclamation;
 use App\Entity\Notification;
 use App\Enum\ReclamationStatus;
@@ -14,10 +15,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/reclamation')]
+#[IsGranted('ROLE_USER')]
 final class ReclamationController extends AbstractController
 {
     private EmailService $emailService;
@@ -25,6 +28,17 @@ final class ReclamationController extends AbstractController
     public function __construct(EmailService $emailService)
     {
         $this->emailService = $emailService;
+    }
+
+    private function getAuthenticatedPlayerOrDeny(): Player
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof Player) {
+            throw $this->createAccessDeniedException('Compte joueur requis.');
+        }
+
+        return $user;
     }
 
     #[Route('/home', name: 'app_reclamation_index', methods: ['GET'])]
@@ -39,8 +53,12 @@ final class ReclamationController extends AbstractController
             'method' => 'POST'
         ]);
 
+        $reclamations = $this->isGranted('ROLE_ADMIN')
+            ? $reclamationRepository->findBy([], ['createdAt' => 'DESC'])
+            : $reclamationRepository->findBy(['player' => $this->getAuthenticatedPlayerOrDeny()], ['createdAt' => 'DESC']);
+
         return $this->render('reclamation/index.html.twig', [
-            'reclamations' => $reclamationRepository->findBy([], ['createdAt' => 'DESC']),
+            'reclamations' => $reclamations,
             'form' => $form->createView(),
         ]);
     }
@@ -66,6 +84,10 @@ final class ReclamationController extends AbstractController
                 $reclamation->setType(ReclamationType::TECHNIQUE);
             } elseif ($simpleType === 'ORGANISATIONNELLE') {
                 $reclamation->setType(ReclamationType::ORGANISATIONNELLE);
+            }
+
+            if ($this->isGranted('ROLE_MANAGER') || $this->isGranted('ROLE_USER')) {
+                $reclamation->setPlayer($this->getAuthenticatedPlayerOrDeny());
             }
 
             if (method_exists($reclamation, 'setCreatedAt')) {
@@ -118,6 +140,7 @@ final class ReclamationController extends AbstractController
         $reclamation = new Reclamation();
         $reclamation->setType(ReclamationType::JOUEUR);
         $reclamation->setEtat(ReclamationStatus::EN_COURS);
+        $reclamation->setPlayer($this->getAuthenticatedPlayerOrDeny());
 
         $form = $this->createForm(ReclamationTypeForm::class, $reclamation);
         $form->handleRequest($request);
@@ -160,17 +183,23 @@ final class ReclamationController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_reclamation_show', methods: ['GET'])]
+    #[Route('/{id<\d+>}', name: 'app_reclamation_show', methods: ['GET'])]
     public function show(Reclamation $reclamation): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && $reclamation->getPlayer() !== $this->getAuthenticatedPlayerOrDeny()) {
+            throw $this->createAccessDeniedException('Accès non autorisé.');
+        }
+
         return $this->render('reclamation/show.html.twig', [
             'reclamation' => $reclamation,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_reclamation_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id<\d+>}/edit', name: 'app_reclamation_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $form = $this->createForm(ReclamationTypeForm::class, $reclamation);
         $form->handleRequest($request);
 
@@ -234,9 +263,11 @@ final class ReclamationController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_reclamation_delete', methods: ['POST'])]
+    #[Route('/{id<\d+>}', name: 'app_reclamation_delete', methods: ['POST'])]
     public function delete(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $token = $request->request->get('_token');
 
         if (!$this->isCsrfTokenValid('delete' . $reclamation->getId(), $token)) {
@@ -250,5 +281,24 @@ final class ReclamationController extends AbstractController
         $this->addFlash('success', 'Réclamation supprimée avec succès');
 
         return $this->redirectToRoute('app_reclamation_index');
+    }
+
+    #[Route('/my-responses', name: 'app_reclamation_my_responses', methods: ['GET'])]
+    public function myResponses(ReclamationRepository $reclamationRepository): Response
+    {
+        $player = $this->getAuthenticatedPlayerOrDeny();
+
+        $reclamations = $reclamationRepository->createQueryBuilder('r')
+            ->innerJoin('r.adminResponse', 'ar')
+            ->addSelect('ar')
+            ->where('r.player = :player')
+            ->setParameter('player', $player)
+            ->orderBy('r.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('reclamation/my_responses.html.twig', [
+            'reclamations' => $reclamations,
+        ]);
     }
 }

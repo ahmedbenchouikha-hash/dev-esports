@@ -53,15 +53,17 @@
                         <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">
                             <i class="fas fa-eye"></i> View
                         </a>
-                        <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </form>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="POST" action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this reclamation?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>

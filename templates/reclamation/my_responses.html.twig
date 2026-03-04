@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes réponses admin{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="mb-4">
+        <h1>Mes réponses admin</h1>
+    </div>
+
+    {% if reclamations is empty %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Aucune réponse admin pour le moment.
+        </div>
+    {% else %}
+        <div class="row g-3">
+            {% for reclamation in reclamations %}
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between flex-wrap gap-2">
+                                <h5 class="mb-0">#{{ reclamation.id }} - {{ reclamation.titre }}</h5>
+                                <span class="badge {% if reclamation.etat.value == 'EN_COURS' %}bg-warning{% elseif reclamation.etat.value == 'RESOLU' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ reclamation.etat.value|replace({'_': ' '}) }}
+                                </span>
+                            </div>
+                            <p class="text-muted mt-2 mb-2">{{ reclamation.description }}</p>
+
+                            <div class="border rounded p-3 bg-light text-dark">
+                                <strong>Réponse admin :</strong>
+                                <p class="mb-0 mt-2">{{ reclamation.adminResponse.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

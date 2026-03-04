@@ -1,0 +1,53 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Assistant Vocal - Punitions{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Assistant Vocal IA</h1>
+        <a href="{{ path('app_punition_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Punitions
+        </a>
+    </div>
+
+    <div class="card" data-controller="punition-voice" data-punition-voice-endpoint-value="{{ path('app_punition_voice_assistant') }}">
+        <div class="card-body">
+            {% if chat_error is defined and chat_error %}
+                <div class="alert alert-danger">{{ chat_error }}</div>
+            {% endif %}
+
+            {% if chat_answer is defined and chat_answer %}
+                <div class="alert alert-success">Réponse reçue via formulaire.</div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-primary" data-punition-voice-target="button" data-action="click->punition-voice#toggle">
+                    <i class="fas fa-microphone"></i> Assistant Vocal
+                </button>
+                <span class="text-muted" data-punition-voice-target="status">Assistant prêt.</span>
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted d-block mb-1">Vous avez dit :</small>
+                <div class="form-control" data-punition-voice-target="transcript" style="min-height: 48px;">{{ chat_message|default('') }}</div>
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted d-block mb-1">Réponse IA :</small>
+                <div class="form-control" data-punition-voice-target="answer" style="min-height: 120px;">{{ chat_answer|default('') }}</div>
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted d-block mb-1">Message manuel (fallback)</small>
+                <form method="POST" action="{{ path('app_punition_voice_assistant_page') }}">
+                    <div class="input-group">
+                        <input type="text" name="message" class="form-control" placeholder="Écris ton message ici..." value="{{ chat_message|default('') }}" data-punition-voice-target="manual">
+                        <button type="submit" class="btn btn-primary">Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
