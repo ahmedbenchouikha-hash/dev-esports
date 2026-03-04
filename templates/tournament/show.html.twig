@@ -76,19 +76,15 @@
                 {% if tournament.status == 'pending' and app.user %}
                     <hr>
                     <div class="text-center py-3">
-                        {% if app.user is instanceof('App\\Entity\\Player') and app.user.getTeam() %}
+                        {% set userTeam = app.user.teams|first|default(null) %}
+                        {% if userTeam %}
                             <a href="{{ path('tournament_join_form', {id: tournament.id}) }}" class="btn btn-primary btn-lg">
                                 <i class="fas fa-plus-circle"></i> Register Your Team
                             </a>
-                            <p class="small text-muted mt-2">Team: <strong>{{ app.user.getTeam().name }}</strong></p>
+                            <p class="small text-muted mt-2">Team: <strong>{{ userTeam.name }}</strong></p>
                         {% else %}
                             <div class="alert alert-warning" role="alert">
-                                <i class="fas fa-exclamation-circle"></i> 
-                                {% if app.user is not instanceof('App\\Entity\\Player') %}
-                                    You must have a Player account to register for tournaments.
-                                {% else %}
-                                    You must be part of a team to register for tournaments.
-                                {% endif %}
+                                <i class="fas fa-exclamation-circle"></i> You must be part of a team to register for tournaments.
                             </div>
                         {% endif %}
                     </div>
