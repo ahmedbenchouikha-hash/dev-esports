@@ -360,8 +360,26 @@ class TournamentController extends AbstractController
             }
         }
 
+        // Count registrations by status
+        $pending_count = 0;
+        $approved_count = 0;
+        $rejected_count = 0;
+        
+        foreach ($registrations as $reg) {
+            if ($reg->getStatus() === 'pending') {
+                $pending_count++;
+            } elseif ($reg->getStatus() === 'approved') {
+                $approved_count++;
+            } elseif ($reg->getStatus() === 'rejected') {
+                $rejected_count++;
+            }
+        }
+
         return $this->render('tournament/my_registrations.html.twig', [
             'registrations' => $registrations,
+            'pending_count' => $pending_count,
+            'approved_count' => $approved_count,
+            'rejected_count' => $rejected_count,
         ]);
     }
 
