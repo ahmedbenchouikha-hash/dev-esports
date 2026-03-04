@@ -69,10 +69,14 @@ class Tournament
     #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: TournamentRegistration::class, cascade: ['remove'])]
     private Collection $registrations;
 
+    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Recompense::class, cascade: ['remove'])]
+    private Collection $recompenses;
+
     public function __construct()
     {
         $this->games = new ArrayCollection();
         $this->registrations = new ArrayCollection();
+        $this->recompenses = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -264,6 +268,30 @@ class Tournament
         if ($this->registrations->removeElement($registration)) {
             if ($registration->getTournament() === $this) {
                 $registration->setTournament(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getRecompenses(): Collection
+    {
+        return $this->recompenses;
+    }
+
+    public function addRecompense(Recompense $recompense): static
+    {
+        if (!$this->recompenses->contains($recompense)) {
+            $this->recompenses->add($recompense);
+            $recompense->setTournament($this);
+        }
+        return $this;
+    }
+
+    public function removeRecompense(Recompense $recompense): static
+    {
+        if ($this->recompenses->removeElement($recompense)) {
+            if ($recompense->getTournament() === $this) {
+                $recompense->setTournament(null);
             }
         }
         return $this;
