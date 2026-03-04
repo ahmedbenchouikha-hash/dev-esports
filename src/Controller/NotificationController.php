@@ -14,6 +14,26 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/notifications')]
 final class NotificationController extends AbstractController
 {
+    #[Route('', name: 'app_notifications', methods: ['GET'])]
+    public function index(NotificationRepository $repo): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException('You must be logged in to view notifications');
+        }
+
+        $notifications = $repo->createQueryBuilder('n')
+            ->where('n.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('n.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('notification/index.html.twig', [
+            'notifications' => $notifications,
+        ]);
+    }
+
     #[Route('/unread-count', name: 'notification_unread_count', methods: ['GET'])]
     public function unreadCount(NotificationRepository $repo): JsonResponse
     {

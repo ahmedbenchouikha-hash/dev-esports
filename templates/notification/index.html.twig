@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">
+                    <i class="fas fa-bell"></i> Notifications
+                </h1>
+                {% if notifications %}
+                    <button class="btn btn-sm btn-outline-primary" id="markAllRead">
+                        <i class="fas fa-check"></i> Mark All as Read
+                    </button>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+                <div class="list-group">
+                    {% for notification in notifications %}
+                        <div class="list-group-item {% if not notification.isRead %}list-group-item-light{% endif %}" style="border-left: 4px solid {% if notification.isRead %}#dee2e6{% else %}#00f2fe{% endif %};">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">
+                                        <i class="fas fa-bell" style="color: #00f2fe;"></i>
+                                        {{ notification.title }}
+                                        {% if not notification.isRead %}
+                                            <span class="badge bg-info">New</span>
+                                        {% endif %}
+                                    </h5>
+                                    <p class="mb-2 text-secondary">{{ notification.message }}</p>
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar"></i>
+                                        {{ notification.createdAt ? notification.createdAt|date('M d, Y H:i') : 'Unknown date' }}
+                                    </small>
+                                </div>
+                                {% if not notification.isRead %}
+                                    <button class="btn btn-sm btn-outline-primary mark-read-btn" data-notification-id="{{ notification.id }}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i> You don't have any notifications yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mark all as read
+    const markAllReadBtn = document.getElementById('markAllRead');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function() {
+            fetch('{{ path("notification_mark_all_read") }}', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    }
+
+    // Mark individual notifications as read
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const notificationId = this.dataset.notificationId;
+            fetch(`/notifications/${notificationId}/mark-read`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+{% endblock %}
