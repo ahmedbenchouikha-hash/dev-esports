@@ -70,3 +70,6 @@ services:
   # App\Service\AIPricingService:
   #   arguments:
   #     $groqApiKey: '%env(GROQ_API_KEY)%'
+  App\Service\AIRewardAnalysisService:
+    arguments:
+      $groqApiKey: '%env(GROQ_API_KEY)%'
