@@ -7,8 +7,10 @@ use App\Entity\Notification;
 use App\Form\AdminResponseType;
 use App\Repository\AdminResponseRepository;
 use App\Service\EmailService;
+use App\Service\MistralAssistantService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,6 +33,30 @@ final class AdminResponseController extends AbstractController
         return $this->render('admin_response/index.html.twig', [
             'admin_responses' => $adminResponseRepository->findAll(),
         ]);
+    }
+
+    #[Route('/chatbot', name: 'app_admin_response_chatbot', methods: ['GET'])]
+    public function chatbotPage(): Response
+    {
+        return $this->render('admin_response/chatbot.html.twig');
+    }
+
+    #[Route('/chatbot/ask', name: 'app_admin_response_chatbot_ask', methods: ['POST'])]
+    public function chatbotAsk(Request $request, MistralAssistantService $assistant): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        $message = trim((string) ($payload['message'] ?? ''));
+
+        $prompt = "Tu es un assistant e-sport pour les administrateurs. "
+            . "Réponds en français, clairement et brièvement. "
+            . "Si la question concerne une sanction, recommande une action proportionnée. "
+            . "Tu peux aussi aider à rédiger des réponses admin professionnelles.";
+
+        $result = $assistant->askWithPrompt($message, $prompt);
+        $status = $result['status'] ?? 200;
+        unset($result['status']);
+
+        return $this->json($result, $status);
     }
 
     #[Route('/new', name: 'app_admin_response_new', methods: ['GET', 'POST'])]

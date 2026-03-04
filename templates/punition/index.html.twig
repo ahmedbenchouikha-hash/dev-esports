@@ -6,9 +6,16 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Punitions</h1>
-        <a href="{{ path('app_punition_new') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> New Punishment
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ path('app_punition_voice_assistant_page') }}" class="btn btn-info">
+                <i class="fas fa-microphone"></i> Assistant Vocal
+            </a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_punition_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Punishment
+                </a>
+            {% endif %}
+        </div>
     </div>
 
     {% if punitions|length > 0 %}
@@ -38,15 +45,17 @@
                             <a href="{{ path('app_punition_show', {'id': punition.id}) }}" class="btn btn-sm btn-info" title="View">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{{ path('app_punition_edit', {'id': punition.id}) }}" class="btn btn-sm btn-warning" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form method="POST" action="{{ path('app_punition_delete', {'id': punition.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this punishment?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ punition.id) }}">
-                                <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('app_punition_edit', {'id': punition.id}) }}" class="btn btn-sm btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ path('app_punition_delete', {'id': punition.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this punishment?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ punition.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

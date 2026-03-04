@@ -92,6 +92,21 @@
             <span class="menu-label">My Invitations</span>
         </a>
 
+        <a href="{{ path('app_reclamation_new_player') }}" class="menu-item {% if 'app_reclamation_new_player' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-plus-circle menu-icon"></i>
+            <span class="menu-label">Ajouter Réclamation</span>
+        </a>
+
+        <a href="{{ path('app_reclamation_my_responses') }}" class="menu-item {% if 'app_reclamation_my_responses' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-reply menu-icon"></i>
+            <span class="menu-label">Réponses Admin</span>
+        </a>
+
+        <a href="{{ path('app_punition_my') }}" class="menu-item {% if 'app_punition_my' in app.request.attributes.get('_route') %}active{% endif %}">
+            <i class="fas fa-gavel menu-icon"></i>
+            <span class="menu-label">Ma Punition</span>
+        </a>
+
         <!-- Divider -->
         <div class="menu-divider"></div>
 
