@@ -159,11 +159,22 @@
             <span class="menu-label">View Matches</span>
         </a>
 
-        <!-- View Tournaments -->
-        <a href="{{ path('tournament_index') }}" class="menu-item">
-            <i class="fas fa-crown menu-icon"></i>
-            <span class="menu-label">View Tournaments</span>
-        </a>
+        <!-- Tournaments Menu -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#playerTournamentMenu">
+                <i class="fas fa-crown menu-icon"></i>
+                <span class="menu-label">Tournaments</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="playerTournamentMenu" class="collapse {% if 'tournament' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('tournament_index') }}" class="menu-subitem {% if 'tournament_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> Available Tournaments
+                </a>
+                <a href="{{ path('tournament_my_registrations') }}" class="menu-subitem {% if 'tournament_my_registrations' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-ticket-alt"></i> My Registrations
+                </a>
+            </div>
+        </div>
     </nav>
 
     <!-- Sidebar Footer -->
