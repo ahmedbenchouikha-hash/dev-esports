@@ -86,13 +86,8 @@
                                 {% if demande.aiLegitimacyScore %}
                                 <small class="text-muted d-block">
                                     <strong>AI Score:</strong>
-                                    <span class="badge 
-                                        {% if demande.aiLegitimacyScore >= 80 %}bg-success
-                                        {% elseif demande.aiLegitimacyScore >= 60 %}bg-info
-                                        {% elseif demande.aiLegitimacyScore >= 40 %}bg-warning
-                                        {% else %}bg-danger
-                                        {% endif %}"
-                                        title="Legitimacy score">
+                                    {% set scoreClass = demande.aiLegitimacyScore >= 80 ? 'bg-success' : (demande.aiLegitimacyScore >= 60 ? 'bg-info' : (demande.aiLegitimacyScore >= 40 ? 'bg-warning' : 'bg-danger')) %}
+                                    <span class="badge {{ scoreClass }}" title="Legitimacy score">
                                         {{ demande.aiLegitimacyScore }}/100
                                     </span>
                                 </small>
