@@ -76,7 +76,6 @@
                 {% if tournament.status == 'pending' and app.user %}
                     <hr>
                     <div class="text-center py-3">
-                        {% set userTeam = app.user.teams|first|default(null) %}
                         {% if userTeam %}
                             <a href="{{ path('tournament_join_form', {id: tournament.id}) }}" class="btn btn-primary btn-lg">
                                 <i class="fas fa-plus-circle"></i> Register Your Team

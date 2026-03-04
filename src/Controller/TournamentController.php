@@ -56,6 +56,7 @@ class TournamentController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(int $id, TournamentRepository $tournamentRepository): Response
     {
         $tournament = $tournamentRepository->find($id);
@@ -71,8 +72,15 @@ class TournamentController extends AbstractController
             throw $this->createNotFoundException(sprintf('Tournament with ID %d not found. Available tournament IDs: please check the database.', $id));
         }
 
+        $userTeam = null;
+        $user = $this->getUser();
+        if ($user instanceof Player) {
+            $userTeam = $user->getTeam();
+        }
+
         return $this->render('tournament/show.html.twig', [
             'tournament' => $tournament,
+            'userTeam' => $userTeam,
         ]);
     }
 
