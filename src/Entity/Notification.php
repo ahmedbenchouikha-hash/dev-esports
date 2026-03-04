@@ -24,6 +24,10 @@ class Notification
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Reclamation $reclamation = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -65,6 +69,17 @@ class Notification
     public function setReclamation(?Reclamation $r): static 
     { 
         $this->reclamation = $r; 
+        return $this; 
+    }
+
+    public function getUser(): ?User 
+    { 
+        return $this->user; 
+    }
+
+    public function setUser(?User $user): static 
+    { 
+        $this->user = $user; 
         return $this; 
     }
 
