@@ -405,7 +405,8 @@ class DemandeRecompenseController extends AbstractController
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        RecompenseRepository $recompenseRepository
     ): Response
     {
         if ($this->isGranted('ROLE_ADMIN')) {
@@ -419,6 +420,16 @@ class DemandeRecompenseController extends AbstractController
         }
 
         $demande = new DemandeRecompense();
+        
+        // Pre-select recompense if recompenseId is provided
+        $recompenseId = $request->query->get('recompenseId');
+        if ($recompenseId) {
+            $recompense = $recompenseRepository->find($recompenseId);
+            if ($recompense) {
+                $demande->setRecompense($recompense);
+            }
+        }
+        
         $form = $this->createForm(DemandeRecompenseType::class, $demande);
         $form->handleRequest($request);
 
