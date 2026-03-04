@@ -1205,11 +1205,10 @@
                     .catch(error => console.error('Error marking notifications as read:', error));
             }
 
-            // Load notifications on page load
-            document.addEventListener('DOMContentLoaded', loadNotifications);
-
-            // Refresh notifications every 30 seconds
-            setInterval(loadNotifications, 30000);
+            // Temporarily disabled for performance optimization
+            // Notifications will load manually when user clicks the bell icon
+            // DISABLED: document.addEventListener('DOMContentLoaded', loadNotifications);
+            // DISABLED: setInterval(loadNotifications, 30000);
         </script>
 
         <!-- Chart.js (loaded at end of body to avoid blocking initial render) -->

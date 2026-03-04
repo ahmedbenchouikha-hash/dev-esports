@@ -43,15 +43,19 @@ class PlayerDashboardController extends AbstractController
         }
 
         $currentTeams = $user->getTeams();
-        $availableTeams = $em->getRepository(Team::class)->findAll();
         
-        // Remove teams the player is already in from available teams
-        $availableTeams = array_filter($availableTeams, function($team) use ($currentTeams) {
-            return !$currentTeams->contains($team);
-        });
+        // OPTIMIZATION: Get only teams the player is NOT in
+        // Instead of loading all teams and filtering, query for available teams directly
+        $playerTeamIds = array_map(fn($t) => $t->getId(), $currentTeams->toArray());
+        $availableTeams = empty($playerTeamIds) 
+            ? $em->getRepository(Team::class)->findAll()
+            : $em->getRepository(Team::class)->createQueryBuilder('t')
+                ->where('t.id NOT IN (:ids)')
+                ->setParameter('ids', $playerTeamIds)
+                ->getQuery()
+                ->getResult();
         
-        // Reindex array for Twig
-        $availableTeams = array_values($availableTeams);
+        // No need to reindex - query builder returns array
 
         // Get pending invitations for this player
         $pendingInvitations = $invitationRepo->findPendingInvitationForPlayer($user);
@@ -61,18 +65,46 @@ class PlayerDashboardController extends AbstractController
 
         $budgets = [];
         $depenses = [];
+        $managedTeams = [];
 
         if ($this->isGranted('ROLE_MANAGER') || $this->isGranted('ROLE_ADMIN')) {
-            // Check budgets and alerts for teams where user is a manager
-            foreach ($currentTeams as $team) {
-                if ($team->getManager() && $team->getManager()->getId() === $user->getId()) {
+            // OPTIMIZATION: Query for teams where user is manager directly instead of looping
+            if ($this->isGranted('ROLE_MANAGER')) {
+                $managedTeams = $em->getRepository(Team::class)->createQueryBuilder('t')
+                    ->where('t.manager = :manager')
+                    ->setParameter('manager', $user)
+                    ->getQuery()
+                    ->getResult();
+                
+                // Check budgets and alerts for teams where user is a manager
+                foreach ($managedTeams as $team) {
                     $budgetAlertService->checkBudgetAndAlert($team);
                 }
             }
 
-            // Get budgets and expenses for manager dashboard
-            $budgets = $budgetRepo->findAll();
-            $depenses = $depenseRepo->findAll();
+            // OPTIMIZATION: Only fetch budgets and expenses for the user's managed teams
+            // or all if admin (avoid loading thousands of records)
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $budgets = $budgetRepo->findAll();
+                $depenses = $depenseRepo->findAll();
+            } elseif (!empty($managedTeams)) {
+                // Managers only see their team budgets
+                $teamIds = array_map(fn($t) => $t->getId(), $managedTeams);
+                $budgets = $budgetRepo->createQueryBuilder('b')
+                    ->leftJoin('b.team', 't')
+                    ->andWhere('t.id IN (:teams)')
+                    ->setParameter('teams', $teamIds)
+                    ->getQuery()
+                    ->getResult();
+                
+                $depenses = $depenseRepo->createQueryBuilder('d')
+                    ->leftJoin('d.budget', 'b')
+                    ->leftJoin('b.team', 't')
+                    ->andWhere('t.id IN (:teams)')
+                    ->setParameter('teams', $teamIds)
+                    ->getQuery()
+                    ->getResult();
+            }
         }
 
         // Manager financial data (aggregate from their teams)
