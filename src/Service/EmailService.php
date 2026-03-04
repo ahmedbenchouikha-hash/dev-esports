@@ -217,6 +217,225 @@ HTML;
     }
 
     /**
+     * Send reward request status change email
+     */
+    public function sendStatusChangeEmail($demande, string $newStatut): bool
+    {
+        try {
+            $email = $demande->getEmail();
+            $rewardName = $demande->getRecompense() ? $demande->getRecompense()->getRecompense() : 'Unknown Reward';
+            
+            $statusBadge = match($newStatut) {
+                'approuvee' => '✅ Approved',
+                'rejetee' => '❌ Rejected',
+                default => 'Updated'
+            };
+
+            $statusColor = match($newStatut) {
+                'approuvee' => '22c55e',
+                'rejetee' => 'ef4444',
+                default => '3b82f6'
+            };
+
+            $subject = "🎁 Your Reward Request Status: $statusBadge";
+            $htmlContent = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #b622d1 0%, #7c3aed 100%); color: white; padding: 40px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+        .content { padding: 40px 30px; }
+        .status-box { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #$statusColor; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .status-badge { display: inline-block; background: #$statusColor; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; margin: 10px 0; }
+        .detail-box { background: #f5f5f5; padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .detail-label { font-size: 12px; color: #666; text-transform: uppercase; }
+        .detail-value { font-size: 16px; font-weight: bold; color: #333; margin-top: 5px; }
+        .footer { text-align: center; padding: 30px 20px; color: #666; font-size: 12px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Reward Request Update</h1>
+        </div>
+        <div class="content">
+            <p>Hello {$demande->getNomDemandeur()},</p>
+            
+            <p>Your reward request has been reviewed by our admin team.</p>
+            
+            <div class="status-box">
+                <div class="status-badge">$statusBadge</div>
+                <div class="detail-label">Requested Reward</div>
+                <div class="detail-value">$rewardName</div>
+            </div>
+            
+            <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                Status: <strong>$statusBadge</strong><br>
+                Thank you for your participation in Dev Esports!
+            </p>
+        </div>
+        <div class="footer">
+            <p><strong>Dev Esports</strong></p>
+            <p>© 2026 Dev Esports. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+            return $this->send($email, $subject, $htmlContent);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to send status change email', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Send email verification link
+     */
+    public function sendVerificationEmail($demande): bool
+    {
+        try {
+            $email = $demande->getEmail();
+            $id = $demande->getId();
+            $token = $demande->getVerificationToken();
+            $verificationUrl = "https://validation.local/demande-recompense/$id/verify/$token";
+
+            $subject = "🔐 Verify Your Email - Dev Esports Reward Request";
+            $htmlContent = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 40px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+        .content { padding: 40px 30px; }
+        .verify-button { display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+        .footer { text-align: center; padding: 30px 20px; color: #666; font-size: 12px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Verify Your Email</h1>
+        </div>
+        <div class="content">
+            <p>Hello {$demande->getNomDemandeur()},</p>
+            
+            <p>Thank you for submitting your reward request! To activate your request and mark it as prioritaire, please verify your email by clicking the button below:</p>
+            
+            <a href="$verificationUrl" class="verify-button">Verify Email Address</a>
+            
+            <p style="color: #666; font-size: 14px;">
+                Or copy and paste this link:<br>
+                <small style="word-break: break-all;">$verificationUrl</small>
+            </p>
+            
+            <p style="color: #999; font-size: 12px;">
+                This link will expire in 24 hours. If you didn't submit this request, please ignore this email.
+            </p>
+        </div>
+        <div class="footer">
+            <p><strong>Dev Esports</strong></p>
+            <p>© 2026 Dev Esports. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+            return $this->send($email, $subject, $htmlContent);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to send verification email', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Send reward request confirmation email
+     */
+    public function sendConfirmationEmail($demande): bool
+    {
+        try {
+            $email = $demande->getEmail();
+            $rewardName = $demande->getRecompense() ? $demande->getRecompense()->getRecompense() : 'Unknown Reward';
+            $requestDate = $demande->getDateDemande() ? $demande->getDateDemande()->format('d/m/Y H:i') : 'N/A';
+
+            $subject = "✅ Reward Request Submitted - Dev Esports";
+            $htmlContent = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+        .content { padding: 40px 30px; }
+        .details-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .detail-item { margin: 10px 0; }
+        .detail-label { font-size: 12px; color: #666; text-transform: uppercase; }
+        .detail-value { font-size: 16px; font-weight: bold; color: #333; margin-top: 5px; }
+        .footer { text-align: center; padding: 30px 20px; color: #666; font-size: 12px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Request Submitted!</h1>
+        </div>
+        <div class="content">
+            <p>Hello {$demande->getNomDemandeur()},</p>
+            
+            <p>Thank you for submitting your reward request. We've received it and our admin team will review it shortly.</p>
+            
+            <div class="details-box">
+                <div class="detail-item">
+                    <div class="detail-label">Requested Reward</div>
+                    <div class="detail-value">$rewardName</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Request Date</div>
+                    <div class="detail-value">$requestDate</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">🕐 Pending Review</div>
+                </div>
+            </div>
+            
+            <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                <strong>What's next?</strong><br>
+                • Check your email for verification link (if provided)<br>
+                • You can track your request status at any time<br>
+                • Admin will notify you once reviewed
+            </p>
+        </div>
+        <div class="footer">
+            <p><strong>Dev Esports</strong></p>
+            <p>© 2026 Dev Esports. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+            return $this->send($email, $subject, $htmlContent);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to send confirmation email', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
      * Render payment confirmation HTML
      */
     private function renderPaymentConfirmationHtml(Payment $payment, $ticket, $game): string

@@ -357,11 +357,14 @@ class DemandeRecompenseController extends AbstractController
         $entityManager->flush();
 
         // Envoyer un email de notification du changement de statut
-        if ($this->emailService->sendStatusChangeEmail($demande, $newStatut)) {
-            return new JsonResponse(['success' => true, 'message' => 'Statut mis à jour et email envoyé.']);
-        } else {
-            return new JsonResponse(['success' => true, 'message' => 'Statut mis à jour (email non envoyé).']);
+        try {
+            $this->emailService->sendStatusChangeEmail($demande, $newStatut);
+        } catch (\Exception $e) {
+            $this->logger?->error('Failed to send status change email', ['error' => $e->getMessage()]);
+            // Email failure is not critical, continue anyway
         }
+
+        return new JsonResponse(['success' => true, 'message' => 'Status updated successfully']);
     }
 
     #[Route('/{id}/verify/{token}', name: 'demande_recompense_verify_email', methods: ['GET'])]
