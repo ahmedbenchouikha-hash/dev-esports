@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New reward request{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-gift me-2"></i>New reward request
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+                        <div class="mb-3">
+                            {{ form_label(form.recompense) }}
+                            {{ form_widget(form.recompense, {'attr': {'class': 'form-select' ~ (form.recompense.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            {% if form.recompense.vars.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.recompense.vars.errors %}
+                                        <div>{{ error.message }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="invalid-feedback d-block ai-recompense-error" style="display:none;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.nomDemandeur) }}
+                            {{ form_widget(form.nomDemandeur, {'attr': {'class': 'form-control' ~ (form.nomDemandeur.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Full name'}}) }}
+                            {% if form.nomDemandeur.vars.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.nomDemandeur.vars.errors %}
+                                        <div>{{ error.message }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="invalid-feedback d-block ai-nom-error" style="display:none;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.email) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'your.email@domain.com'}}) }}
+                            {% if form.email.vars.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.email.vars.errors %}
+                                        <div>{{ error.message }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{ form_label(form.motif) }}
+                                <button type="button" id="suggestMotifBtn" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-wand-magic-sparkles me-1"></i>AI Suggest
+                                </button>
+                            </div>
+                            {{ form_widget(form.motif, {'attr': {'class': 'form-control' ~ (form.motif.vars.errors|length ? ' is-invalid' : ''), 'rows': 5, 'placeholder': 'Leave empty for AI suggestion or describe your request...'}}) }}
+                            <small class="form-text text-muted">AI will generate 2-3 sentences if you leave this empty</small>
+                            <div id="aiSuggestionBox" class="alert alert-info mt-3" style="display:none;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <i class="fas fa-lightbulb me-2" style="color: #6366f1;"></i>
+                                        <strong>AI Suggestion:</strong>
+                                        <p id="aiSuggestionText" class="mb-0 mt-2" style="font-style: italic; color: #555;"></p>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-success" id="acceptSuggestionBtn">
+                                        <i class="fas fa-check me-1"></i>Use it
+                                    </button>
+                                </div>
+                            </div>
+                            {% if form.motif.vars.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.motif.vars.errors %}
+                                        <div>{{ error.message }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('demande_recompense_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Submit request
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const motifField = document.querySelector('[id$="_motif"]');
+    const recompenseField = document.querySelector('[id$="_recompense"]');
+    const nomField = document.querySelector('[id$="_nomDemandeur"]');
+    const suggestBtn = document.getElementById('suggestMotifBtn');
+    const suggestionBox = document.getElementById('aiSuggestionBox');
+    const suggestionText = document.getElementById('aiSuggestionText');
+    const acceptBtn = document.getElementById('acceptSuggestionBtn');
+    const aiRecompenseError = document.querySelector('.ai-recompense-error');
+    const aiNomError = document.querySelector('.ai-nom-error');
+
+    if (!motifField || !suggestBtn || !suggestionBox || !suggestionText || !acceptBtn) return;
+
+    // Always show the AI Suggest button, whether motif is empty or not
+    suggestBtn.style.display = 'inline-block';
+
+    const clearAiErrors = () => {
+        if (aiRecompenseError) {
+            aiRecompenseError.textContent = '';
+            aiRecompenseError.style.display = 'none';
+        }
+        if (aiNomError) {
+            aiNomError.textContent = '';
+            aiNomError.style.display = 'none';
+        }
+        recompenseField?.classList.remove('is-invalid');
+        nomField?.classList.remove('is-invalid');
+    };
+
+    recompenseField?.addEventListener('change', clearAiErrors);
+    nomField?.addEventListener('input', clearAiErrors);
+
+    suggestBtn.addEventListener('click', function() {
+        const recompenseId = recompenseField?.value;
+        const nomDemandeur = nomField?.value?.trim();
+        const motif = motifField?.value?.trim();
+
+        if (!recompenseId || !nomDemandeur) {
+            clearAiErrors();
+            if (!recompenseId && aiRecompenseError) {
+                recompenseField?.classList.add('is-invalid');
+                aiRecompenseError.textContent = 'Please select a reward.';
+                aiRecompenseError.style.display = 'block';
+            }
+            if (!nomDemandeur && aiNomError) {
+                nomField?.classList.add('is-invalid');
+                aiNomError.textContent = 'Please enter your name.';
+                aiNomError.style.display = 'block';
+            }
+            return;
+        }
+
+        suggestBtn.disabled = true;
+        suggestBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating...';
+
+        fetch('{{ path("demande_recompense_motif_suggest") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `recompenseId=${encodeURIComponent(recompenseId)}&nomDemandeur=${encodeURIComponent(nomDemandeur)}&motif=${encodeURIComponent(motif || '')}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.suggestion) {
+                suggestionBox.classList.remove('alert-danger');
+                suggestionBox.classList.add('alert-info');
+                suggestionText.textContent = data.suggestion;
+                suggestionBox.style.display = 'block';
+            } else {
+                suggestionBox.classList.remove('alert-info');
+                suggestionBox.classList.add('alert-danger');
+                suggestionText.textContent = data.error || 'Unable to generate suggestion.';
+                suggestionBox.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            suggestionBox.classList.remove('alert-info');
+            suggestionBox.classList.add('alert-danger');
+            suggestionText.textContent = 'An error occurred while generating the suggestion.';
+            suggestionBox.style.display = 'block';
+        })
+        .finally(() => {
+            suggestBtn.disabled = false;
+            suggestBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles me-1"></i>AI Suggest';
+        });
+    });
+
+    acceptBtn.addEventListener('click', function() {
+        if (suggestionText.textContent.trim() !== '') {
+            motifField.value = suggestionText.textContent.trim();
+            suggestionBox.style.display = 'none';
+            updateSuggestionVisibility();
+        }
+    });
+});
+</script>
+{% endblock %}
