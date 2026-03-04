@@ -163,7 +163,7 @@
                 <span class="menu-label">Recompenses</span>
                 <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
-            <div id="recompenseMenu" class="collapse {% if 'recompense' in app.request.attributes.get('_route') %}show{% endif %}">
+            <div id="recompenseMenu" class="collapse {% if 'recompense' in app.request.attributes.get('_route') or 'demande_recompense' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Recompenses
                 </a>
@@ -172,6 +172,9 @@
                 </a>
                 <a href="{{ path('recompense_export_pdf') }}" class="menu-subitem">
                     <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
+                <a href="{{ path('demande_recompense_index') }}" class="menu-subitem {% if 'demande_recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-inbox"></i> Reward Requests
                 </a>
             </div>
         </div>
