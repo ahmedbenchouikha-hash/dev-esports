@@ -78,8 +78,8 @@
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="fas fa-pie-chart me-2"></i>Distribution by Type</h5>
                     </div>
-                    <div class="card-body">
-                        <canvas id="rewardTypeChart" height="60"></canvas>
+                    <div class="card-body" style="max-height: 300px; overflow: hidden;">
+                        <canvas id="rewardTypeChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -88,8 +88,8 @@
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0"><i class="fas fa-bar-chart me-2"></i>Requests per Reward</h5>
                     </div>
-                    <div class="card-body">
-                        <canvas id="requestsChart" height="60"></canvas>
+                    <div class="card-body" style="max-height: 300px; overflow: hidden;">
+                        <canvas id="requestsChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -164,109 +164,121 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     {% if recompenses|length > 0 %}
-        // Prepare data for charts
-        const recompenses = {{ recompenses|json_encode }};
+        // Build data structure directly from template
+        const chartData = {
+            types: {},
+            rewards: []
+        };
         
-        // Group by type for pie chart
-        const typeCount = {};
-        const rewardNames = [];
-        const requestCounts = [];
+        // Prepare data from template
+        {% for reward in recompenses %}
+            const type = '{{ reward.type }}';
+            const name = '{{ reward.recompense }}';
+            const demandes = {{ reward.demandes|length }};
+            
+            // Count by type
+            if (!chartData.types[type]) {
+                chartData.types[type] = 0;
+            }
+            chartData.types[type]++;
+            
+            // Store reward names and request counts
+            chartData.rewards.push({
+                name: name,
+                requests: demandes
+            });
+        {% endfor %}
+        
+        // Define colors
         const typeColors = {
             'Computer accessory': '#00f2fe',
             'Medal': '#fd7e14',
             'Cash': '#95E1D3',
-            'Trophy': '#FF6B6B',
-            'default': '#6366f1'
+            'Trophy': '#FF6B6B'
         };
         
-        recompenses.forEach(reward => {
-            // Count by type
-            if (!typeCount[reward.type]) {
-                typeCount[reward.type] = 0;
-            }
-            typeCount[reward.type]++;
-            
-            // Track reward names and request counts
-            rewardNames.push(reward.recompense);
-            requestCounts.push(reward.demandes ? reward.demandes.length : 0);
-        });
+        // Get colors for pie chart based on types
+        const typeLabels = Object.keys(chartData.types);
+        const typeValues = Object.values(chartData.types);
+        const typeBackgroundColors = typeLabels.map(type => typeColors[type] || '#6366f1');
         
         // Pie Chart - Distribution by Type
-        const ctx1 = document.getElementById('rewardTypeChart').getContext('2d');
-        new Chart(ctx1, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(typeCount),
-                datasets: [{
-                    data: Object.values(typeCount),
-                    backgroundColor: [
-                        typeColors['Computer accessory'] || typeColors['default'],
-                        typeColors['Medal'] || typeColors['default'],
-                        typeColors['Cash'] || typeColors['default'],
-                        typeColors['Trophy'] || typeColors['default'],
-                    ],
-                    borderColor: '#fff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: {
-                                size: 12,
-                                weight: '500'
+        const ctx1 = document.getElementById('rewardTypeChart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        data: typeValues,
+                        backgroundColor: typeBackgroundColors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
         
         // Bar Chart - Requests per Reward
-        const ctx2 = document.getElementById('requestsChart').getContext('2d');
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: rewardNames,
-                datasets: [{
-                    label: 'Number of Requests',
-                    data: requestCounts,
-                    backgroundColor: '#4299E1',
-                    borderColor: '#2c5282',
-                    borderWidth: 1.5,
-                    borderRadius: 4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        labels: {
-                            font: {
-                                size: 12,
-                                weight: '500'
+        const ctx2 = document.getElementById('requestsChart');
+        if (ctx2) {
+            const rewardNames = chartData.rewards.map(r => r.name);
+            const requestCounts = chartData.rewards.map(r => r.requests);
+            
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: rewardNames,
+                    datasets: [{
+                        label: 'Requests',
+                        data: requestCounts,
+                        backgroundColor: '#4299E1',
+                        borderColor: '#2c5282',
+                        borderWidth: 1.5,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
                             }
                         }
                     }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
                 }
-            }
-        });
+            });
+        }
     {% endif %}
 });
 </script>
