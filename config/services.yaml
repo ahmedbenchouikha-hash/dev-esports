@@ -17,7 +17,7 @@ parameters:
   mailer.from_email: '%env(MAILER_FROM_EMAIL)%'
   mailer.from_name: '%env(MAILER_FROM_NAME)%'
   mailer.smtp_encryption: '%env(bool:MAILER_SMTP_ENCRYPTION)%'
-  pandascore_api_key: '%env(default::PANDASCORE_API_KEY)%'
+  app.mistral_api_key: '%env(MISTRAL_API_KEY)%'
 
 services:
   # default configuration for services in *this* file
@@ -71,12 +71,3 @@ services:
   # App\Service\AIPricingService:
   #   arguments:
   #     $groqApiKey: '%env(GROQ_API_KEY)%'
-  
-  App\Service\PandaScorePlayerService:
-    arguments:
-      $pandaScoreApiKey: '%pandascore_api_key%'
-  
-  App\Service\AIRewardAnalysisService:
-    arguments:
-      $groqApiKey: '%env(GROQ_API_KEY)%'
-      $pandaScoreService: '@App\Service\PandaScorePlayerService'
