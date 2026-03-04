@@ -2,25 +2,79 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "formatOnSave": true
   },
   "[scss]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "formatOnSave": true
   },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "formatOnSave": true
   },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "formatOnSave": true
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "formatOnSave": true
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+
+  "// MEMORY OPTIMIZATION SETTINGS": "",
+  
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/vendor": true,
+    "**/.git": true,
+    "**/var/cache": true,
+    "**/var/log": true,
+    "**/.env.local": true,
+    "**/public/uploads": true,
+    "**/.DS_Store": true
+  },
+  
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/vendor": true,
+    "**/var": true,
+    "**/.git": true,
+    "**/.vscode": true
+  },
+  
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/vendor/**": true,
+    "**/.git/**": true,
+    "**/var/cache/**": true,
+    "**/var/log/**": true,
+    "**/public/uploads/**": true
+  },
+  
+  "// Disable memory-intensive features": "",
+  "editor.autoClosingBrackets": "never",
+  "editor.autoClosingQuotes": "never",
+  "editor.autoClosingOvertype": "never",
+  "editor.autoSurround": "never",
+  "editor.lightbulb.enabled": false,
+  "editor.parameterHints.enabled": false,
+  "editor.inlayHints.enabled": false,
+  "editor.linkedEditing": false,
+  
+  "search.smartCase": true,
+  "search.useEditorAsIncludePattern": false,
+  "python.linting.enabled": false,
+  "php.validate.enable": false,
+  
+  "// Reduce memory for language servers": "",
+  "[php]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  
+  "// Disable telemetry": "",
+  "telemetry.telemetryLevel": "off",
+  "experiments.enabled": false
 }
