@@ -101,7 +101,7 @@
 
                             <!-- Reason Preview -->
                             <p class="text-muted small mb-3" style="height: 60px; overflow: hidden;">
-                                <em>{{ demande.motif|truncate(100) }}</em>
+                                <em>{{ demande.motif|slice(0, 100) }}{% if demande.motif|length > 100 %}...{% endif %}</em>
                             </p>
                         </div>
 
