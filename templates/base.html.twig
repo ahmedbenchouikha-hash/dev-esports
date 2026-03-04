@@ -9,16 +9,13 @@
         <!-- Bootstrap CSS -->
         <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
         
-        <!-- Google Fonts -->
+        <!-- Google Fonts (preload for faster loading) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
         
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
-        
-        <!-- Chart.js -->
-        <script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}"></script>
+        <!-- Font Awesome (non-critical, async) -->
+        <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}" media="print" onload="this.media='all'">
         
         <!-- App CSS -->
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -1214,5 +1211,8 @@
             // Refresh notifications every 30 seconds
             setInterval(loadNotifications, 30000);
         </script>
+
+        <!-- Chart.js (loaded at end of body to avoid blocking initial render) -->
+        <script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}"></script>
     </body>
 </html>
