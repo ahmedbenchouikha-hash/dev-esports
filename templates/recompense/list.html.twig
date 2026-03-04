@@ -70,6 +70,30 @@
             <strong>Statistiques:</strong> {{ recompenses|length }} récompense(s) 
             | Classement min: {{ minClassement }} | Classement max: {{ maxClassement }}
         </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-pie-chart me-2"></i>Distribution by Type</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="rewardTypeChart" height="60"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-bar-chart me-2"></i>Requests per Reward</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="requestsChart" height="60"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endif %}
 
     <!-- Recompenses Table -->
@@ -133,4 +157,117 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if recompenses|length > 0 %}
+        // Prepare data for charts
+        const recompenses = {{ recompenses|json_encode }};
+        
+        // Group by type for pie chart
+        const typeCount = {};
+        const rewardNames = [];
+        const requestCounts = [];
+        const typeColors = {
+            'Computer accessory': '#00f2fe',
+            'Medal': '#fd7e14',
+            'Cash': '#95E1D3',
+            'Trophy': '#FF6B6B',
+            'default': '#6366f1'
+        };
+        
+        recompenses.forEach(reward => {
+            // Count by type
+            if (!typeCount[reward.type]) {
+                typeCount[reward.type] = 0;
+            }
+            typeCount[reward.type]++;
+            
+            // Track reward names and request counts
+            rewardNames.push(reward.recompense);
+            requestCounts.push(reward.demandes ? reward.demandes.length : 0);
+        });
+        
+        // Pie Chart - Distribution by Type
+        const ctx1 = document.getElementById('rewardTypeChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(typeCount),
+                datasets: [{
+                    data: Object.values(typeCount),
+                    backgroundColor: [
+                        typeColors['Computer accessory'] || typeColors['default'],
+                        typeColors['Medal'] || typeColors['default'],
+                        typeColors['Cash'] || typeColors['default'],
+                        typeColors['Trophy'] || typeColors['default'],
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Bar Chart - Requests per Reward
+        const ctx2 = document.getElementById('requestsChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: rewardNames,
+                datasets: [{
+                    label: 'Number of Requests',
+                    data: requestCounts,
+                    backgroundColor: '#4299E1',
+                    borderColor: '#2c5282',
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    {% endif %}
+});
+</script>
 {% endblock %}
