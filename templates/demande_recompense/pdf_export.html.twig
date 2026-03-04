@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Reward Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+            margin: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4A5568;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            color: #2D3748;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .header .info {
+            color: #718096;
+            font-size: 11px;
+        }
+        .summary {
+            background-color: #F7FAFC;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4299E1;
+        }
+        .summary h2 {
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            color: #2D3748;
+        }
+        .summary-stats {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .summary-stats td {
+            width: 25%;
+            text-align: center;
+            padding: 10px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2D3748;
+        }
+        .stat-label {
+            font-size: 10px;
+            color: #718096;
+            text-transform: uppercase;
+        }
+        .demande-item {
+            border: 1px solid #E2E8F0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .demande-header {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .demande-header .left-col {
+            width: 70%;
+        }
+        .demande-header .right-col {
+            width: 30%;
+            text-align: right;
+        }
+        .demande-id {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2D3748;
+        }
+        .demande-date {
+            color: #718096;
+            font-size: 10px;
+        }
+        .demande-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-en_attente {
+            background-color: #FED7D7;
+            color: #C53030;
+        }
+        .status-approuvee {
+            background-color: #C6F6D5;
+            color: #22543D;
+        }
+        .status-rejetee {
+            background-color: #FED7D7;
+            color: #742A2A;
+        }
+        .demande-content {
+            margin-top: 10px;
+        }
+        .field {
+            margin-bottom: 8px;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #4A5568;
+            font-size: 11px;
+        }
+        .field-value {
+            color: #2D3748;
+            margin-top: 2px;
+        }
+        .ai-section {
+            background-color: #EBF4FF;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid #4299E1;
+        }
+        .ai-section h4 {
+            margin: 0 0 8px 0;
+            color: #2C5282;
+            font-size: 12px;
+        }
+        .ai-score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2C5282;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #A0AEC0;
+            border-top: 1px solid #E2E8F0;
+            padding-top: 15px;
+        }
+        .no-requests {
+            text-align: center;
+            padding: 40px;
+            color: #A0AEC0;
+            font-style: italic;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .demande-header table {
+            border: none;
+        }
+        .demande-header table td {
+            border: none;
+        }
+        .priority-badge {
+            background-color: #FED7E2;
+            color: #702459;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏆 My Reward Requests</h1>
+        <div class="info">
+            <strong>User:</strong> {{ userEmail }}<br>
+            <strong>Export Date:</strong> {{ exportDate|date('F d, Y - H:i') }}
+        </div>
+    </div>
+
+    {% if demandes|length > 0 %}
+        <div class="summary">
+            <h2>Summary</h2>
+            <table class="summary-stats">
+                <tr>
+                    <td class="stat-item">
+                        <div class="stat-value">{{ demandes|length }}</div>
+                        <div class="stat-label">Total Requests</div>
+                    </td>
+                    <td class="stat-item">
+                        <div class="stat-value">{{ demandes|filter(d => d.statut == 'en_attente')|length }}</div>
+                        <div class="stat-label">Pending</div>
+                    </td>
+                    <td class="stat-item">
+                        <div class="stat-value">{{ demandes|filter(d => d.statut == 'approuvee')|length }}</div>
+                        <div class="stat-label">Approved</div>
+                    </td>
+                    <td class="stat-item">
+                        <div class="stat-value">{{ demandes|filter(d => d.statut == 'rejetee')|length }}</div>
+                        <div class="stat-label">Rejected</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {% for demande in demandes %}
+        <div class="demande-item">
+            <div class="demande-header">
+                <table>
+                    <tr>
+                        <td class="left-col">
+                            <span class="demande-id">Request #{{ demande.id }}</span>
+                            {% if demande.isPrioritaire %}
+                                <span class="priority-badge">⚡ Priority</span>
+                            {% endif %}
+                        </td>
+                        <td class="right-col">
+                            <span class="demande-status status-{{ demande.statut }}">
+                                {% if demande.statut == 'en_attente' %}
+                                    Pending
+                                {% elseif demande.statut == 'approuvee' %}
+                                    Approved
+                                {% elseif demande.statut == 'rejetee' %}
+                                    Rejected
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="demande-content">
+                <div class="field">
+                    <div class="field-label">📅 Request Date:</div>
+                    <div class="field-value">{{ demande.dateDemande|date('F d, Y - H:i') }}</div>
+                </div>
+
+                <div class="field">
+                    <div class="field-label">🎁 Requested Reward:</div>
+                    <div class="field-value">{{ demande.recompense.recompense }} ({{ demande.recompense.type }})</div>
+                </div>
+
+                <div class="field">
+                    <div class="field-label">👤 Requester:</div>
+                    <div class="field-value">{{ demande.nomDemandeur }}</div>
+                </div>
+
+                <div class="field">
+                    <div class="field-label">📧 Email:</div>
+                    <div class="field-value">
+                        {{ demande.email }}
+                        {% if demande.emailVerifiedAt %}
+                            ✓ Verified
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if demande.motif %}
+                <div class="field">
+                    <div class="field-label">📝 Reason:</div>
+                    <div class="field-value">{{ demande.motif }}</div>
+                </div>
+                {% endif %}
+
+                {% if demande.aiLegitimacyScore is not null %}
+                <div class="ai-section">
+                    <h4>🤖 AI Analysis</h4>
+                    <div class="field">
+                        <div class="field-label">Legitimacy Score:</div>
+                        <div class="ai-score">{{ demande.aiLegitimacyScore }}/100</div>
+                    </div>
+                    {% if demande.aiFraudType %}
+                    <div class="field">
+                        <div class="field-label">Risk Type:</div>
+                        <div class="field-value">{{ demande.aiFraudType }}</div>
+                    </div>
+                    {% endif %}
+                    {% if demande.aiSentiment %}
+                    <div class="field">
+                        <div class="field-label">Sentiment:</div>
+                        <div class="field-value">{{ demande.aiSentiment|capitalize }}</div>
+                    </div>
+                    {% endif %}
+                    {% if demande.aiConfidenceLevel %}
+                    <div class="field">
+                        <div class="field-label">Confidence Level:</div>
+                        <div class="field-value">{{ (demande.aiConfidenceLevel * 100)|round }}%</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-requests">
+            No reward requests found for this account.
+        </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>This document was automatically generated from the eSports Management Platform</p>
+        <p>© {{ exportDate|date('Y') }} - Confidential Document</p>
+    </div>
+</body>
+</html>
