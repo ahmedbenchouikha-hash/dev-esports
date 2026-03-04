@@ -269,6 +269,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // Disable button and show loading state
+            this.disabled = true;
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fe fe-loader me-1"></i>Loading...';
+
             fetch(url, {
                 method: 'POST',
                 headers: {
@@ -277,17 +282,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: `statut=${statut}&_token=${token}`
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
                 if (data.success) {
-                    location.reload();
+                    // Show success message
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.role = 'alert';
+                    successAlert.innerHTML = `<i class="fe fe-check-circle me-2"></i>${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                    document.querySelector('.container-fluid').insertBefore(successAlert, document.querySelector('.container-fluid').firstChild);
+                    
+                    // Reload after 1 second
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Error: ' + (data.error || 'Unable to update status'));
+                    throw new Error(data.error || 'Unable to update status');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred');
+                // Restore button state
+                this.disabled = false;
+                this.innerHTML = originalText;
+                
+                // Show error alert
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+                errorAlert.role = 'alert';
+                errorAlert.innerHTML = `<i class="fe fe-alert-circle me-2"></i>Error: ${error.message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                document.querySelector('.container-fluid').insertBefore(errorAlert, document.querySelector('.container-fluid').firstChild);
             });
         });
     });
