@@ -162,44 +162,65 @@
     {% endif %}
 </div>
 
+
+<!-- Pass data to JavaScript -->
+<script id="chartData" type="application/json">
+{
+    "recompenses": [
+        {% for reward in recompenses %}
+        {
+            "id": {{ reward.id }},
+            "name": "{{ reward.recompense|escape('js') }}",
+            "type": "{{ reward.type|escape('js') }}",
+            "requests": {{ reward.demandes|length }}
+        }{{ not loop.last ? ',' : '' }}
+        {% endfor %}
+    ]
+}
+</script>
+
 <!-- Chart.js Library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Chart script loaded');
-    {% if recompenses|length > 0 %}
-        console.log('Recompenses found');
-        // Build data structure directly from template
-        const chartData = {
-            types: {},
-            rewards: []
-        };
+    // Get data from embedded JSON
+    const dataScriptTag = document.getElementById('chartData');
+    if (!dataScriptTag) {
+        console.log('No chart data found');
+        return;
+    }
+    
+    try {
+        const data = JSON.parse(dataScriptTag.textContent);
+        const recompenses = data.recompenses || [];
         
-        // Prepare data from template
-        {% for reward in recompenses %}
-            const type = '{{ reward.type }}';
-            const name = '{{ reward.recompense }}';
-            const demandes = {{ reward.demandes|length }};
-            
-            console.log('Reward:', name, 'Type:', type, 'Demandes:', demandes);
-            
+        console.log('Recompenses data:', recompenses);
+        
+        if (recompenses.length === 0) {
+            console.log('No recompenses data');
+            return;
+        }
+        
+        // Build aggregated data for charts
+        const typeCount = {};
+        const rewardNames = [];
+        const requestCounts = [];
+        
+        recompenses.forEach(reward => {
             // Count by type
-            if (!chartData.types[type]) {
-                chartData.types[type] = 0;
-            }
-            chartData.types[type]++;
+            typeCount[reward.type] = (typeCount[reward.type] || 0) + 1;
             
-            // Store reward names and request counts
-            chartData.rewards.push({
-                name: name,
-                requests: demandes
-            });
-        {% endfor %}
+            // Store reward info
+            rewardNames.push(reward.name);
+            requestCounts.push(reward.requests);
+        });
         
-        console.log('Chart data:', chartData);
+        console.log('Type count:', typeCount);
+        console.log('Reward names:', rewardNames);
+        console.log('Request counts:', requestCounts);
         
-        // Define colors
+        // Colors for chart
         const typeColors = {
             'Computer accessory': '#00f2fe',
             'Medal': '#fd7e14',
@@ -207,26 +228,23 @@ document.addEventListener('DOMContentLoaded', function() {
             'Trophy': '#FF6B6B'
         };
         
-        // Get colors for pie chart based on types
-        const typeLabels = Object.keys(chartData.types);
-        const typeValues = Object.values(chartData.types);
-        const typeBackgroundColors = typeLabels.map(type => typeColors[type] || '#6366f1');
-        
-        console.log('Type labels:', typeLabels);
-        console.log('Type values:', typeValues);
-        
-        // Pie Chart - Distribution by Type
+        // Type chart
         const ctx1 = document.getElementById('rewardTypeChart');
-        console.log('ctx1 element:', ctx1);
         if (ctx1) {
+            const typeLabels = Object.keys(typeCount);
+            const typeValues = Object.values(typeCount);
+            const colors = typeLabels.map(t => typeColors[t] || '#6366f1');
+            
+            console.log('Creating type chart with labels:', typeLabels, 'values:', typeValues);
+            
             try {
-                new Chart(ctx1, {
+                const chart1 = new Chart(ctx1, {
                     type: 'doughnut',
                     data: {
                         labels: typeLabels,
                         datasets: [{
                             data: typeValues,
-                            backgroundColor: typeBackgroundColors,
+                            backgroundColor: colors,
                             borderColor: '#fff',
                             borderWidth: 2
                         }]
@@ -240,8 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 labels: {
                                     padding: 10,
                                     font: {
-                                        size: 11,
-                                        weight: '500'
+                                        size: 11
                                     }
                                 }
                             }
@@ -249,23 +266,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 console.log('Type chart created successfully');
-            } catch (e) {
-                console.error('Error creating type chart:', e);
+            } catch (err) {
+                console.error('Error creating type chart:', err);
             }
+        } else {
+            console.error('rewardTypeChart element not found');
         }
         
-        // Bar Chart - Requests per Reward
+        // Requests chart
         const ctx2 = document.getElementById('requestsChart');
-        console.log('ctx2 element:', ctx2);
         if (ctx2) {
+            console.log('Creating requests chart with names:', rewardNames, 'counts:', requestCounts);
+            
             try {
-                const rewardNames = chartData.rewards.map(r => r.name);
-                const requestCounts = chartData.rewards.map(r => r.requests);
-                
-                console.log('Reward names:', rewardNames);
-                console.log('Request counts:', requestCounts);
-                
-                new Chart(ctx2, {
+                const chart2 = new Chart(ctx2, {
                     type: 'bar',
                     data: {
                         labels: rewardNames,
@@ -286,8 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             legend: {
                                 labels: {
                                     font: {
-                                        size: 11,
-                                        weight: '500'
+                                        size: 11
                                     }
                                 }
                             }
@@ -303,13 +316,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 console.log('Requests chart created successfully');
-            } catch (e) {
-                console.error('Error creating requests chart:', e);
+            } catch (err) {
+                console.error('Error creating requests chart:', err);
             }
+        } else {
+            console.error('requestsChart element not found');
         }
-    {% else %}
-        console.log('No recompenses found');
-    {% endif %}
+        
+    } catch (err) {
+        console.error('Error parsing chart data:', err);
+    }
 });
 </script>
 {% endblock %}
