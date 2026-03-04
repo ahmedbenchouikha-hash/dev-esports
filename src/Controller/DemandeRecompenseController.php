@@ -99,10 +99,16 @@ class DemandeRecompenseController extends AbstractController
             return new JsonResponse(['error' => 'Acces refuse'], 403);
         }
 
-        $userEmail = $this->getUser()?->getUserIdentifier();
+        $user = $this->getUser();
+        $userEmail = $user?->getUserIdentifier();
         if (!$userEmail) {
             return new JsonResponse(['error' => 'Utilisateur non authentifie'], 403);
         }
+
+        // Get user's full name
+        $firstName = $user->getFirstName() ?? '';
+        $lastName = $user->getLastName() ?? '';
+        $nomDemandeur = trim($firstName . ' ' . $lastName) ?: $user->getUsername();
 
         // Récupérer action depuis GET (chargement formulaire) ou POST (soumission)
         $action = $request->query->get('action') ?? $request->request->get('action', 'create');
@@ -120,6 +126,12 @@ class DemandeRecompenseController extends AbstractController
             return new JsonResponse(['error' => 'Acces refuse'], 403);
         }
 
+        // Auto-populate for new demands
+        if ($action === 'create') {
+            $demande->setEmail($userEmail);
+            $demande->setNomDemandeur($nomDemandeur);
+        }
+
         $form = $this->createForm(DemandeRecompenseType::class, $demande);
 
         if ($request->isMethod('POST')) {
@@ -128,6 +140,9 @@ class DemandeRecompenseController extends AbstractController
             error_log("📝 Form handled");
 
             if ($form->isSubmitted()) {
+                // Ensure email and nomDemandeur are never changed
+                $demande->setEmail($userEmail);
+                $demande->setNomDemandeur($nomDemandeur);
                 if ($action === 'create' && trim((string) $demande->getMotif()) === '') {
                     try {
                         $demande->setMotif($this->aiService->generateMotifSuggestion($demande));
@@ -253,7 +268,8 @@ class DemandeRecompenseController extends AbstractController
             return new JsonResponse(['error' => 'Acces refuse'], 403);
         }
 
-        $userEmail = $this->getUser()?->getUserIdentifier();
+        $user = $this->getUser();
+        $userEmail = $user?->getUserIdentifier();
         if (!$userEmail) {
             return new JsonResponse(['error' => 'Utilisateur non authentifie'], 403);
         }
@@ -420,12 +436,20 @@ class DemandeRecompenseController extends AbstractController
         }
 
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $userEmail = $this->getUser()?->getUserIdentifier();
+        $user = $this->getUser();
+        $userEmail = $user?->getUserIdentifier();
         if (!$userEmail) {
             throw new AccessDeniedException('Utilisateur non authentifie.');
         }
 
         $demande = new DemandeRecompense();
+        
+        // Auto-populate with current user's information
+        $demande->setEmail($userEmail);
+        $firstName = $user->getFirstName() ?? '';
+        $lastName = $user->getLastName() ?? '';
+        $nomDemandeur = trim($firstName . ' ' . $lastName) ?: $user->getUsername();
+        $demande->setNomDemandeur($nomDemandeur);
         
         // Pre-select recompense if recompenseId is provided
         $recompenseId = $request->query->get('recompenseId');
@@ -440,6 +464,10 @@ class DemandeRecompenseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            // Ensure email and nomDemandeur are never changed by the form
+            $demande->setEmail($userEmail);
+            $demande->setNomDemandeur($nomDemandeur);
+            
             if (trim((string) $demande->getMotif()) === '') {
                 try {
                     $demande->setMotif($this->aiService->generateMotifSuggestion($demande));
