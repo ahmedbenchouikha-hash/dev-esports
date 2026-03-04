@@ -51,7 +51,7 @@ class TournamentRegistrationType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('notes', TextareaType::class, [
+            ->add('additionalInfo', TextareaType::class, [
                 'label' => 'Additional Notes (Optional)',
                 'attr' => [
                     'class' => 'form-control',

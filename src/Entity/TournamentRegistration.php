@@ -20,12 +20,16 @@ class TournamentRegistration
     private ?Tournament $tournament = null;
 
     #[ORM\ManyToOne(targetEntity: Team::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?Team $team = null;
 
     #[ORM\ManyToOne(targetEntity: Player::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?Player $player = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'reviewed_by_id', nullable: true, onDelete: 'SET NULL')]
+    private ?User $reviewedBy = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Team name is required')]
@@ -35,18 +39,27 @@ class TournamentRegistration
     #[Assert\Email(message: 'Please provide a valid email address')]
     private ?string $contactEmail = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $contactPhone = null;
+
     #[ORM\Column(length: 50, options: ['default' => 'pending'])]
     #[Assert\Choice(choices: ['pending', 'approved', 'rejected'])]
     private ?string $status = 'pending';
 
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $notes = null;
+    #[ORM\Column(type: 'text', nullable: true, name: 'additional_info')]
+    private ?string $additionalInfo = null;
+
+    #[ORM\Column(type: 'text', nullable: true, name: 'admin_notes')]
+    private ?string $adminNotes = null;
 
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTime $updatedAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true, name: 'reviewed_at')]
+    private ?\DateTime $reviewedAt = null;
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -121,6 +134,17 @@ class TournamentRegistration
         return $this;
     }
 
+    public function getContactPhone(): ?string
+    {
+        return $this->contactPhone;
+    }
+
+    public function setContactPhone(?string $contactPhone): static
+    {
+        $this->contactPhone = $contactPhone;
+        return $this;
+    }
+
     public function getStatus(): ?string
     {
         return $this->status;
@@ -132,14 +156,47 @@ class TournamentRegistration
         return $this;
     }
 
-    public function getNotes(): ?string
+    public function getAdditionalInfo(): ?string
     {
-        return $this->notes;
+        return $this->additionalInfo;
     }
 
-    public function setNotes(?string $notes): static
+    public function setAdditionalInfo(?string $additionalInfo): static
     {
-        $this->notes = $notes;
+        $this->additionalInfo = $additionalInfo;
+        return $this;
+    }
+
+    public function getAdminNotes(): ?string
+    {
+        return $this->adminNotes;
+    }
+
+    public function setAdminNotes(?string $adminNotes): static
+    {
+        $this->adminNotes = $adminNotes;
+        return $this;
+    }
+
+    public function getReviewedBy(): ?User
+    {
+        return $this->reviewedBy;
+    }
+
+    public function setReviewedBy(?User $reviewedBy): static
+    {
+        $this->reviewedBy = $reviewedBy;
+        return $this;
+    }
+
+    public function getReviewedAt(): ?\DateTime
+    {
+        return $this->reviewedAt;
+    }
+
+    public function setReviewedAt(?\DateTime $reviewedAt): static
+    {
+        $this->reviewedAt = $reviewedAt;
         return $this;
     }
 
