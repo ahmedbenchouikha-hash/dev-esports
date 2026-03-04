@@ -59,6 +59,23 @@
         </div>
         {% endif %}
 
+        <!-- Reward Requests Menu -->
+        <div class="menu-group">
+            <a href="#" class="menu-item menu-toggle" data-bs-toggle="collapse" data-bs-target="#playerRecompenseMenu">
+                <i class="fas fa-gift menu-icon"></i>
+                <span class="menu-label">Reward Requests</span>
+                <i class="fas fa-chevron-down menu-arrow"></i>
+            </a>
+            <div id="playerRecompenseMenu" class="collapse {% if 'demande_recompense' in app.request.attributes.get('_route') %}show{% endif %}">
+                <a href="{{ path('demande_recompense_index') }}" class="menu-subitem {% if 'demande_recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-list"></i> My Requests
+                </a>
+                <a href="{{ path('recompense_index') }}" class="menu-subitem {% if 'recompense_index' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-shopping-bag"></i> Available Rewards
+                </a>
+            </div>
+        </div>
+
         <!-- Teams Section -->
         <div class="menu-section-title">TEAMS</div>
 

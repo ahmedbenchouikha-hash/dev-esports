@@ -69,7 +69,10 @@ class DemandeRecompenseController extends AbstractController
 
         $isPlayer = !$isAdmin;
 
-        return $this->render('demande_recompense/list.html.twig', [
+        // Use different template for players vs admins
+        $template = $isPlayer ? 'demande_recompense/player_list.html.twig' : 'demande_recompense/list.html.twig';
+
+        return $this->render($template, [
             'demandes' => $demandes,
             'search' => $search,
             'sort' => $sort,
