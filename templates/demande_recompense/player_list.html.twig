@@ -82,7 +82,7 @@
                             <!-- Details -->
                             <div class="mb-3">
                                 <small class="text-muted d-block"><strong>Requested:</strong> {{ demande.dateDemande|date('d M Y') }}</small>
-                                <small class="text-muted d-block"><strong>Type:</strong> {{ demande.recompense.type if demande.recompense else 'N/A' }}</small>
+                                <small class="text-muted d-block"><strong>Type:</strong> {{ demande.recompense ? demande.recompense.type : 'N/A' }}</small>
                                 {% if demande.aiLegitimacyScore %}
                                 <small class="text-muted d-block">
                                     <strong>AI Score:</strong>
