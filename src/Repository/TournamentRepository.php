@@ -57,4 +57,58 @@ class TournamentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function createAdminListQueryBuilder(string $search = '', string $status = '', string $orderBy = 'startDate', string $direction = 'DESC')
+    {
+        $validOrderBy = ['name', 'startDate', 'endDate', 'createdAt'];
+        $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'startDate';
+        $direction = strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC';
+
+        $qb = $this->createQueryBuilder('t');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $qb->andWhere('t.name LIKE :search OR t.description LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        // Apply status filter
+        if (!empty($status)) {
+            $qb->andWhere('t.status = :status')
+               ->setParameter('status', $status);
+        }
+
+        $qb->orderBy('t.' . $orderBy, $direction);
+
+        return $qb;
+    }
+
+    public function getStatusCountsForFilters(string $search = '', string $status = ''): array
+    {
+        $statuses = ['pending', 'ongoing', 'completed', 'cancelled'];
+        $counts = [];
+
+        foreach ($statuses as $stat) {
+            $qb = $this->createQueryBuilder('t')
+                ->select('COUNT(t.id)')
+                ->where('t.status = :status')
+                ->setParameter('status', $stat);
+
+            // Apply search filter if provided
+            if (!empty($search)) {
+                $qb->andWhere('t.name LIKE :search OR t.description LIKE :search')
+                   ->setParameter('search', '%' . $search . '%');
+            }
+
+            // Note: $status parameter in this context is the filter, not the stat
+            // So we only apply it if it matches current stat
+            if (!empty($status) && $status !== $stat) {
+                $counts[$stat] = 0;
+            } else {
+                $counts[$stat] = (int) $qb->getQuery()->getSingleScalarResult();
+            }
+        }
+
+        return $counts;
+    }
 }
