@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Service\AILoginMessageService;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +28,8 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private RouterInterface $router,
-        private AILoginMessageService $aiLoginMessageService
+        private AILoginMessageService $aiLoginMessageService,
+        private LoggerInterface $logger
     ) {}
 
     public function authenticate(Request $request): Passport
@@ -48,19 +50,17 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // Get the user and generate personalized login message
         $user = $token->getUser();
         
         try {
             $loginMessage = $this->aiLoginMessageService->generateLoginMessage($user);
-            $request->getSession()->getFlashBag()->add('login_message', $loginMessage);
+            $request->getSession()->set('_login_message', $loginMessage);
         } catch (\Throwable $e) {
-            \error_log('Erreur lors de la génération du message de login: ' . $e->getMessage());
+            $this->logger->error('Error generating login message: ' . $e->getMessage());
         }
         
         // Check if player is approved
         if (in_array('ROLE_USER', $user->getRoles()) && !$user->isApproved()) {
-            // Player not approved - redirect to waiting page
             return new RedirectResponse($this->router->generate('player_pending_approval'));
         }
         
@@ -69,7 +69,6 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->router->generate('admin_dashboard'));
         }
         
-        // Default to player dashboard for approved ROLE_USER
         return new RedirectResponse($this->router->generate('player_dashboard'));
     }
 

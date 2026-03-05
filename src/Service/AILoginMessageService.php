@@ -93,7 +93,6 @@ class AILoginMessageService
             return $this->generateFallbackMessage($user, $stats);
 
         } catch (\Throwable $e) {
-            \error_log('Erreur AI Login Message: ' . $e->getMessage());
             return $this->generateFallbackMessage($user, $stats);
         }
     }

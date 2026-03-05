@@ -26,6 +26,7 @@ class PlayerDashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'player_dashboard', methods: ['GET'])]
     public function dashboard(
+        Request $request,
         EntityManagerInterface $em,
         TeamInvitationRepository $invitationRepo,
         PlayerScoreService $scoreService,
@@ -35,6 +36,12 @@ class PlayerDashboardController extends AbstractController
     ): Response
     {
         $user = $this->getUser();
+        
+        // Get and clear the AI login message from session
+        $loginMessage = $request->getSession()->get('_login_message');
+        if ($loginMessage) {
+            $request->getSession()->remove('_login_message');
+        }
         
         // Check if user is a Player
         if (!$user instanceof Player) {
@@ -120,6 +127,7 @@ class PlayerDashboardController extends AbstractController
 
         return $this->render('player/dashboard.html.twig', [
             'player' => $user,
+            'loginMessage' => $loginMessage,
             'currentTeam' => $currentTeams->first() ?: null,
             'currentTeams' => $currentTeams,
             'availableTeams' => $availableTeams,
