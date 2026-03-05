@@ -30,8 +30,8 @@ class AIPricingController extends AbstractController
         $geminiAvailable = $aiPricingService->isGeminiAvailable();
         $availableModels = $aiPricingService->getAvailableModels();
         
-        // Get all tickets for analysis
-        $tickets = $ticketRepo->findAll();
+        // Get all tickets with game+teams eagerly loaded (avoids N+1 queries)
+        $tickets = $ticketRepo->findAllWithGameAndTeams();
         
         return $this->render('admin/ai_pricing/index.html.twig', [
             'geminiAvailable' => $geminiAvailable,
@@ -99,7 +99,7 @@ class AIPricingController extends AbstractController
             ], 503);
         }
 
-        $tickets = $ticketRepo->findAll();
+        $tickets = $ticketRepo->findAllWithGameAndTeams();
         $analyses = [];
         $processedCount = 0;
 

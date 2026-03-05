@@ -51,12 +51,18 @@
                 <span class="menu-label">Tickets</span>
                 <i class="fas fa-chevron-down menu-arrow"></i>
             </a>
-            <div id="ticketsMenu" class="collapse {% if 'admin_ticket' in app.request.attributes.get('_route') %}show{% endif %}">
+            <div id="ticketsMenu" class="collapse {% if 'admin_ticket' in app.request.attributes.get('_route') or 'smart_pricing' in app.request.attributes.get('_route') or 'ai_pricing' in app.request.attributes.get('_route') %}show{% endif %}">
                 <a href="{{ path('admin_ticket_index') }}" class="menu-subitem {% if 'admin_ticket_index' in app.request.attributes.get('_route') %}active{% endif %}">
                     <i class="fas fa-list"></i> All Tickets
                 </a>
                 <a href="{{ path('admin_ticket_create') }}" class="menu-subitem">
                     <i class="fas fa-plus"></i> Create Ticket
+                </a>
+                <a href="{{ path('smart_pricing_index') }}" class="menu-subitem {% if 'smart_pricing' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-tags"></i> Ticket Pricing
+                </a>
+                <a href="{{ path('ai_pricing_index') }}" class="menu-subitem {% if 'ai_pricing' in app.request.attributes.get('_route') %}active{% endif %}">
+                    <i class="fas fa-robot"></i> AI Pricing (Groq)
                 </a>
             </div>
         </div>

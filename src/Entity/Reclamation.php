@@ -149,7 +149,7 @@ class Reclamation
 
     public function getPlayerId(): ?int
     {
-        return $this->player?->getPlayerId();
+        return $this->player?->getId();
     }
 
     #[Assert\Callback]

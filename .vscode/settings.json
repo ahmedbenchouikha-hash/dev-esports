@@ -25,7 +25,7 @@
   },
 
   "// MEMORY OPTIMIZATION SETTINGS": "",
-  
+
   "files.exclude": {
     "**/node_modules": true,
     "**/vendor": true,
@@ -36,7 +36,7 @@
     "**/public/uploads": true,
     "**/.DS_Store": true
   },
-  
+
   "search.exclude": {
     "**/node_modules": true,
     "**/vendor": true,
@@ -44,7 +44,7 @@
     "**/.git": true,
     "**/.vscode": true
   },
-  
+
   "files.watcherExclude": {
     "**/node_modules/**": true,
     "**/vendor/**": true,
@@ -53,7 +53,7 @@
     "**/var/log/**": true,
     "**/public/uploads/**": true
   },
-  
+
   "// Disable memory-intensive features": "",
   "editor.autoClosingBrackets": "never",
   "editor.autoClosingQuotes": "never",
@@ -63,17 +63,17 @@
   "editor.parameterHints.enabled": false,
   "editor.inlayHints.enabled": false,
   "editor.linkedEditing": false,
-  
+
   "search.smartCase": true,
   "search.useEditorAsIncludePattern": false,
   "python.linting.enabled": false,
   "php.validate.enable": false,
-  
+
   "// Reduce memory for language servers": "",
   "[php]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  
+
   "// Disable telemetry": "",
   "telemetry.telemetryLevel": "off",
   "experiments.enabled": false

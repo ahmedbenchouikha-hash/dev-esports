@@ -16,12 +16,12 @@ class Payment
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'payments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'Ticket is required')]
     private ?Ticket $ticket = null;
 
     #[ORM\ManyToOne(targetEntity: Player::class, inversedBy: 'payments')]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Player $player = null;
 
     #[ORM\Column(length: 100)]
@@ -37,10 +37,10 @@ class Payment
     #[Assert\Email(message: 'Invalid email address')]
     private ?string $customerEmail = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Amount is required')]
     #[Assert\GreaterThan(value: 0, message: 'Amount must be greater than 0')]
-    private ?float $amount = null;
+    private ?string $amount = null;
 
     #[ORM\Column]
     #[Assert\NotNull(message: 'Quantity is required')]
@@ -62,8 +62,8 @@ class Payment
     #[ORM\Column(nullable: true)]
     private ?\DateTime $refundedAt = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $refundAmount = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $refundAmount = null;
 
     #[ORM\Column]
     private \DateTime $createdAt;
@@ -140,12 +140,12 @@ class Payment
 
     public function getAmount(): ?float
     {
-        return $this->amount;
+        return $this->amount !== null ? (float) $this->amount : null;
     }
 
     public function setAmount(float $amount): static
     {
-        $this->amount = $amount;
+        $this->amount = (string) $amount;
         return $this;
     }
 
@@ -206,12 +206,12 @@ class Payment
 
     public function getRefundAmount(): ?float
     {
-        return $this->refundAmount;
+        return $this->refundAmount !== null ? (float) $this->refundAmount : null;
     }
 
     public function setRefundAmount(?float $refundAmount): static
     {
-        $this->refundAmount = $refundAmount;
+        $this->refundAmount = $refundAmount !== null ? (string) $refundAmount : null;
         return $this;
     }
 

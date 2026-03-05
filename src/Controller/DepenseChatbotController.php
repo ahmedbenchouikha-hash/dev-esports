@@ -38,6 +38,7 @@ class DepenseChatbotController extends AbstractController
             return $this->json(['error' => 'Message cannot be empty'], 422);
         }
 
+        /** @var \App\Entity\Player|null $user */
         $user = $this->getUser();
         $answer = $chatbotService->ask($message, $user);
 
@@ -53,6 +54,7 @@ class DepenseChatbotController extends AbstractController
             return $this->json(['error' => 'Access denied'], 403);
         }
 
+        /** @var \App\Entity\Player|null $user */
         $user = $this->getUser();
         $history = $chatbotService->getConversationHistory($user);
 

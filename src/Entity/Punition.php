@@ -102,7 +102,7 @@ class Punition
     // Méthode utilitaire
     public function getPlayerId(): ?int
     {
-        return $this->reclamation?->getPlayer()?->getPlayerId();
+        return $this->reclamation?->getPlayer()?->getId();
     }
 
     #[ORM\PrePersist]

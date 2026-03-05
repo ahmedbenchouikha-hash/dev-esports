@@ -16,7 +16,7 @@ class ManagerRequest
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Player::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Player $player = null;
 
     #[ORM\Column(length: 255, nullable: true)]

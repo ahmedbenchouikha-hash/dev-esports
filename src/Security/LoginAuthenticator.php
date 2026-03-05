@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Entity\User;
 use App\Service\AILoginMessageService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -50,6 +51,7 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        /** @var User $user */
         $user = $token->getUser();
         
         try {

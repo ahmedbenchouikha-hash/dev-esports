@@ -469,7 +469,9 @@ class TournamentController extends AbstractController
         }
 
         $registration->setStatus('approved');
-        $registration->setReviewedBy($this->getUser());
+        /** @var \App\Entity\User $reviewer */
+        $reviewer = $this->getUser();
+        $registration->setReviewedBy($reviewer);
         $registration->setReviewedAt(new \DateTime());
         
         $adminNotes = $request->request->get('admin_notes', '');
@@ -503,7 +505,9 @@ class TournamentController extends AbstractController
         }
 
         $registration->setStatus('rejected');
-        $registration->setReviewedBy($this->getUser());
+        /** @var \App\Entity\User $reviewer */
+        $reviewer = $this->getUser();
+        $registration->setReviewedBy($reviewer);
         $registration->setReviewedAt(new \DateTime());
         
         $rejectionReason = $request->request->get('rejection_reason', '');

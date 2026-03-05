@@ -90,10 +90,6 @@ final class ReclamationController extends AbstractController
                 $reclamation->setPlayer($this->getAuthenticatedPlayerOrDeny());
             }
 
-            if (method_exists($reclamation, 'setCreatedAt')) {
-                $reclamation->setCreatedAt(new \DateTime());
-            }
-
             $errors = $validator->validate($reclamation);
             if (count($errors) > 0) {
                 $errs = [];
@@ -146,10 +142,6 @@ final class ReclamationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            if (method_exists($reclamation, 'setCreatedAt')) {
-                $reclamation->setCreatedAt(new \DateTime());
-            }
 
             $uploadedFile = $form->get('attachment')->getData();
             if ($uploadedFile) {
@@ -242,16 +234,13 @@ final class ReclamationController extends AbstractController
                     'etat' => $reclamation->getEtat()->value,
                     'createdAt' => $reclamation->getCreatedAt()?->format('d M Y H:i'),
                     'updatedAt' => $reclamation->getUpdatedAt()?->format('d M Y H:i'),
-                    'playerId' => $reclamation->getPlayer()?->getPlayerId() ?? '',
+                    'playerId' => $reclamation->getPlayer()?->getId() ?? '',
                     'adminResponse' => $reclamation->getAdminResponse() ?? '',
                 ]
             ]);
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (method_exists($reclamation, 'setUpdatedAt')) {
-                $reclamation->setUpdatedAt(new \DateTime());
-            }
             $entityManager->flush();
             $this->addFlash('success', 'Réclamation modifiée');
             return $this->redirectToRoute('app_reclamation_index');

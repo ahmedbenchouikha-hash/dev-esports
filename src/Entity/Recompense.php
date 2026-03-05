@@ -43,11 +43,11 @@ class Recompense
     private ?\DateTimeImmutable $giphy_updated_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'recompenses')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'Le tournoi est requis')]
     private ?Tournament $tournament = null;
 
-    #[ORM\OneToMany(mappedBy: 'recompense', targetEntity: DemandeRecompense::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'recompense', targetEntity: DemandeRecompense::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $demandes;
 
     public function __construct()

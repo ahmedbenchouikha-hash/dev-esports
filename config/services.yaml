@@ -68,6 +68,6 @@ services:
   # App\Service\NotificationService: ~
 
   # App\Service\PdfGenerator: ~
-  # App\Service\AIPricingService:
-  #   arguments:
-  #     $groqApiKey: '%env(GROQ_API_KEY)%'
+  App\Service\AIPricingService:
+    arguments:
+      $groqApiKey: '%env(GROQ_API_KEY)%'

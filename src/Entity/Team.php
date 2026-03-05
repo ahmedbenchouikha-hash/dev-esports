@@ -94,10 +94,10 @@ class Team
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'team1', targetEntity: Game::class)]
+    #[ORM\OneToMany(mappedBy: 'team1', targetEntity: Game::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $gamesAsTeam1;
 
-    #[ORM\OneToMany(mappedBy: 'team2', targetEntity: Game::class)]
+    #[ORM\OneToMany(mappedBy: 'team2', targetEntity: Game::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $gamesAsTeam2;
 
     #[ORM\ManyToMany(targetEntity: Player::class, inversedBy: 'teams')]

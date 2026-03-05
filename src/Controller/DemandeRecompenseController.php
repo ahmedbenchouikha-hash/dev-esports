@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\DemandeRecompense;
 use App\Entity\Recompense;
+use App\Entity\User;
 use App\Form\DemandeRecompenseType;
 use App\Repository\DemandeRecompenseRepository;
 use App\Repository\RecompenseRepository;
@@ -29,6 +30,14 @@ class DemandeRecompenseController extends AbstractController
         private EmailService $emailService,
         private AIRewardAnalysisService $aiService
     ) {}
+
+    /** @return User */
+    private function getAuthenticatedUser(): User
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        return $user;
+    }
 
     #[Route('', name: 'demande_recompense_index', methods: ['GET'])]
     public function index(
@@ -99,8 +108,8 @@ class DemandeRecompenseController extends AbstractController
             return new JsonResponse(['error' => 'Acces refuse'], 403);
         }
 
-        $user = $this->getUser();
-        $userEmail = $user?->getUserIdentifier();
+        $user = $this->getAuthenticatedUser();
+        $userEmail = $user->getUserIdentifier();
         if (!$userEmail) {
             return new JsonResponse(['error' => 'Utilisateur non authentifie'], 403);
         }
@@ -379,7 +388,6 @@ class DemandeRecompenseController extends AbstractController
         try {
             $this->emailService->sendStatusChangeEmail($demande, $newStatut);
         } catch (\Exception $e) {
-            $this->logger?->error('Failed to send status change email', ['error' => $e->getMessage()]);
             // Email failure is not critical, continue anyway
         }
 
@@ -436,8 +444,8 @@ class DemandeRecompenseController extends AbstractController
         }
 
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $user = $this->getUser();
-        $userEmail = $user?->getUserIdentifier();
+        $user = $this->getAuthenticatedUser();
+        $userEmail = $user->getUserIdentifier();
         if (!$userEmail) {
             throw new AccessDeniedException('Utilisateur non authentifie.');
         }

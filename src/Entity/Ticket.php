@@ -32,10 +32,10 @@ class Ticket
     #[Assert\Choice(choices: ['regular', 'vip', 'student'], message: 'Invalid ticket type')]
     private ?string $type = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Price is required')]
     #[Assert\GreaterThanOrEqual(value: 0, message: 'Price must be 0 or higher')]
-    private ?float $price = 0.0;
+    private ?string $price = '0.00';
 
     #[ORM\Column]
     #[Assert\NotNull(message: 'Quantity is required')]
@@ -107,12 +107,12 @@ class Ticket
 
     public function getPrice(): ?float
     {
-        return $this->price;
+        return $this->price !== null ? (float) $this->price : null;
     }
 
     public function setPrice(float $price): static
     {
-        $this->price = $price;
+        $this->price = (string) $price;
         return $this;
     }
 

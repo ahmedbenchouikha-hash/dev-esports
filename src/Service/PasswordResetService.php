@@ -151,10 +151,10 @@ class PasswordResetService
                 ->execute();
 
             $this->logger->info("Expired password reset tokens cleaned up");
-            return true;
+            return 1;
         } catch (\Exception $e) {
             $this->logger->error("Error cleaning up expired tokens: " . $e->getMessage());
-            return false;
+            return 0;
         }
     }
 }

@@ -41,22 +41,13 @@ class TestMailCommand extends Command
             @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] About to call mailer->send()\n", FILE_APPEND);
             $output->writeln('<info>About to call mailer->send()...</info>');
             
-            $result = $this->mailer->send($email);
+            $this->mailer->send($email);
             
-            @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] mailer->send() completed. Result: " . var_export($result, true) . "\n", FILE_APPEND);
+            @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] mailer->send() completed.\n", FILE_APPEND);
             $output->writeln('<fg=green>Mailer->send() completed</>');
-            $output->writeln('<info>Result type: ' . gettype($result) . '</info>');
-            $output->writeln('<info>Result value: ' . var_export($result, true) . '</info>');
-            
-            if ($result) {
-                $output->writeln('<fg=green>✅ Email sent successfully!</>');
-                @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ✅ EMAIL SENT SUCCESSFULLY\n", FILE_APPEND);
-                return Command::SUCCESS;
-            } else {
-                $output->writeln('<fg=yellow>⚠️ send() returned falsy value (may be queued)</>');
-                @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ⚠️ send() returned falsy\n", FILE_APPEND);
-                return Command::SUCCESS;
-            }
+            $output->writeln('<fg=green>✅ Email sent successfully!</>');
+            @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ✅ EMAIL SENT SUCCESSFULLY\n", FILE_APPEND);
+            return Command::SUCCESS;
         } catch (\Throwable $e) {
             $msg = $e->getMessage();
             @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ⚠️ EXCEPTION (dev mode - treated as success): " . get_class($e) . " - " . $msg . "\n", FILE_APPEND);

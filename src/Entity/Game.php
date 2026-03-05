@@ -17,12 +17,12 @@ class Game
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'gamesAsTeam1')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'Team 1 is required')]
     private ?Team $team1 = null;
 
     #[ORM\ManyToOne(inversedBy: 'gamesAsTeam2')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'Team 2 is required')]
     private ?Team $team2 = null;
 
@@ -46,6 +46,7 @@ class Game
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'games')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'Tournament is required')]
     private ?Tournament $tournament = null;
 

@@ -29,7 +29,7 @@ class SmartPricingController extends AbstractController
     #[Route('', name: 'smart_pricing_index', methods: ['GET'])]
     public function index(): Response
     {
-        $tickets = $this->ticketRepository->findAll();
+        $tickets = $this->ticketRepository->findAllWithGameAndTeams();
 
         $recommendations = [];
         foreach ($tickets as $ticket) {
@@ -102,7 +102,7 @@ class SmartPricingController extends AbstractController
     public function applyAllSmartPrices(): JsonResponse
     {
         try {
-            $tickets = $this->ticketRepository->findAll();
+            $tickets = $this->ticketRepository->findAllWithGameAndTeams();
             $updated = 0;
             $totalRevenueDifference = 0;
 
@@ -161,6 +161,7 @@ class SmartPricingController extends AbstractController
                 'INCREASE_PRICE' => $stats['shouldIncrease']++,
                 'DECREASE_PRICE' => $stats['shouldDecrease']++,
                 'KEEP_CURRENT' => $stats['keepCurrent']++,
+                default => null,
             };
 
             if ($rec['recommendedAction'] === 'INCREASE_PRICE') {

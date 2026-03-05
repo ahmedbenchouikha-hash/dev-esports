@@ -24,8 +24,8 @@ class BudgetAlert
     #[ORM\Column]
     private ?float $budgetPercentage = null;
 
-    #[ORM\Column]
-    private ?float $remainingAmount = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private ?string $remainingAmount = null;
 
     #[ORM\Column]
     private ?DateTime $sentAt = null;
@@ -84,12 +84,12 @@ class BudgetAlert
 
     public function getRemainingAmount(): ?float
     {
-        return $this->remainingAmount;
+        return $this->remainingAmount !== null ? (float) $this->remainingAmount : null;
     }
 
     public function setRemainingAmount(?float $remainingAmount): self
     {
-        $this->remainingAmount = $remainingAmount;
+        $this->remainingAmount = $remainingAmount !== null ? (string) $remainingAmount : null;
         return $this;
     }
 

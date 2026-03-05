@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -18,6 +19,7 @@ class PlayerPendingApprovalController extends AbstractController
     #[Route('/player/pending-approval', name: 'player_pending_approval')]
     public function pending(): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         
         // Redirect if already approved
@@ -41,9 +43,8 @@ class PlayerPendingApprovalController extends AbstractController
         EntityManagerInterface $entityManager,
         SluggerInterface $slugger
     ): Response {
+        /** @var User $user */
         $user = $this->getUser();
-        
-        // Only allow if pending approval
         if (!$user->getApprovalStatus() || $user->getApprovalStatus() !== 'pending') {
             $this->addFlash('warning', 'You cannot upload a document at this time.');
             return $this->redirectToRoute('player_pending_approval');
@@ -109,6 +110,7 @@ class PlayerPendingApprovalController extends AbstractController
     #[Route('/player/rejected', name: 'player_rejected')]
     public function rejected(): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         
         // Redirect if somehow not rejected

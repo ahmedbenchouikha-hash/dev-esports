@@ -501,6 +501,7 @@ class TeamController extends AbstractController
     public function rejectInvitation(int $id, Request $request, EntityManagerInterface $em, TeamInvitationRepository $invitationRepo): Response
     {
         $invitation = $invitationRepo->find($id);
+        /** @var \App\Entity\Player $player */
         $player = $this->getUser();
 
         if (!$this->isCsrfTokenValid('team_invitation_' . $id, (string) $request->request->get('_token'))) {
@@ -951,6 +952,7 @@ class TeamController extends AbstractController
     public function join(Request $request, Team $team, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('join' . $team->getId(), $request->request->get('_token'))) {
+            /** @var \App\Entity\User $user */
             $user = $this->getUser();
 
             try {

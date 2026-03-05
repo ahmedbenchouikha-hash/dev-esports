@@ -123,11 +123,10 @@ class DepenseController extends AbstractController
     }
 
     #[Route('/team/{teamId}', name: 'by_team', methods: ['GET'])]
-    public function byTeam(int $teamId, DepenseRepository $depenseRepository, AuthorizationService $authService): Response
+    public function byTeam(int $teamId, DepenseRepository $depenseRepository, AuthorizationService $authService, EntityManagerInterface $em): Response
     {
         // Load team from repository to check access
-        $teamRepo = $this->getDoctrine()->getRepository(Team::class);
-        $team = $teamRepo->find($teamId);
+        $team = $em->getRepository(Team::class)->find($teamId);
 
         if (!$team) {
             throw $this->createNotFoundException('Team not found');

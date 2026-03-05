@@ -13,6 +13,42 @@ class TicketRepository extends ServiceEntityRepository
         parent::__construct($registry, Ticket::class);
     }
 
+    /**
+     * Find all tickets with game and teams eagerly loaded (avoids N+1)
+     */
+    public function findAllWithGameAndTeams(): array
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.game', 'g')
+            ->addSelect('g')
+            ->leftJoin('g.team1', 't1')
+            ->addSelect('t1')
+            ->leftJoin('g.team2', 't2')
+            ->addSelect('t2')
+            ->orderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find paginated tickets with game and teams eagerly loaded
+     */
+    public function findPaginatedWithGameAndTeams(int $limit = 50, int $offset = 0): array
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.game', 'g')
+            ->addSelect('g')
+            ->leftJoin('g.team1', 't1')
+            ->addSelect('t1')
+            ->leftJoin('g.team2', 't2')
+            ->addSelect('t2')
+            ->orderBy('t.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findByGame($gameId)
     {
         return $this->createQueryBuilder('t')

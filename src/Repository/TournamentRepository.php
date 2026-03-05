@@ -16,7 +16,24 @@ class TournamentRepository extends ServiceEntityRepository
         parent::__construct($registry, Tournament::class);
     }
 
-    public function findBySearchTerm(string $searchTerm): array
+    public function countAll(): int
+    {
+        return $this->createQueryBuilder('t')
+            ->select('NEW App\DTO\EntityCountDTO(COUNT(t.id))')
+            ->getQuery()
+            ->getSingleResult()->count;
+    }
+
+    public function findRecentTournaments(int $limit = 6): array
+    {
+        return $this->createQueryBuilder('t')
+            ->orderBy('t.startDate', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findBySearchTerm(string $searchTerm, string $sort = 'name', string $direction = 'ASC'): array
     {
         return $this->createQueryBuilder('t')
             ->leftJoin('t.games', 'g')
@@ -32,7 +49,7 @@ class TournamentRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByStatus(string $status): array
+    public function findByStatus(string $status, string $sort = 'startDate', string $direction = 'DESC'): array
     {
         return $this->createQueryBuilder('t')
             ->leftJoin('t.games', 'g')
@@ -62,7 +79,7 @@ class TournamentRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllOrdered(string $orderBy = 'startDate'): array
+    public function findAllOrdered(string $orderBy = 'startDate', string $direction = 'DESC'): array
     {
         $validOrderBy = ['name', 'startDate', 'endDate', 'createdAt'];
         $orderBy = in_array($orderBy, $validOrderBy) ? $orderBy : 'startDate';

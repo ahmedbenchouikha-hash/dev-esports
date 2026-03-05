@@ -17,6 +17,14 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
+    public function countAll(): int
+    {
+        return $this->createQueryBuilder('p')
+            ->select('NEW App\DTO\EntityCountDTO(COUNT(p.id))')
+            ->getQuery()
+            ->getSingleResult()->count;
+    }
+
     public function findByFilters(string $searchTerm = '', ?int $teamId = null, ?string $role = null, string $orderBy = 'nickname'): array
     {
         $qb = $this->createQueryBuilder('p')

@@ -112,6 +112,7 @@ class UserController extends AbstractController
         SluggerInterface $slugger
     ): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $form = $this->createForm(UserEditType::class, $user);
         $form->handleRequest($request);

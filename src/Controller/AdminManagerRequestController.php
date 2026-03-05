@@ -53,7 +53,9 @@ class AdminManagerRequestController extends AbstractController
 
             $managerRequest->setStatus($status);
             $managerRequest->setAdminComment($adminComment);
-            $managerRequest->setReviewedBy($this->getUser());
+            /** @var \App\Entity\User $reviewer */
+            $reviewer = $this->getUser();
+            $managerRequest->setReviewedBy($reviewer);
             $managerRequest->setReviewedAt(new \DateTime());
 
             // If approved, add ROLE_MANAGER to the player

@@ -32,7 +32,7 @@ class PandaScorePlayerService
     {
         try {
             // Search for player
-            $searchUrl = $this->PANDA_SCORE_URL . '/players?filter[name]=' . urlencode($playerName);
+            $searchUrl = self::PANDA_SCORE_URL . '/players?filter[name]=' . urlencode($playerName);
             
             $response = $this->httpClient->request('GET', $searchUrl, [
                 'headers' => [

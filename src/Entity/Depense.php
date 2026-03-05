@@ -59,7 +59,7 @@ class Depense
     private ?string $categorie = null;
 
     #[ORM\ManyToOne(targetEntity: Team::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Team $team = null;
 
     #[ORM\Column(length: 255, nullable: true)]

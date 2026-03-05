@@ -63,13 +63,13 @@ class Tournament
     #[ORM\Column]
     private ?\DateTime $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Game::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Game::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $games;
 
-    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: TournamentRegistration::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: TournamentRegistration::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $registrations;
 
-    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Recompense::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'tournament', targetEntity: Recompense::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $recompenses;
 
     public function __construct()

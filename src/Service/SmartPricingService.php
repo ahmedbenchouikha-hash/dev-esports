@@ -17,6 +17,8 @@ use DateTime;
  */
 class SmartPricingService
 {
+    private array $teamSalesCache = [];
+
     public function __construct(
         private PaymentRepository $paymentRepository,
         private EntityManagerInterface $entityManager,
@@ -184,6 +186,10 @@ class SmartPricingService
      */
     private function getHistoricalTeamSales(int $teamId): int
     {
+        if (isset($this->teamSalesCache[$teamId])) {
+            return $this->teamSalesCache[$teamId];
+        }
+
         $qb = $this->entityManager->createQueryBuilder();
         
         $result = $qb->select('COUNT(p.id)')
@@ -197,7 +203,9 @@ class SmartPricingService
             ->getQuery()
             ->getSingleScalarResult();
 
-        return (int) $result;
+        $this->teamSalesCache[$teamId] = (int) $result;
+
+        return $this->teamSalesCache[$teamId];
     }
 
     /**

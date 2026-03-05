@@ -55,13 +55,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'date', nullable: true)]
     private ?\DateTimeInterface $birthDate = null;
 
-    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserProfile::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserProfile::class, cascade: ['persist'], fetch: 'EAGER')]
     private ?UserProfile $profile = null;
 
     /**
      * @var Collection<int, ChatbotConversation>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ChatbotConversation::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ChatbotConversation::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $chatbotConversations;
 
     public function __construct()

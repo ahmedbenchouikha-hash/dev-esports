@@ -17,6 +17,14 @@ class TeamRepository extends ServiceEntityRepository
         parent::__construct($registry, Team::class);
     }
 
+    public function countAll(): int
+    {
+        return $this->createQueryBuilder('t')
+            ->select('NEW App\DTO\EntityCountDTO(COUNT(t.id))')
+            ->getQuery()
+            ->getSingleResult()->count;
+    }
+
     /**
      * Search teams by multiple criteria
      */

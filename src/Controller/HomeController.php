@@ -19,63 +19,48 @@ class HomeController extends AbstractController
         TournamentRepository $tournamentRepository,
         PlayerRepository $playerRepository
     ): Response {
-        $allGames = $gameRepository->findAll();
-        $allTeams = $teamRepository->findAll();
-        
-        // Get recent matches (limit to 6)
-        $recentMatches = array_slice($allGames, 0, 6);
-        
-        // Get all tournaments
-        $allTournaments = $tournamentRepository->findAll();
-        $recentTournaments = array_slice($allTournaments, 0, 6);
-        
-        // Count games by status
-        $completedGames = count($gameRepository->findByStatus('finished'));
-        $scheduledGames = count($gameRepository->findByStatus('pending'));
-        $inProgressGames = count($gameRepository->findByStatus('ongoing'));
-        $cancelledGames = count($gameRepository->findByStatus('cancelled'));
-        
-        // Get top teams by wins (from finished games)
-        $teamWins = [];
-        foreach ($allTeams as $team) {
-            $wins = 0;
-            foreach ($allGames as $game) {
-                if ($game->getStatus() === 'finished') {
-                    // Determine winner based on scores
-                    $winnerTeam = null;
-                    if ($game->getScore1() > $game->getScore2()) {
-                        $winnerTeam = $game->getTeam1();
-                    } elseif ($game->getScore2() > $game->getScore1()) {
-                        $winnerTeam = $game->getTeam2();
-                    }
-                    
-                    // Check if this team is the winner
-                    if ($winnerTeam && $winnerTeam->getId() === $team->getId()) {
-                        $wins++;
-                    }
-                }
-            }
-            // Add all teams, even if they have 0 wins
-            $teamWins[$team->getName()] = $wins;
+        // Use COUNT queries instead of loading all entities
+        $gamesCount = $gameRepository->countAll();
+        $teamsCount = $teamRepository->countAll();
+        $tournamentsCount = $tournamentRepository->countAll();
+        $playersCount = $playerRepository->countAll();
+
+        // Get recent matches with JOIN FETCH (limited)
+        $recentMatches = $gameRepository->findRecentWithTeams(6);
+
+        // Get recent tournaments (limited)
+        $recentTournaments = $tournamentRepository->findRecentTournaments(6);
+
+        // Count games by status in a single GROUP BY query
+        $statusCounts = $gameRepository->countAllByStatus();
+        $statusMap = [];
+        foreach ($statusCounts as $dto) {
+            $statusMap[$dto->status] = $dto->count;
         }
-        arsort($teamWins);
-        $topTeams = array_slice($teamWins, 0, 5);
-        
-        // Get matches by tournament
+        $completedGames = $statusMap['finished'] ?? 0;
+        $scheduledGames = $statusMap['pending'] ?? 0;
+        $inProgressGames = $statusMap['ongoing'] ?? 0;
+        $cancelledGames = $statusMap['cancelled'] ?? 0;
+
+        // Get top teams by wins using DTO hydration
+        $topTeamsDTOs = $gameRepository->getTopTeamsByWins(5);
+        $topTeams = [];
+        foreach ($topTeamsDTOs as $dto) {
+            $topTeams[$dto->name] = $dto->wins;
+        }
+
+        // Get top teams for chart
+        $topTeamsForChartDTOs = $gameRepository->getTopTeamsByWinsForChart(8);
+        $teamNamesChart = array_map(fn($dto) => $dto->name, $topTeamsForChartDTOs);
+        $winsChart = array_map(fn($dto) => $dto->wins, $topTeamsForChartDTOs);
+
+        // Get matches by tournament using grouped COUNT query with DTO
+        $matchesByTournamentDTOs = $gameRepository->countMatchesByTournament();
         $matchesByTournament = [];
-        $tournaments = $tournamentRepository->findAll();
-        foreach ($tournaments as $tournament) {
-            $matches = $gameRepository->findByTournament($tournament);
-            if (count($matches) > 0) {
-                $matchesByTournament[$tournament->getName()] = count($matches);
-            }
+        foreach ($matchesByTournamentDTOs as $dto) {
+            $matchesByTournament[$dto->tournamentName] = $dto->matchCount;
         }
-        
-        // Get team wins data for chart - show top 8 teams
-        $topTeamsForChart = array_slice($teamWins, 0, 8);
-        $teamNamesChart = array_keys($topTeamsForChart);
-        $winsChart = array_values($topTeamsForChart);
-        
+
         // Match status data for pie chart
         $statusData = [
             'completed' => $completedGames,
@@ -83,17 +68,17 @@ class HomeController extends AbstractController
             'in_progress' => $inProgressGames,
             'cancelled' => $cancelledGames,
         ];
-        
+
         return $this->render('home.html.twig', [
-            'games_count' => count($allGames),
-            'teams_count' => count($allTeams),
-            'tournaments_count' => count($tournaments),
-            'players_count' => count($playerRepository->findAll()),
+            'games_count' => $gamesCount,
+            'teams_count' => $teamsCount,
+            'tournaments_count' => $tournamentsCount,
+            'players_count' => $playersCount,
             'completed_games' => $completedGames,
             'scheduled_games' => $scheduledGames,
             'in_progress_games' => $inProgressGames,
             'top_teams' => $topTeams,
-            'all_teams' => $allTeams,
+            'all_teams' => [],
             'recent_matches' => $recentMatches,
             'recent_tournaments' => $recentTournaments,
             'matches_by_tournament' => $matchesByTournament,
