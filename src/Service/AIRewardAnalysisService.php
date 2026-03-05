@@ -103,12 +103,21 @@ class AIRewardAnalysisService
             }
 
             $analysisText = $content['choices'][0]['message']['content'];
-
+            \error_log('=== MISTRAL API RESPONSE ===');
+            \error_log('Raw response: ' . substr($analysisText, 0, 500));
+            
             // Parser le texte de réponse en JSON
-            return $this->parseAnalysisResponse($analysisText);
+            try {
+                return $this->parseAnalysisResponse($analysisText);
+            } catch (\Exception $parseError) {
+                \error_log('Parse error: ' . $parseError->getMessage());
+                \error_log('Full response was: ' . $analysisText);
+                throw $parseError;
+            }
 
         } catch (ClientException $e) {
             \error_log('Mistral API Client Error: ' . $e->getMessage());
+            \error_log('Response: ' . $e->getResponse()->getContent(false));
             return $this->generateFallbackAnalysis($demand);
         } catch (TransportException $e) {
             \error_log('Mistral API Transport Error: ' . $e->getMessage());
@@ -398,14 +407,21 @@ PROMPT;
         // Extraire le JSON du texte
         $jsonPattern = '/\{[\s\S]*\}/';
         if (!preg_match($jsonPattern, $responseText, $matches)) {
+            \error_log('JSON extraction failed for response: ' . $responseText);
             throw new \Exception('Could not extract JSON from API response');
         }
 
+        \error_log('Extracted JSON: ' . substr($matches[0], 0, 300));
+        
         $json = json_decode($matches[0], true);
 
         if (!is_array($json)) {
+            \error_log('JSON decode failed: ' . json_last_error_msg());
+            \error_log('Raw JSON string: ' . substr($matches[0], 0, 300));
             throw new \Exception('Invalid JSON in API response: ' . json_last_error_msg());
         }
+        
+        \error_log('Successfully decoded JSON. Keys: ' . implode(', ', array_keys($json)));
 
         // Créer le DTO avec les données parsées
         $analysis = new RewardAnalysisDTO();

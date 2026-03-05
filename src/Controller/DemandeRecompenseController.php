@@ -481,6 +481,16 @@ class DemandeRecompenseController extends AbstractController
                 $errors = $validator->validate($demande);
 
                 if (count($errors) === 0) {
+                    // === ANALYSE IA ===
+                    try {
+                        $aiAnalysis = $this->aiService->analyzeDemand($demande);
+                        $demande->applyAIAnalysis($aiAnalysis);
+                        error_log("IA Analysis complete");
+                    } catch (\Exception $e) {
+                        // Log l'erreur mais continue (l'IA n'est pas bloquante)
+                        error_log('Erreur lors de l\'analyse IA: ' . $e->getMessage());
+                    }
+
                     $entityManager->persist($demande);
                     $entityManager->flush();
 
