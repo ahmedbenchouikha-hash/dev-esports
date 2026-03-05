@@ -1,303 +1,150 @@
-# Dev Esports - Tournament Management System
+# RankUp – E-Sports Tournament Management Platform
 
-Professional Esports Tournament Management System built with Symfony 7 and Bootstrap 5.
+## Overview
+
+This project was developed as part of the **PIDEV – 3rd Year Engineering Program** at **Esprit School of Engineering** (Academic Year 2025–2026).
+
+It consists of a full-stack web application for managing competitive E-Sports tournaments — allowing teams to register, compete in matches, track statistics, manage budgets, and handle rewards. The platform features both a public-facing Front Office for players and spectators and a Back Office for administrators and managers.
 
 ## Features
 
-### ✅ Completed Requirements
+- **Team Management** – Create, edit, and manage E-Sports teams with full roster tracking
+- **Player Registration & Profiles** – Player accounts with statistics, roles, and team membership
+- **Tournament Organization** – Create and manage tournaments with brackets, scheduling, and prize pools
+- **Match Tracking & Scoring** – Record match results, live scores, and match statistics
+- **Ticket & Payment System** – Event ticketing with Stripe payment integration and QR code generation
+- **Budget & Expense Management** – Track team and tournament budgets with configurable alert thresholds
+- **Reward System** – Manage rewards and reward requests linked to tournament performance
+- **Reclamation System** – User complaints with admin responses
+- **Punition System** – Player discipline tracking with voice notifications
+- **Manager Role** – Dedicated manager workflows with team invitations and approvals
+- **AI-Powered Features** – Mistral AI login messages, AI reward analysis, AI ticket pricing
+- **Real-Time Chat** – Team chat messaging system
+- **Notifications** – In-app notification system for key events
+- **Authentication & Security** – JWT authentication, CSRF protection, role-based access control
+- **PDF Export** – Generate PDF reports via DomPDF
+- **Email Notifications** – SendGrid and PHPMailer integration
 
-#### 1. **Integrated Templates**
+## Tech Stack
 
-- Professional dark-themed UI using Bootstrap 5
-- Fully responsive design for desktop and mobile
-- Separate Front Office and Back Office interfaces
-- Functional navigation between all pages
-- Beautiful card-based layouts with hover effects
+### Frontend
 
-#### 2. **Entity Management with CRUD**
+- **Twig** – Symfony templating engine
+- **Bootstrap 5** – Responsive UI with dark theme
+- **Hotwired Stimulus** 3.2 – JavaScript controllers for interactivity
+- **Hotwired Turbo** 7.3 – SPA-like page navigation
+- **Symfony AssetMapper** – Native ES module importmaps (no Webpack)
 
-**Entities Created:**
+### Backend
 
-- **Game** - Tournament matches with scoring
-- **Team** - Teams participating in tournaments
-- **Player** - Individual players belonging to teams
-- **Tournament** - Tournament organization and management
+- **PHP** 8.2
+- **Symfony** 6.4 – Full-stack framework (Security, Mailer, Validator, Form, Console)
+- **Doctrine ORM** 3.6 – Database abstraction and entity management
+- **MariaDB** 10.4 – Relational database
+- **Stripe SDK** – Payment processing
+- **Lexik JWT** – JSON Web Token authentication
+- **KnpPaginator** – Pagination
+- **VichUploader** – File upload handling
+- **DomPDF** – PDF generation
+- **Endroid QR Code** – QR code generation
+- **Docker Compose** – Local development orchestration
 
-**Key Relationships:**
+## Architecture
 
-- Game → Team (Many-to-One) - Game references two teams
-- Team → Player (One-to-Many) - Teams have multiple players
-- Tournament → Game (One-to-Many) - Tournaments have multiple matches
-- Player → Team (Many-to-One) - Players belong to a team
-
-**CRUD Operations:**
-
-- ✓ Create new entities via forms
-- ✓ Read/View entity details
-- ✓ Update entity information
-- ✓ Delete entities with confirmation
-- ✓ List views with sorting and filtering
-
-#### 3. **Server-side Input Validation**
-
-**Validation Constraints Applied:**
-
-- Entity-level validation using Symfony's Validator component
-- Form-based validation through FormType classes
-- No HTML5 or JavaScript validation - all validation is server-side
-
-**Validated Fields:**
-
-- Team: Name (required, 2-255 chars)
-- Player: Nickname, FirstName, LastName (required, 2-255 chars)
-- Game: Team references, scores (non-negative), dates
-- Tournament: Name, dates (start before end), status, prize pool (positive)
-
-#### 4. **Advanced Features**
-
-**Search Functionality:**
-
-- Global search by team name across matches and tournaments
-- Player search by nickname, first name, or last name
-- Tournament search by name and description
-- Real-time filtering without page reload
-
-**Sorting & Filtering:**
-
-- Filter matches by status (pending, ongoing, finished, cancelled)
-- Filter tournaments by status
-- Sort results by multiple criteria
-- Upcoming matches and tournaments views
-
-**Additional Features:**
-
-- Flash messages for user feedback (success, error, info)
-- CSRF token protection for form submissions
-- Responsive data tables with hover effects
-- Team statistics (number of players, matches)
-- Player roster views by team
-- Match history and upcoming matches
-
-## Project Structure
+The application follows a **3-tier MVC architecture**:
 
 ```
-src/
-├── Entity/               # Database entities
-│   ├── Game.php
-│   ├── Team.php
-│   ├── Player.php
-│   └── Tournament.php
-├── Controller/
-│   ├── HomeController.php           # Home page
-│   ├── MatchController.php          # Front office matches
-│   ├── TeamController.php           # Front office teams
-│   ├── TournamentController.php     # Front office tournaments
-│   ├── MatchAdminController.php     # Back office matches
-│   ├── TeamAdminController.php      # Back office teams
-│   ├── PlayerAdminController.php    # Back office players
-│   └── TournamentAdminController.php # Back office tournaments
-├── Form/                # Form types
-│   ├── GameType.php
-│   ├── TeamType.php
-│   ├── PlayerType.php
-│   └── TournamentType.php
-└── Repository/          # Database queries
-    ├── GameRepository.php
-    ├── TeamRepository.php
-    ├── PlayerRepository.php
-    └── TournamentRepository.php
-
-templates/
-├── base.html.twig       # Base template with navigation
-├── home.html.twig       # Home page
-├── match/               # Front office match templates
-│   ├── index.html.twig
-│   ├── show.html.twig
-│   └── upcoming.html.twig
-├── team/                # Front office team templates
-│   ├── index.html.twig
-│   └── show.html.twig
-├── tournament/          # Front office tournament templates
-│   ├── index.html.twig
-│   ├── show.html.twig
-│   └── upcoming.html.twig
-└── admin/               # Back office admin templates
-    ├── match/
-    ├── team/
-    ├── player/
-    └── tournament/
+┌─────────────────────────────────────────────┐
+│              UI Layer (Twig)                 │
+│   Front Office  │  Back Office (Admin)      │
+├─────────────────────────────────────────────┤
+│           Controller Layer                   │
+│  HomeController, MatchController,           │
+│  TeamController, TournamentController,      │
+│  AdminControllers, API Controllers ...      │
+├─────────────────────────────────────────────┤
+│     Service / Repository Layer               │
+│  BudgetManager, AILoginMessageService,      │
+│  GameRepository, TeamRepository ...         │
+├─────────────────────────────────────────────┤
+│           Entity Layer (Doctrine)            │
+│  28 entities with validated relationships   │
+├─────────────────────────────────────────────┤
+│              Database (MariaDB)              │
+└─────────────────────────────────────────────┘
 ```
 
-## Routes Overview
+**Key entities:** Game, Team, Player, Tournament, Ticket, Payment, Budget, BudgetAlert, Recompense, DemandeRecompense, Reclamation, Punition, User, UserProfile, and more (28 total).
 
-### Front Office (Public)
+**Entity relationships:**
 
-- `/` - Home page
-- `/matches` - All matches with search/filter
-- `/matches/upcoming` - Upcoming matches
-- `/matches/{id}` - Match details
-- `/teams` - All teams with search
-- `/teams/{id}` - Team details with players
-- `/tournaments` - All tournaments with search/filter
-- `/tournaments/upcoming` - Upcoming tournaments
-- `/tournaments/{id}` - Tournament details with matches
+- Tournament → Games (One-to-Many)
+- Game → Team1 / Team2 (Many-to-One)
+- Team → Players (One-to-Many)
+- Player extends User (JOINED inheritance)
+- Tournament → Recompenses → DemandeRecompenses (cascading)
 
-### Back Office (Admin)
+## Contributors
 
-- `/admin/matches` - Manage matches (CRUD)
-- `/admin/matches/create` - Create new match
-- `/admin/matches/{id}` - View match
-- `/admin/matches/{id}/edit` - Edit match
-- `/admin/matches/{id}/delete` - Delete match
-- `/admin/teams` - Manage teams (CRUD)
-- `/admin/players` - Manage players (CRUD)
-- `/admin/tournaments` - Manage tournaments (CRUD)
+| Name               | Role      |
+| ------------------ | --------- |
+| Ahmed Ben Chouikha | Developer |
+| Melki malek        | Developer |
+| Linda nebily       | Developer |
+| mohamed khouja     | Developer |
+| Ramzi ben hmida    | Developer |
+| ghassen saidani    | Developer |
 
-## Installation & Setup
+## Academic Context
+
+Developed at **Esprit School of Engineering – Tunisia**
+
+**PIDEV – 3A** | Academic Year 2025–2026
+
+## Getting Started
 
 ### Prerequisites
 
 - PHP 8.2+
-- Symfony CLI
 - Composer
-- MySQL/MariaDB
+- Symfony CLI
+- MariaDB / MySQL
+- Docker (optional)
 
-### Installation Steps
-
-1. **Install dependencies:**
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/ahmedbenchouikha-hash/dev-esports.git
+cd dev-esports
+
+# Install PHP dependencies
 composer install
-```
 
-2. **Create database:**
+# Configure environment
+cp .env .env.local
+# Edit .env.local with your database credentials
 
-```bash
+# Create the database and run migrations
 php bin/console doctrine:database:create
-```
-
-3. **Run migrations:**
-
-```bash
 php bin/console doctrine:migrations:migrate
-```
 
-4. **Create fixtures (optional):**
-
-```bash
+# Load seed data (optional)
 php bin/console doctrine:fixtures:load
-```
 
-5. **Run development server:**
-
-```bash
+# Start the development server
 symfony serve
 ```
 
 Access the application at `http://localhost:8000`
 
-## Form Validation Examples
+## Acknowledgments
 
-### Game Form Validation
-
-```php
-- Team 1: Required entity selection
-- Team 2: Required entity selection
-- Score 1: Non-negative integer (>= 0)
-- Score 2: Non-negative integer (>= 0)
-- Match Date: Required datetime
-- Status: Must be one of [pending, ongoing, finished, cancelled]
-- Tournament: Required entity selection
-```
-
-### Team Form Validation
-
-```php
-- Name: Required, 2-255 characters
-- Country: Optional, max 255 characters
-- Description: Optional text field
-```
-
-### Player Form Validation
-
-```php
-- Nickname: Required, 2-255 characters
-- First Name: Required, 2-255 characters
-- Last Name: Required, 2-255 characters
-- Birth Date: Optional, must be in the past
-- Role: Optional text (e.g., ADC, Support, Mid)
-- Team: Required entity selection
-```
-
-### Tournament Form Validation
-
-```php
-- Name: Required, 2-255 characters
-- Description: Optional text
-- Start Date: Required, must be before end date
-- End Date: Required
-- Status: Must be one of [pending, ongoing, completed, cancelled]
-- Location: Optional text
-- Prize Pool: Optional, must be positive if provided
-```
-
-## Advanced Repository Methods
-
-### GameRepository
-
-- `findByStatus(string $status)` - Filter by match status
-- `findByTournament(Tournament $tournament)` - Get matches for a tournament
-- `findBySearchTerm(string $searchTerm)` - Search matches by team name
-- `findUpcoming()` - Get upcoming matches
-- `findAllOrdered(string $orderBy)` - Sort matches
-
-### TeamRepository
-
-- `findBySearchTerm(string $searchTerm)` - Search teams
-- `findAllOrdered(string $orderBy)` - Sort teams
-
-### PlayerRepository
-
-- `findBySearchTerm(string $searchTerm)` - Search players
-- `findByTeam(Team $team)` - Get players for a team
-- `findAllOrdered(string $orderBy)` - Sort players
-
-### TournamentRepository
-
-- `findBySearchTerm(string $searchTerm)` - Search tournaments
-- `findByStatus(string $status)` - Filter by status
-- `findUpcoming()` - Get upcoming tournaments
-- `findAllOrdered(string $orderBy)` - Sort tournaments
-
-## Styling Features
-
-- **Color Scheme**: Dark theme with accent color (#e94560)
-- **Responsive Grid**: Bootstrap 5 responsive layout
-- **Cards**: Hover effects on interactive elements
-- **Forms**: Custom styled inputs with validation feedback
-- **Tables**: Striped rows with hover highlighting
-- **Badges**: Status indicators with color coding
-- **Modals**: Bootstrap modals for confirmation dialogs
-- **Navigation**: Sticky navbar with dropdown menus
-- **Footer**: Fixed footer with copyright information
-
-## Security Features
-
-- CSRF token protection on all forms
-- Secure entity binding with Symfony's ParamConverter
-- Proper exception handling for missing entities
-- Input validation on all forms
-- No sensitive data in URLs
-
-## Future Enhancements
-
-- API endpoints for tournament data
-- User authentication and authorization
-- Role-based access control (Admin/User)
-- File uploads for team logos
-- Email notifications
-- Export to PDF/Excel
-- Real-time match updates
+- **Esprit School of Engineering** – Academic supervision and project framework
+- **Symfony** – Open-source PHP framework
+- **Doctrine Project** – ORM and database abstraction
+- **Bootstrap** – Frontend UI framework
+- **Mistral AI** – AI-powered features integration
 - Advanced statistics and analytics
 - Mobile app API
 
