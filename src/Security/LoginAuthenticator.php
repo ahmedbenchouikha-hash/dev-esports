@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Service\AILoginMessageService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +25,10 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private RouterInterface $router) {}
+    public function __construct(
+        private RouterInterface $router,
+        private AILoginMessageService $aiLoginMessageService
+    ) {}
 
     public function authenticate(Request $request): Passport
     {
@@ -44,8 +48,15 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // Get the user and check their roles
+        // Get the user and generate personalized login message
         $user = $token->getUser();
+        
+        try {
+            $loginMessage = $this->aiLoginMessageService->generateLoginMessage($user);
+            $request->getSession()->getFlashBag()->add('login_message', $loginMessage);
+        } catch (\Throwable $e) {
+            \error_log('Erreur lors de la génération du message de login: ' . $e->getMessage());
+        }
         
         // Check if player is approved
         if (in_array('ROLE_USER', $user->getRoles()) && !$user->isApproved()) {
